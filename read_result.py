@@ -1,12 +1,11 @@
 #%%
 import pickle
 import matplotlib.pyplot as plt
-import json
-
+import numpy as np
 # %%
 from abdominal_tools import RESULTSPATH, MRFSequence
 #%%
-timestamp = '230927_1335'
+timestamp = '230927_1533'
 resultspath = RESULTSPATH/timestamp
 
 #%%
@@ -19,14 +18,15 @@ with open(resultspath/'mrf_sequence_best.pkl', 'rb') as handle:
 with open(resultspath/'mrf_sequence_worst.pkl', 'rb') as handle:
     mrf_sequence_worst = pickle.load(handle)
 
-with open(resultspath/'prot.json', 'r') as handle:
-    prot = json.load(handle)
+crlb_array = np.load(resultspath/'crlb_array.npy')
 
 # %%
-plt.plot(sorted(prot['crlbs']), label='total')
-plt.plot(prot['crlbs_T1'], label='T1')
-plt.plot(prot['crlbs_T2'], label='T2')
+plt.plot(crlb_array[0], label='total')
+plt.plot(crlb_array[1], label='T1')
+plt.plot(crlb_array[2], label='T2')
 plt.axhline(mrf_sequence_ref.crlb, ls='--')
 plt.axhline(mrf_sequence_ref.crlb_T1, ls='--', color='tab:orange')
 plt.axhline(mrf_sequence_ref.crlb_T2, ls='--', color='tab:green')
+plt.legend()
+plt.ylim(0, 20)
 # %%

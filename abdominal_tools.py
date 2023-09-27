@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 import random
+import matplotlib.pyplot as plt
 
 import sys
 sys.path.append('/home/tomgr/Documents/tg_mrf_optimization')
@@ -20,10 +21,29 @@ BLOCKS = {
         'fa': [180],
         'tr': [12]
     },
+    'TI21': {
+        'fa': [180],
+        'tr': [21]
+    },
+    'TI100':
+    {
+        'fa': [180],
+        'tr': [100]
+    },
+    'TI250':
+    {
+        'fa': [180],
+        'tr': [250]
+    },
     'TI300':
     {
         'fa': [180],
         'tr': [300]
+    },
+    'TI400':
+    {
+        'fa': [180],
+        'tr': [400]
     },
     'T2prep40':
     {
@@ -42,12 +62,52 @@ BLOCKS = {
     }
 }
 
+
 def divide_into_random_integers(N, n):
 
     positions = [0] + sorted(list(random.sample(range(1, N), n-1))) + [N]
     integers = [positions[i+1]-positions[i] for i in range(n)]
 
     return integers
+
+
+def visualize_sequence(mrf_sequence):
+
+    prep_pulse_timings = [0]
+    for i in range(len(mrf_sequence.prep_order)-1):
+        prep_pulse_timing = prep_pulse_timings[-1] + sum(BLOCKS[mrf_sequence.prep_order[i]]['tr']) + sum(mrf_sequence.acq_block_tr[:-1]) + mrf_sequence.waittimes[i]
+        prep_pulse_timings.append(prep_pulse_timing)
+
+    colormap = {prep: color for prep, color in zip(BLOCKS.keys(), plt.rcParams['axes.prop_cycle'].by_key()['color'])}
+
+    plt.plot([sum(mrf_sequence.tr[:i]) for i in range(len(mrf_sequence.tr))], mrf_sequence.fa, '.', color='black')
+
+    for i in range(len(mrf_sequence.prep_order)):
+        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+sum(BLOCKS[mrf_sequence.prep_order[i]]['tr']), color=colormap[mrf_sequence.prep_order[i]], label=mrf_sequence.prep_order[i], alpha=0.5)
+        plt.axvspan(prep_pulse_timings[i]+sum(BLOCKS[mrf_sequence.prep_order[i]]['tr']), prep_pulse_timings[i]+sum(BLOCKS[mrf_sequence.prep_order[i]]['tr'])+sum(mrf_sequence.acq_block_tr[:-1]), color='gray', alpha=0.2, label='acquisition')
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = dict(zip(labels, handles))
+    plt.legend(by_label.values(), by_label.keys(), loc='upper right', ncols=3)
+
+    plt.ylim(0, 20)
+
+    plt.tight_layout()
+
+
+class AcquisitionBlock:
+
+    def __init__(self, fa, tr, TE):
+        self.fa = fa
+        self.tr = tr
+        self.TE = TE
+
+class TargetTissue:
+
+    def __init__(self, T1, T2, M0):
+        self.T1 = T1
+        self.T2 = T2
+        self.M0 = M0
 
 
 class MRFSequence:
@@ -60,11 +120,9 @@ class MRFSequence:
         self.fa = np.concatenate([np.concatenate([blocks[name]['fa'], self.acq_block_fa]) for name in self.prep_order])
         self.tr = np.concatenate([np.concatenate([blocks[name]['tr'], self.acq_block_tr[:-1], [wait_time]]) for name, wait_time in zip(self.prep_order, self.waittimes)])
 
-    def calc_crlb(self, T1, T2, M0, TE, weightingmatrix=None):
-        V = calculate_crlb_sc_epg(T1, T2, M0, self.fa, self.tr, TE, return_crlb_matrix=True, weightingmatrix=weightingmatrix)
+    def calc_crlb(self, target_tissue, TE, weightingmatrix=None):
+        V = calculate_crlb_sc_epg(target_tissue.T1, target_tissue.T2, target_tissue.M0, self.fa, self.tr, TE, return_crlb_matrix=True, weightingmatrix=weightingmatrix)
         self.crlb_T1 = V[0, 0].item()
         self.crlb_T2 = V[1, 1].item()
         self.crlb_M0 = V[2, 2].item()
         self.crlb = self.crlb_T1 + self.crlb_T2 + self.crlb_M0
-        
-
