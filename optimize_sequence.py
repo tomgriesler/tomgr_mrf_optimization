@@ -4,7 +4,6 @@ import random
 import json
 from datetime import datetime
 import pickle
-import matplotlib.pyplot as plt
 
 from abdominal_tools import RESULTSPATH, BLOCKS, divide_into_random_integers, MRFSequence
 
