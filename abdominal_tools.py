@@ -8,6 +8,7 @@ import pickle
 import sys
 sys.path.append('/home/tomgr/Documents/tg_mrf_optimization')
 from costfunctions import calculate_crlb_sc_epg
+from signalmodel_epg import calculate_complex_signal_epg
 
 
 RESULTSPATH = Path('/home/tomgr/Documents/code/abdominal/results_optim')
@@ -177,6 +178,13 @@ class MRFSequence:
         self.acq_block_tr = acq_block_tr
         self.fa = np.concatenate([np.concatenate([blocks[name]['fa'], self.acq_block_fa]) for name in self.prep_order])
         self.tr = np.concatenate([np.concatenate([blocks[name]['tr'], self.acq_block_tr[:-1], [wait_time]]) for name, wait_time in zip(self.prep_order, self.waittimes)])
+
+    def calc_signal(self, target_tissue, TE):
+        signal_temp = calculate_complex_signal_epg(target_tissue.T1, target_tissue.T2, target_tissue.M0, self.fa, self.tr, TE).detach().numpy()
+        self.signal = signal_temp[np.isin(self.fa, self.acq_block_fa)]
+
+
+        # self.signal = calculate_complex_signal_epg(target_tissue.T1, target_tissue.T2, target_tissue.M0, self.fa, self.tr, TE).detach().numpy()
 
     def calc_crlb(self, target_tissue, TE, weightingmatrix=None):
         V = calculate_crlb_sc_epg(target_tissue.T1, target_tissue.T2, target_tissue.M0, self.fa, self.tr, TE, return_crlb_matrix=True, weightingmatrix=weightingmatrix)
