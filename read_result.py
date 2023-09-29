@@ -8,6 +8,7 @@ from abdominal_tools import RESULTSPATH, visualize_sequence
 #%%
 timestamp = '230927_1752'
 timestamp = '230927_1753'
+timestamp = '230928_0905'
 
 #%%
 resultspath = RESULTSPATH/timestamp
@@ -42,12 +43,12 @@ plt.tight_layout()
 # %%
 for i in range(4):
     plt.plot(crlb_array[i], '.', ms=1, label=['tot', 'T1', 'T2', 'M0'][i])
-# plt.ylim(0, 20)
+plt.ylim(0, 2000)
 plt.axhline(mrf_sequence_ref.crlb, label='reference', ls='--')
 plt.axhline(mrf_sequence_ref.crlb_T1, color='tab:orange', ls='--')
 plt.axhline(mrf_sequence_ref.crlb_T2, color='tab:green', ls='--')
 plt.axhline(mrf_sequence_ref.crlb_M0, color='tab:red', ls='--')
 plt.legend()
-# plt.title(f'{len(mrf_sequence_ref.prep_order)} Blocks, Reference: {prot["reference"].capitalize()}')
+plt.title(f'{len(mrf_sequence_ref.prep_order)} Blocks, Reference: {prot["reference"].capitalize()}')
 plt.show()
 # %%

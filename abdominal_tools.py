@@ -96,6 +96,9 @@ def visualize_sequence(mrf_sequence):
 
     plt.ylim(0, 20)
 
+    plt.xlabel('Time [ms]')
+    plt.ylabel('FA [deg]')
+
 
 def return_reference(reference):
 
@@ -120,7 +123,7 @@ def return_reference(reference):
     return acquisition_block, mrf_sequence_ref
 
 
-def store_optimization(count, best_sequences, worst_sequences, crlb_array, timestamp, duration, mrf_sequence_ref, target_tissue, acquisition_block, reference):
+def store_optimization(count, best_sequences, worst_sequences, crlb_array, timestamp, duration, mrf_sequence_ref, target_tissue, acquisition_block, reference, weightingmatrix=None):
 
     resultspath = RESULTSPATH / timestamp
     resultspath.mkdir()
@@ -152,6 +155,9 @@ def store_optimization(count, best_sequences, worst_sequences, crlb_array, times
         pickle.dump(acquisition_block, handle)
     with open(resultspath/'target_tissue.pkl', 'wb') as handle:
         pickle.dump(target_tissue, handle)
+
+    if weightingmatrix:
+        np.save(resultspath/'weightingmatrix.npy', weightingmatrix)
 
 
 class AcquisitionBlock:

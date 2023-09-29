@@ -14,7 +14,7 @@ def optimize_sequence(target_tissue, acquisition_block, mrf_sequence_ref, prep_m
     count = 0
 
     t0 = datetime.now()
-    timestamp = t0.strftime('%Y%m%d_%H%M')[2:]
+    timestamp = t0.strftime('%Y%m%d_%H%M%S')[2:]
 
     try:
         while True:
