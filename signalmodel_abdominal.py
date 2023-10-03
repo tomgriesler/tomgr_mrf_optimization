@@ -213,3 +213,5 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
         Omega[2, 0] += M0 * b(T1, waittime)
 
     V = np.linalg.inv(I)
+
+    return V
