@@ -121,7 +121,7 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
 
     R_TE = r(T1, T2, TE)
     dR_TE_dT1 = dr_dT1(T1, TE)
-    dR_TE_dT2 = dr_dT1(T2, TE)    
+    dR_TE_dT2 = dr_dT2(T2, TE)    
 
     phase = np.pi/2
     phase_inc = np.pi
@@ -175,7 +175,7 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
 
         for fa, tr in zip(acq_block_fa, acq_block_tr): 
 
-            Q = q(np.deg2rad(fa)*delta_B1, phase)
+            Q = q(np.deg2rad(fa), phase)
             R_TR = r(T1, T2, tr)
             dR_TR_dT1 = dr_dT1(T1, tr)
             dR_TR_dT2 = dr_dT2(T2, tr)
