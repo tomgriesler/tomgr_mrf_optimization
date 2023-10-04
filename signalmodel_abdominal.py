@@ -119,8 +119,6 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
 
     acq_block_fa *= delta_B1
 
-    etl = len(PREP) * len(acq_block_fa)
-
     R_TE = r(T1, T2, TE)
     dR_TE_dT1 = dr_dT1(T1, TE)
     dR_TE_dT2 = dr_dT1(T2, TE)    
@@ -139,29 +137,38 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
 
         if prep == 1:
 
-            Omega[:2, :] = 0.
-
             R_TI = r(T1, T2, ti)
 
+            Omega[:2, :] = 0.
+            Omega[2, :] *= -inversion_efficiency
+
+            dOmega_dT1[:2, :] = 0
+            dOmega_dT1[2, :] *= -inversion_efficiency
             dOmega_dT1 = dr_dT1(T1, ti) @ Omega + R_TI @ dOmega_dT1
             dOmega_dT1[2, 0] += M0 * db_dT1(T1, ti)
 
-            dOmega_dT2 = R_TI @ dOmega_dT2
+            dOmega_dT2[:2, :] = 0
+            dOmega_dT2[2, :] *= -inversion_efficiency
+            dOmega_dT2 = dr_dT2(T2, ti) @ Omega + R_TI @ dOmega_dT2
 
+            dOmega_dM0[:2, :] = 0
+            dOmega_dM0[2, :] *= -inversion_efficiency
             dOmega_dM0 = R_TI @ dOmega_dM0
 
-            Omega[2, :] *= -inversion_efficiency
             Omega = R_TI @ Omega
             Omega[2, 0] += M0 * b(T1, ti)
 
         elif prep == 2:
 
             Omega[:2, :] = 0.
-            
+
+            dOmega_dT1[:2, :] = 0
             dOmega_dT1 *= np.exp(-t2te/T2)
 
+            dOmega_dT2[:2, :] = 0
             dOmega_dT2 = np.exp(-t2te/T2) * (t2te/T2**2 * Omega + dOmega_dT2)
 
+            dOmega_dM0[:2, :] = 0
             dOmega_dM0 *= np.exp(-t2te/T2)
 
             Omega[2, :] *= np.exp(-t2te/T2)
@@ -184,10 +191,10 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
 
             # Calculate Jacobian
             J_n = np.array([
-                [np.real(dsignal_dT1), np.imag(dsignal_dT1)],
-                [np.real(dsignal_dT2), np.imag(dsignal_dT2)],
-                [np.real(dsignal_dM0), np.imag(dsignal_dM0)],
+                [np.real(dsignal_dT1), np.real(dsignal_dT2), np.real(dsignal_dM0)],
+                [np.imag(dsignal_dT1), np.imag(dsignal_dT2), np.imag(dsignal_dM0)]
             ])
+
             J_n_t = np.transpose(J_n)
 
             # Calculate FIM
@@ -195,16 +202,16 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
             
             # Calculate new state matrix and derivatives
             dOmega_dT1 = epg_grad(dR_TR_dT1 @ Q @ Omega + R_TR @ Q @ dOmega_dT1) 
-            dOmega_dT1[2, 0] = dOmega_dT1[2, 0] + dB_TR_dT1
+            dOmega_dT1[2, 0] += dB_TR_dT1
 
             dOmega_dT2 = epg_grad(dR_TR_dT2 @ Q @ Omega + R_TR @ Q @ dOmega_dT2)
 
             dOmega_dM0 = epg_grad(R_TR @ Q @ dOmega_dM0)
-            dOmega_dM0[2, 0] = dOmega_dM0[2, 0] + dB_TR_dM0
+            dOmega_dM0[2, 0] += dB_TR_dM0
 
             # Update Magnetization
             Omega = epg_grad(R_TR @ Q @ Omega)
-            Omega[2, 0] = Omega[2, 0] + B_TR
+            Omega[2, 0] += B_TR
 
             # Update phase
             phase = (phase + phase_inc) % (2*np.pi)
