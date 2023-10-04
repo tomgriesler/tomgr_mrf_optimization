@@ -40,9 +40,9 @@ def dr_dT1(T1, t):
 
 def dr_dT2(T2, t):
     
-    mat = t/T2**2 * np.exp(-t/T2) * np.array([[0, 0, 0],
-                                              [0, 0, 0],
-                                              [0, 0, 1]])
+    mat = t/T2**2 * np.exp(-t/T2) * np.array([[1, 0, 0],
+                                              [0, 1, 0],
+                                              [0, 0, 0]])
     
     return mat
 
