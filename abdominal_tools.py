@@ -4,67 +4,13 @@ import random
 import matplotlib.pyplot as plt
 import json
 import pickle
-
-# import sys
-# sys.path.append('/home/tomgr/Documents/tg_mrf_optimization')
-# from costfunctions import calculate_crlb_sc_epg
-# from signalmodel_epg import calculate_complex_signal_epg
+from datetime import datetime
 
 from signalmodel_abdominal import calculate_signal_abdominal, calculate_crlb_abdominal
 
 
 RESULTSPATH = Path('/home/tomgr/Documents/code/abdominal/results_optim')
 
-# BLOCKS = {
-#     'noPrep':
-#     {
-#         'fa': [],
-#         'tr': []
-#     },
-#     'TI12': {
-#         'fa': [180],
-#         'tr': [12]
-#     },
-#     'TI21': {
-#         'fa': [180],
-#         'tr': [21]
-#     },
-#     'TI100':
-#     {
-#         'fa': [180],
-#         'tr': [100]
-#     },
-#     'TI250':
-#     {
-#         'fa': [180],
-#         'tr': [250]
-#     },
-#     'TI300':
-#     {
-#         'fa': [180],
-#         'tr': [300]
-#     },
-#     'TI400':
-#     {
-#         'fa': [180],
-#         'tr': [400]
-#     },
-#     'T2prep40':
-#     {
-#         'fa': [90, -90], 
-#         'tr': [40, 20]
-#     },
-#     'T2prep80':
-#     {
-#         'fa': [90, -90],
-#         'tr': [80, 20]
-#     },
-#     'T2prep160':
-#     {
-#         'fa': [90, -90],
-#         'tr': [160, 20]
-#     }
-# }
 
 BLOCKS = {
     'noPrep': {'prep': 0, 'ti': 0, 't2te': 0},
@@ -76,6 +22,7 @@ BLOCKS = {
     'TI400': {'prep': 1, 'ti': 400, 't2te': 0},
     'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
     'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
+    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
     'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
 }
 
@@ -122,65 +69,53 @@ def create_weightingmatrix(target_tissue, weighting):
     return weightingmatrix
 
 
+def sort_sequences(sequences, weightingmatrix):
 
-# def return_reference(reference):
-
-#     acq_block_fa = np.load('/home/tomgr/Documents/code/abdominal/fa_jaubert.npy')
-#     acq_block_tr = np.load('/home/tomgr/Documents/code/abdominal/tr_jaubert.npy')
-
-#     if reference == 'jaubert':
-
-#         prep_order_ref = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI12', 'noPrep']
-
-#     elif reference == 'hamilton': 
-
-#         prep_order_ref = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
+    sequences.sort(key = lambda x: np.trace(weightingmatrix @ x.crlb))
 
 
-#     waittimes_ref = [1.2e3 - sum(BLOCKS[name]['tr']) - sum(acq_block_tr[:-1]) for name in prep_order_ref]
+def store_optimization(sequences, prot):
 
-#     acq_block = AcquisitionBlock(acq_block_fa, acq_block_tr, 1.4)
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')[2:]
+    resultspath = RESULTSPATH/timestamp
 
-#     mrf_sequence_ref = MRFSequence(prep_order_ref, waittimes_ref, acq_block_fa, acq_block_tr, BLOCKS)
+    with open(resultspath/'sequences.pkl', 'wb') as handle:
+        pickle.dump(sequences, handle)
 
-#     return acq_block, mrf_sequence_ref
+    with open(resultspath/'prot.json', 'r') as handle: 
+        json.dump(prot, handle)
 
 
-def store_optimization(count, best_sequences, worst_sequences, crlb_array, timestamp, duration, mrf_sequence_ref, target_tissue, acq_block, reference, weightingmatrix=None):
 
-    resultspath = RESULTSPATH / timestamp
-    resultspath.mkdir()
+    
 
-    with open(resultspath/'mrf_sequence_ref.pkl', 'wb') as handle:
-        pickle.dump(mrf_sequence_ref, handle)
+    # prot = {
+    #     'count': count,
+    #     'crlb_min': best_sequences[0].crlb,
+    #     'reduction': 1-best_sequences[0].crlb/mrf_sequence_ref.crlb,
+    #     'duration': duration,
+    #     'reference': reference
+    # }
+    # with open(resultspath/'prot.json', 'w') as handle:
+    #     json.dump(prot, handle, indent='\t')
 
-    prot = {
-        'count': count,
-        'crlb_min': best_sequences[0].crlb,
-        'reduction': 1-best_sequences[0].crlb/mrf_sequence_ref.crlb,
-        'duration': duration,
-        'reference': reference
-    }
-    with open(resultspath/'prot.json', 'w') as handle:
-        json.dump(prot, handle, indent='\t')
+    # np.save(resultspath/'crlb_array.npy', crlb_array)
 
-    np.save(resultspath/'crlb_array.npy', crlb_array)
+    # with open(resultspath/'blocks.json', 'w') as handle:
+    #     json.dump(BLOCKS, handle, indent='\t')
 
-    with open(resultspath/'blocks.json', 'w') as handle:
-        json.dump(BLOCKS, handle, indent='\t')
+    # with open(resultspath/'best_sequences.pkl', 'wb') as handle:
+    #     pickle.dump({i: best_sequences[i] for i in range(len(best_sequences))}, handle)
+    # with open(resultspath/'worst_sequences.pkl', 'wb') as handle:
+    #     pickle.dump({i: worst_sequences[i] for i in range(len(worst_sequences))}, handle)
 
-    with open(resultspath/'best_sequences.pkl', 'wb') as handle:
-        pickle.dump({i: best_sequences[i] for i in range(len(best_sequences))}, handle)
-    with open(resultspath/'worst_sequences.pkl', 'wb') as handle:
-        pickle.dump({i: worst_sequences[i] for i in range(len(worst_sequences))}, handle)
+    # with open(resultspath/'acq_block.pkl', 'wb') as handle:
+    #     pickle.dump(acq_block, handle)
+    # with open(resultspath/'target_tissue.pkl', 'wb') as handle:
+    #     pickle.dump(target_tissue, handle)
 
-    with open(resultspath/'acq_block.pkl', 'wb') as handle:
-        pickle.dump(acq_block, handle)
-    with open(resultspath/'target_tissue.pkl', 'wb') as handle:
-        pickle.dump(target_tissue, handle)
-
-    if weightingmatrix:
-        np.save(resultspath/'weightingmatrix.npy', weightingmatrix)
+    # if weightingmatrix:
+    #     np.save(resultspath/'weightingmatrix.npy', weightingmatrix)
 
 
 class AcquisitionBlock:

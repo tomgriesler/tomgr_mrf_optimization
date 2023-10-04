@@ -142,16 +142,16 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
             Omega[:2, :] = 0.
             Omega[2, :] *= -inversion_efficiency
 
-            dOmega_dT1[:2, :] = 0
+            dOmega_dT1[:2, :] = 0.
             dOmega_dT1[2, :] *= -inversion_efficiency
             dOmega_dT1 = dr_dT1(T1, ti) @ Omega + R_TI @ dOmega_dT1
             dOmega_dT1[2, 0] += M0 * db_dT1(T1, ti)
 
-            dOmega_dT2[:2, :] = 0
+            dOmega_dT2[:2, :] = 0.
             dOmega_dT2[2, :] *= -inversion_efficiency
             dOmega_dT2 = dr_dT2(T2, ti) @ Omega + R_TI @ dOmega_dT2
 
-            dOmega_dM0[:2, :] = 0
+            dOmega_dM0[:2, :] = 0.
             dOmega_dM0[2, :] *= -inversion_efficiency
             dOmega_dM0 = R_TI @ dOmega_dM0
 

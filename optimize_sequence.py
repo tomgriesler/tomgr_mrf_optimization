@@ -5,22 +5,15 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 
-# def optimize_sequence(target_tissue, acq_block, mrf_sequence_ref, prep_modules, weightingmatrix, num_acq_blocks=12, avg_dur_block=1200, track_crlbs=True, store_good=20, store_bad=20):
-def optimize_sequence(target_tissue, acq_block, mrf_sequence_ref, prep_modules, weightingmatrix, num_acq_blocks=12, avg_dur_block=1200):
-
-    # crlbs, crlbs_T1, crlbs_T2, crlbs_M0 = [], [], [], []
-
-    # best_sequences, worst_sequences = [], []
-
-    mrf_sequence_ref.calc_crlb(target_tissue)
-    ref_value = np.trace(weightingmatrix @ mrf_sequence_ref.crlb)
+def optimize_sequence(target_tissue, acq_block, prep_modules, num_acq_blocks=12, avg_dur_block=1200, weightingmatrix=None, ref_crlb_matrix=None, update_every=10, N_iter_max=np.inf):
 
     sequences = []
+
+    ref_value = np.trace(weightingmatrix@ref_crlb_matrix) if ref_crlb_matrix is not None else False
 
     count = 0
 
     t0 = datetime.now()
-    timestamp = t0.strftime('%Y%m%d_%H%M%S')[2:]
 
     try:
         while True:
@@ -39,53 +32,22 @@ def optimize_sequence(target_tissue, acq_block, mrf_sequence_ref, prep_modules, 
 
             sequences.append(mrf_sequence)
 
-            sequences.sort(key = lambda x: np.trace(weightingmatrix @ x.crlb))
-
-
-
-            # CRLB = weightingmatrix @ self.crlb
-
-            # if track_crlbs:
-            #     crlbs.append(np.trace(CRLB))    
-            #     crlbs_T1.append(CRLB[0, 0])    
-            #     crlbs_T2.append(CRLB[1, 1])    
-            #     crlbs_M0.append(CRLB[2, 2])    
-            
-
-            # if len(best_sequences) < store_good:
-            #     best_sequences.append(mrf_sequence)
-            #     best_sequences.sort(key=lambda x: np.trace(weightingmatrix @ x.crlb))
-
-            # elif mrf_sequence.crlb < best_sequences[-1].crlb:
-            #     best_sequences[-1] = mrf_sequence
-            #     best_sequences.sort(key=lambda x: np.trace(weightingmatrix @ x.crlb))
-
-
-            # if len(worst_sequences) < store_bad:
-            #     worst_sequences.append(mrf_sequence)
-            #     worst_sequences.sort(key=lambda x: np.trace(weightingmatrix @ x.crlb))
-
-            # elif mrf_sequence.crlb > worst_sequences[0].crlb:
-            #     worst_sequences[0] = mrf_sequence
-            #     worst_sequences.sort(key=lambda x: np.trace(weightingmatrix @ x.crlb))
-
             count += 1
 
-            # print(f'{count} iters. Min CRLB: {best_sequences[0].crlb:.3f}. Impr of {(1-best_sequences[0].crlb/mrf_sequence_ref.crlb)*100:.2f}%. Time: {str(datetime.now()-t0)}\t', end='\r')
-            print(f'{count} iters. Min CRLB: {np.trace(weightingmatrix@sequences[0].crlb):.3f}. Impr of {(1-np.trace(weightingmatrix@sequences[0].crlb)/ref_value)*100:.2f}%. Time: {str(datetime.now()-t0)}\t', end='\r')
+            if count%update_every==0:
+                    
+                if ref_value:    
+                    sequences.sort(key = lambda x: np.trace(weightingmatrix @ x.crlb))
+                    print(f'{count} iters. Min CRLB: {np.trace(weightingmatrix@sequences[0].crlb):.3f}. Impr of {(1-np.trace(weightingmatrix@sequences[0].crlb)/ref_value)*100:.2f}%. Time: {str(datetime.now()-t0)}\t', end='\r')
+                
+                else: 
+                    print(f'{count} iters. Time: {str(datetime.now()-t0)}\t', end='\r')
+
+            if count >= N_iter_max:
+                break
 
 
     except KeyboardInterrupt:
-
-        duration = str(datetime.now()-t0)
-
-        # print(f'\n\nMin CRLB: {best_sequences[0].crlb:.3f}.')
-        # print(f'Max CRLB: {worst_sequences[-1].crlb:.3f}.')
-        # print(f'Ref CRLB: {mrf_sequence_ref.crlb:.3f}.')
-        # print(f'Improvement of {(1-best_sequences[0].crlb/mrf_sequence_ref.crlb)*100:.2f}%.')
-        # print(f'Time elapsed: {duration}.')
-
-        # crlb_array = np.transpose(sorted(zip(crlbs, crlbs_T1, crlbs_T2, crlbs_M0)))
-
-    # return count, best_sequences, worst_sequences, crlb_array, timestamp, duration    
-    return count, sequences, timestamp, duration
+        pass
+        
+    return sequences
