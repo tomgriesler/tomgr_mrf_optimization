@@ -13,17 +13,17 @@ RESULTSPATH = Path('/home/tomgr/Documents/code/abdominal/results_optim')
 
 
 BLOCKS = {
-    'noPrep': {'prep': 0, 'ti': 0, 't2te': 0},
-    'TI12': {'prep': 1, 'ti': 12, 't2te': 0},
-    'TI21': {'prep': 1, 'ti': 21, 't2te': 0},
-    'TI100': {'prep': 1, 'ti': 100, 't2te': 0},
-    'TI250': {'prep': 1, 'ti': 250, 't2te': 0},
-    'TI300': {'prep': 1, 'ti': 300, 't2te': 0},
-    'TI400': {'prep': 1, 'ti': 400, 't2te': 0},
-    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
-    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
-    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
-    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
+    'noPrep': {'prep': 0, 'ti': 0, 't2te': 0, 'color': 'gray', 'label': 'noPrep'},
+    'TI12': {'prep': 1, 'ti': 12, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
+    'TI21': {'prep': 1, 'ti': 21, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
+    'TI100': {'prep': 1, 'ti': 100, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
+    'TI250': {'prep': 1, 'ti': 250, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
+    'TI300': {'prep': 1, 'ti': 300, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
+    'TI400': {'prep': 1, 'ti': 400, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
+    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40, 'color': 'tab:red', 'label': 'T2Prep'},
+    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80, 'color': 'tab:red', 'label': 'T2Prep'},
+    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120, 'color': 'tab:red', 'label': 'T2Prep'},
+    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160, 'color': 'tab:red', 'label': 'T2Prep'}
 }
 
 
@@ -39,22 +39,32 @@ def visualize_sequence(mrf_sequence):
 
     prep_pulse_timings = [i*sum(mrf_sequence.acq_block.tr)+sum([mrf_sequence.blocks[name]['ti']+mrf_sequence.blocks[name]['t2te'] for name in mrf_sequence.prep_order[:i]])+sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.prep_order))]
 
-    colormap = {prep: color for prep, color in zip(BLOCKS.keys(), plt.rcParams['axes.prop_cycle'].by_key()['color'])}
-
-    for i in range(len(mrf_sequence.prep_order)):
-        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+BLOCKS[mrf_sequence.prep_order[i]]['ti']+BLOCKS[mrf_sequence.prep_order[i]]['t2te'], color=colormap[mrf_sequence.prep_order[i]], label=mrf_sequence.prep_order[i], alpha=0.5)
-        plt.axvline(prep_pulse_timings[i], color=colormap[mrf_sequence.prep_order[i]])
-        plt.axvline(prep_pulse_timings[i]+BLOCKS[mrf_sequence.prep_order[i]]['ti']+BLOCKS[mrf_sequence.prep_order[i]]['t2te'], color=colormap[mrf_sequence.prep_order[i]])
-        plt.axvspan(prep_pulse_timings[i]+BLOCKS[mrf_sequence.prep_order[i]]['ti']+BLOCKS[mrf_sequence.prep_order[i]]['t2te'], prep_pulse_timings[i]+BLOCKS[mrf_sequence.prep_order[i]]['ti']+BLOCKS[mrf_sequence.prep_order[i]]['t2te']+sum(mrf_sequence.acq_block.tr), color='gray', alpha=0.2, label='acquisition')
+    for i, prep in enumerate(mrf_sequence.prep_order):
+        block = BLOCKS[prep]
+        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+block['ti']+block['t2te'], color=block['color'], label=block['label'], alpha=0.5)
+        plt.axvline(prep_pulse_timings[i], color=block['color'])
+        plt.axvline(prep_pulse_timings[i]+block['ti']+block['t2te'], color=block['color'])
+        plt.axvspan(prep_pulse_timings[i]+block['ti']+block['t2te'], prep_pulse_timings[i]+block['ti']+block['t2te']+sum(mrf_sequence.acq_block.tr), color='gray', alpha=0.2, label='acquisition')
+        plt.plot(prep_pulse_timings[i]+block['ti']+block['t2te']+[sum(mrf_sequence.acq_block.tr[:i]) for i in range(len(mrf_sequence.acq_block.tr))], mrf_sequence.acq_block.fa, '.', color='black', label='excitation')
 
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
-    plt.legend(by_label.values(), by_label.keys(), loc='upper right', ncols=3)
+    plt.legend(by_label.values(), by_label.keys(), loc='upper right', ncols=2)
 
     plt.ylim(0, 20)
 
     plt.xlabel('Time [ms]')
     plt.ylabel('FA [deg]')
+
+
+def visualize_crlb(sequences, weightingmatrix):
+    crlbs = np.array([weightingmatrix@np.sqrt(np.abs(sequence.crlb)) for sequence in sequences])
+
+    plt.plot(crlbs[:, 0, 0] + crlbs[:, 1, 1] + crlbs[:, 2, 2], label='total')
+    plt.plot(crlbs[:, 0, 0], label='T1')
+    plt.plot(crlbs[:, 1, 1], label='T2')
+    plt.plot(crlbs[:, 2, 2], label='M0')
+    plt.legend()
 
 
 def create_weightingmatrix(target_tissue, weighting):
@@ -63,59 +73,30 @@ def create_weightingmatrix(target_tissue, weighting):
         weightingmatrix = np.diag([1, 1, 0])
     elif weighting == '1/T1, 1/T2, 0':
         weightingmatrix = np.diag([1/target_tissue.T1, 1/target_tissue.T2, 0])
+    elif weighting == '1/T1**2, 1/T2**2, 0':
+        weightingmatrix = np.diag([1/target_tissue.T1**2, 1/target_tissue.T2**2, 0])
     elif weighting == '1/T1**2, 1/T2**2, 1/M0**2':
         weightingmatrix = np.diag([1/target_tissue.T1**2, 1/target_tissue.T2**2, 1/target_tissue.M0**2])
-
+        
     return weightingmatrix
 
 
 def sort_sequences(sequences, weightingmatrix):
 
-    sequences.sort(key = lambda x: np.trace(weightingmatrix @ x.crlb))
+    sequences.sort(key = lambda x: np.trace(weightingmatrix @ np.sqrt(np.abs(x.crlb))))
 
 
 def store_optimization(sequences, prot):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')[2:]
     resultspath = RESULTSPATH/timestamp
+    resultspath.mkdir()
 
     with open(resultspath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
-    with open(resultspath/'prot.json', 'r') as handle: 
+    with open(resultspath/'prot.json', 'w') as handle: 
         json.dump(prot, handle)
-
-
-
-    
-
-    # prot = {
-    #     'count': count,
-    #     'crlb_min': best_sequences[0].crlb,
-    #     'reduction': 1-best_sequences[0].crlb/mrf_sequence_ref.crlb,
-    #     'duration': duration,
-    #     'reference': reference
-    # }
-    # with open(resultspath/'prot.json', 'w') as handle:
-    #     json.dump(prot, handle, indent='\t')
-
-    # np.save(resultspath/'crlb_array.npy', crlb_array)
-
-    # with open(resultspath/'blocks.json', 'w') as handle:
-    #     json.dump(BLOCKS, handle, indent='\t')
-
-    # with open(resultspath/'best_sequences.pkl', 'wb') as handle:
-    #     pickle.dump({i: best_sequences[i] for i in range(len(best_sequences))}, handle)
-    # with open(resultspath/'worst_sequences.pkl', 'wb') as handle:
-    #     pickle.dump({i: worst_sequences[i] for i in range(len(worst_sequences))}, handle)
-
-    # with open(resultspath/'acq_block.pkl', 'wb') as handle:
-    #     pickle.dump(acq_block, handle)
-    # with open(resultspath/'target_tissue.pkl', 'wb') as handle:
-    #     pickle.dump(target_tissue, handle)
-
-    # if weightingmatrix:
-    #     np.save(resultspath/'weightingmatrix.npy', weightingmatrix)
 
 
 class AcquisitionBlock:

@@ -5,7 +5,7 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 
-def optimize_sequence(target_tissue, acq_block, prep_modules, num_acq_blocks=12, avg_dur_block=1200, weightingmatrix=None, ref_crlb_matrix=None, update_every=10, N_iter_max=np.inf):
+def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, weightingmatrix=None, ref_crlb_matrix=None, update_every=10, N_iter_max=np.inf):
 
     sequences = []
 
@@ -18,11 +18,17 @@ def optimize_sequence(target_tissue, acq_block, prep_modules, num_acq_blocks=12,
     try:
         while True:
 
+            max_prep_dur = max([BLOCKS[name]['ti'] for name in prep_modules]+[BLOCKS[name]['t2te'] for name in prep_modules])
+
+            max_num_preps = total_dur // (max_prep_dur+sum(acq_block.tr))
+
+            num_acq_blocks = random.randint(1, max_num_preps)
+
             prep_order = random.choices(prep_modules, k=num_acq_blocks)
 
             prep_time_tot = sum([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_order])
 
-            waittime_tot = int(num_acq_blocks*avg_dur_block - num_acq_blocks*sum(acq_block.tr) - prep_time_tot)
+            waittime_tot = int(total_dur - num_acq_blocks*sum(acq_block.tr) - prep_time_tot)
 
             waittimes = divide_into_random_integers(waittime_tot, num_acq_blocks)
 
