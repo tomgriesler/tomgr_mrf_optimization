@@ -3,52 +3,54 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import json
-# %%
-from abdominal_tools import RESULTSPATH, visualize_sequence
-#%%
-timestamp = '230927_1752'
-timestamp = '230927_1753'
-timestamp = '230928_0905'
+
+from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_crlb,create_weightingmatrix,sort_sequences, TargetTissue, MRFSequence
 
 #%%
+timestamp = '231005_085000'
 resultspath = RESULTSPATH/timestamp
 
-#%%
-with open(resultspath/'best_sequences.pkl', 'rb') as handle:
-    best_sequences = list(pickle.load(handle).values())
-with open(resultspath/'worst_sequences.pkl', 'rb') as handle:
-    worst_sequences = list(pickle.load(handle).values())
-with open(resultspath/'mrf_sequence_ref.pkl', 'rb') as handle:
-    mrf_sequence_ref = pickle.load(handle)
-crlb_array = np.load(resultspath/'crlb_array.npy')
-with open(resultspath/'prot.json', 'r') as handle:
+with open(resultspath/'sequences.pkl', 'rb') as handle: 
+    sequences = pickle.load(handle)
+
+with open(resultspath/'acq_block.pkl', 'rb') as handle: 
+    acq_block = pickle.load(handle)
+
+with open(resultspath/'prot.json', 'r') as handle: 
     prot = json.load(handle)
 
-# %%
-fig = plt.figure(figsize=(16, 9))
-for i in range(6):
-    ax = plt.subplot(2, 3, i+1)
-    visualize_sequence(best_sequences[i])
-    ax.set_title(f'CRLB={best_sequences[i].crlb:.3f}')
-plt.tight_layout()
+target_tissue = TargetTissue(prot['target_tissue']['T1'], prot['target_tissue']['T2'], prot['target_tissue']['M0'])
 
-# %%
-fig = plt.figure(figsize=(16, 9))
-for i in range(6):
-    ax = plt.subplot(2, 3, i+1)
-    visualize_sequence(worst_sequences[-6+i])
-    ax.set_title(f'CRLB={worst_sequences[-6+i].crlb:.3f}')
-plt.tight_layout()
+#%%
+weighting = '1/T1, 1/T2, 0'
+weightingmatrix = create_weightingmatrix(target_tissue, weighting)
+sort_sequences(sequences, weightingmatrix)
 
-# %%
-for i in range(4):
-    plt.plot(crlb_array[i], '.', ms=1, label=['tot', 'T1', 'T2', 'M0'][i])
-plt.ylim(0, 2000)
-plt.axhline(mrf_sequence_ref.crlb, label='reference', ls='--')
-plt.axhline(mrf_sequence_ref.crlb_T1, color='tab:orange', ls='--')
-plt.axhline(mrf_sequence_ref.crlb_T2, color='tab:green', ls='--')
-plt.axhline(mrf_sequence_ref.crlb_M0, color='tab:red', ls='--')
+#%%
+plt.plot([len(sequence.PREP) for sequence in sequences], '.', ms=1)
+
+#%% Compare to reference
+prep_order_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI12', 'noPrep']
+prep_order_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
+
+waittimes_jaubert = [prot['total_dur']/12 - BLOCKS[name]['ti']-BLOCKS[name]['t2te']-sum(acq_block.tr) for name in prep_order_jaubert]
+waittimes_hamilton = [prot['total_dur']/16 - BLOCKS[name]['ti']-BLOCKS[name]['t2te']-sum(acq_block.tr) for name in prep_order_hamilton]
+
+mrf_sequence_jaubert = MRFSequence(prep_order_jaubert, waittimes_jaubert)
+mrf_sequence_hamilton = MRFSequence(prep_order_hamilton, waittimes_hamilton)
+
+mrf_sequence_jaubert.calc_crlb(acq_block, target_tissue)
+mrf_sequence_hamilton.calc_crlb(acq_block, target_tissue)
+
+#%%
+visualize_crlb(sequences, weightingmatrix)
+plt.axhline(np.sum(np.multiply(weightingmatrix, mrf_sequence_jaubert.crlb)), ls='--', label='Jaubert')
+plt.axhline(np.sum(np.multiply(weightingmatrix, mrf_sequence_hamilton.crlb)), ls=':', label='Hamilton')
+plt.ylim(0, 20)
 plt.legend()
-plt.title(f'{len(mrf_sequence_ref.prep_order)} Blocks, Reference: {prot["reference"].capitalize()}')
 plt.show()
+
+#%%
+visualize_sequence(sequences[0], acq_block)
+
 # %%

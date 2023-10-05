@@ -13,17 +13,17 @@ RESULTSPATH = Path('/home/tomgr/Documents/code/abdominal/results_optim')
 
 
 BLOCKS = {
-    'noPrep': {'prep': 0, 'ti': 0, 't2te': 0, 'color': 'gray', 'label': 'noPrep'},
-    'TI12': {'prep': 1, 'ti': 12, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
-    'TI21': {'prep': 1, 'ti': 21, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
-    'TI100': {'prep': 1, 'ti': 100, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
-    'TI250': {'prep': 1, 'ti': 250, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
-    'TI300': {'prep': 1, 'ti': 300, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
-    'TI400': {'prep': 1, 'ti': 400, 't2te': 0, 'color': 'tab:blue', 'label': 'T1Prep'},
-    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40, 'color': 'tab:red', 'label': 'T2Prep'},
-    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80, 'color': 'tab:red', 'label': 'T2Prep'},
-    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120, 'color': 'tab:red', 'label': 'T2Prep'},
-    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160, 'color': 'tab:red', 'label': 'T2Prep'}
+    'noPrep': {'prep': 0, 'ti': 0, 't2te': 0},
+    'TI12': {'prep': 1, 'ti': 12, 't2te': 0},
+    'TI21': {'prep': 1, 'ti': 21, 't2te': 0},
+    'TI100': {'prep': 1, 'ti': 100, 't2te': 0},
+    'TI250': {'prep': 1, 'ti': 250, 't2te': 0},
+    'TI300': {'prep': 1, 'ti': 300, 't2te': 0},
+    'TI400': {'prep': 1, 'ti': 400, 't2te': 0},
+    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
+    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
+    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
+    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
 }
 
 
@@ -35,58 +35,70 @@ def divide_into_random_integers(N, n):
     return integers
 
 
-def visualize_sequence(mrf_sequence):
+def visualize_sequence(mrf_sequence, acq_block):
 
-    prep_pulse_timings = [i*sum(mrf_sequence.acq_block.tr)+sum([mrf_sequence.blocks[name]['ti']+mrf_sequence.blocks[name]['t2te'] for name in mrf_sequence.prep_order[:i]])+sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.prep_order))]
+    prep_pulse_timings = [i*sum(acq_block.tr) + sum(mrf_sequence.TI[:i]) + sum(mrf_sequence.T2TE[:i]) + sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.PREP))]
 
-    for i, prep in enumerate(mrf_sequence.prep_order):
-        block = BLOCKS[prep]
-        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+block['ti']+block['t2te'], color=block['color'], label=block['label'], alpha=0.5)
-        plt.axvline(prep_pulse_timings[i], color=block['color'])
-        plt.axvline(prep_pulse_timings[i]+block['ti']+block['t2te'], color=block['color'])
-        plt.axvspan(prep_pulse_timings[i]+block['ti']+block['t2te'], prep_pulse_timings[i]+block['ti']+block['t2te']+sum(mrf_sequence.acq_block.tr), color='gray', alpha=0.2, label='acquisition')
-        plt.plot(prep_pulse_timings[i]+block['ti']+block['t2te']+[sum(mrf_sequence.acq_block.tr[:i]) for i in range(len(mrf_sequence.acq_block.tr))], mrf_sequence.acq_block.fa, '.', color='black', label='excitation')
+    map = {
+        0: {'color': 'gray', 'label': 'noPrep'},
+        1: {'color': 'tab:blue', 'label': 'T1'},
+        2: {'color': 'tab:red', 'label': 'T2'}
+    }
+
+    for i, prep in enumerate(mrf_sequence.PREP):
+        prep_length = mrf_sequence.TI[i] + mrf_sequence.T2TE[i]
+        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=0.5)
+        plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
+        plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
+        plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
+        plt.plot(prep_pulse_timings[i]+prep_length+[sum(acq_block.tr[:i]) for i in range(len(acq_block.tr))], acq_block.fa, '.', color='black', label='excitation')
 
     handles, labels = plt.gca().get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
     plt.legend(by_label.values(), by_label.keys(), loc='upper right', ncols=2)
 
-    plt.ylim(0, 20)
+    plt.ylim(0, max(acq_block.fa)*4/3)
 
     plt.xlabel('Time [ms]')
     plt.ylabel('FA [deg]')
 
 
 def visualize_crlb(sequences, weightingmatrix):
-    crlbs = np.array([weightingmatrix@np.sqrt(np.abs(sequence.crlb)) for sequence in sequences])
 
-    plt.plot(crlbs[:, 0, 0] + crlbs[:, 1, 1] + crlbs[:, 2, 2], label='total')
-    plt.plot(crlbs[:, 0, 0], label='T1')
-    plt.plot(crlbs[:, 1, 1], label='T2')
-    plt.plot(crlbs[:, 2, 2], label='M0')
+    crlbs = np.array([np.multiply(weightingmatrix, sequence.crlb) for sequence in sequences])
+
+    plt.plot(np.sum(crlbs, axis=1), label='total')
+    plt.plot(crlbs[:, 0], label='T1')
+    plt.plot(crlbs[:, 1], label='T2')
+    plt.plot(crlbs[:, 2], label='M0')
     plt.legend()
+
+    plt.xlabel('N')
+    plt.ylabel('rel. CRLB')
 
 
 def create_weightingmatrix(target_tissue, weighting):
 
     if weighting == '1, 1, 0':
-        weightingmatrix = np.diag([1, 1, 0])
+        weightingmatrix = np.array([1, 1, 0])
     elif weighting == '1/T1, 1/T2, 0':
-        weightingmatrix = np.diag([1/target_tissue.T1, 1/target_tissue.T2, 0])
+        weightingmatrix = np.array([1/target_tissue.T1, 1/target_tissue.T2, 0])
+    elif weighting == '1/T1, 1/T2, 1/M0':
+        weightingmatrix = np.array([1/target_tissue.T1, 1/target_tissue.T2, 1/target_tissue.M0])
     elif weighting == '1/T1**2, 1/T2**2, 0':
-        weightingmatrix = np.diag([1/target_tissue.T1**2, 1/target_tissue.T2**2, 0])
+        weightingmatrix = np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 0])
     elif weighting == '1/T1**2, 1/T2**2, 1/M0**2':
-        weightingmatrix = np.diag([1/target_tissue.T1**2, 1/target_tissue.T2**2, 1/target_tissue.M0**2])
+        weightingmatrix = np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 1/target_tissue.M0**2])
         
     return weightingmatrix
 
 
 def sort_sequences(sequences, weightingmatrix):
 
-    sequences.sort(key = lambda x: np.trace(weightingmatrix @ np.sqrt(np.abs(x.crlb))))
+    sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.crlb)))
 
 
-def store_optimization(sequences, prot):
+def store_optimization(sequences, acq_block, prot):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')[2:]
     resultspath = RESULTSPATH/timestamp
@@ -95,8 +107,11 @@ def store_optimization(sequences, prot):
     with open(resultspath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
+    with open(resultspath/'acq_block.pkl', 'wb') as handle:
+        pickle.dump(acq_block, handle)
+
     with open(resultspath/'prot.json', 'w') as handle: 
-        json.dump(prot, handle)
+        json.dump(prot, handle, indent='\t')
 
 
 class AcquisitionBlock:
@@ -105,6 +120,7 @@ class AcquisitionBlock:
         self.fa = fa
         self.tr = tr
         self.TE = TE
+
 
 class TargetTissue:
 
@@ -116,21 +132,18 @@ class TargetTissue:
 
 class MRFSequence:
 
-    def __init__(self, prep_order, waittimes, acq_block):
-        self.prep_order = prep_order
+    def __init__(self, prep_order, waittimes):
         self.waittimes = waittimes
-        self.acq_block = acq_block
-        self.blocks = {name: BLOCKS[name] for name in np.unique(self.prep_order)}
-        self.PREP = [self.blocks[name]['prep'] for name in self.prep_order]
-        self.TI = [self.blocks[name]['ti'] for name in self.prep_order]
-        self.T2TE = [self.blocks[name]['t2te'] for name in self.prep_order]
+        self.PREP = [BLOCKS[name]['prep'] for name in prep_order]
+        self.TI = [BLOCKS[name]['ti'] for name in prep_order]
+        self.T2TE = [BLOCKS[name]['t2te'] for name in prep_order]
         
-    def calc_signal(self, target_tissue, inversion_efficiency=0.95, delta_B1=1):
+    def calc_signal(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1):
 
-        self.signal = calculate_signal_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, self.acq_block.fa, self.acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, self.acq_block.TE, inversion_efficiency, delta_B1)
+        self.signal = calculate_signal_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1)
 
-    def calc_crlb(self, target_tissue, inversion_efficiency=0.95, delta_B1=1, sigma=1):
+    def calc_crlb(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, sigma=1):
 
-        V = calculate_crlb_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, self.acq_block.fa, self.acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, self.acq_block.TE, inversion_efficiency, delta_B1, sigma)
+        V = calculate_crlb_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, sigma)
 
-        self.crlb = V
+        self.crlb = np.sqrt(np.diagonal(V))

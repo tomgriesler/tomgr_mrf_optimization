@@ -5,22 +5,21 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 
-def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, weightingmatrix=None, ref_crlb_matrix=None, update_every=10, N_iter_max=np.inf):
+def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, N_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1):
 
     sequences = []
 
-    ref_value = np.trace(weightingmatrix@ref_crlb_matrix) if ref_crlb_matrix is not None else False
-
     count = 0
+
+    max_prep_dur = max([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_modules])
+
+    max_num_preps = total_dur // (max_prep_dur+sum(acq_block.tr))
+    print(f'Total sequence duration: {total_dur} s.\nMax num of preps: {max_num_preps:.0f}.')
 
     t0 = datetime.now()
 
     try:
         while True:
-
-            max_prep_dur = max([BLOCKS[name]['ti'] for name in prep_modules]+[BLOCKS[name]['t2te'] for name in prep_modules])
-
-            max_num_preps = total_dur // (max_prep_dur+sum(acq_block.tr))
 
             num_acq_blocks = random.randint(1, max_num_preps)
 
@@ -32,26 +31,20 @@ def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, weighti
 
             waittimes = divide_into_random_integers(waittime_tot, num_acq_blocks)
 
-            mrf_sequence = MRFSequence(prep_order, waittimes, acq_block)
+            mrf_sequence = MRFSequence(prep_order, waittimes)
 
-            mrf_sequence.calc_crlb(target_tissue)
+            mrf_sequence.calc_crlb(acq_block, target_tissue, inversion_efficiency, delta_B1)
 
             sequences.append(mrf_sequence)
 
             count += 1
 
-            if count%update_every==0:
-                    
-                if ref_value:    
-                    sequences.sort(key = lambda x: np.trace(weightingmatrix @ x.crlb))
-                    print(f'{count} iters. Min CRLB: {np.trace(weightingmatrix@sequences[0].crlb):.3f}. Impr of {(1-np.trace(weightingmatrix@sequences[0].crlb)/ref_value)*100:.2f}%. Time: {str(datetime.now()-t0)}\t', end='\r')
-                
-                else: 
-                    print(f'{count} iters. Time: {str(datetime.now()-t0)}\t', end='\r')
+            timediff = datetime.now()-t0
+
+            print(f'{count} iters. Time: {str(timediff).split(".")[0]}. {count/timediff.total_seconds():.2f} its/s.', end='\r')
 
             if count >= N_iter_max:
                 break
-
 
     except KeyboardInterrupt:
         pass
