@@ -1,13 +1,13 @@
 #%%
 import pickle
 import matplotlib.pyplot as plt
-import numpy as np
 import json
+import numpy as np
 
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_crlb,create_weightingmatrix,sort_sequences, TargetTissue, MRFSequence
 
 #%%
-timestamp = '231005_085000'
+timestamp = '231006_180622'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -28,6 +28,7 @@ sort_sequences(sequences, weightingmatrix)
 
 #%%
 plt.plot([len(sequence.PREP) for sequence in sequences], '.', ms=1)
+plt.show()
 
 #%% Compare to reference
 prep_order_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI12', 'noPrep']

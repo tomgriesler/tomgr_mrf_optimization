@@ -14,7 +14,7 @@ def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, N_iter_
     max_prep_dur = max([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_modules])
 
     max_num_preps = total_dur // (max_prep_dur+sum(acq_block.tr))
-    print(f'Total sequence duration: {total_dur} s.\nMax num of preps: {max_num_preps:.0f}.')
+    print(f'Total sequence duration: {total_dur:.0f} ms.\nMax num of preps: {max_num_preps:.0f}.')
 
     t0 = datetime.now()
 
