@@ -7,22 +7,26 @@ import json
 
 from abdominal_tools import MRFSequence, AcquisitionBlock, TargetTissue, BLOCKS, RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 # %%
-prep_order = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep80', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep80', 'TI12', 'noPrep']
+prep_order = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI12', 'noPrep']
 
 prep_order = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
 
+prep_order = ['noPrep']
+
+name = 'optim_20s'
+
 
 #%%
-total_dur = 16000
+total_dur = 2e4
 
-acq_block = AcquisitionBlock(np.full(40, 15.), np.full(40, 5.), TE=0.84)
+acq_block = AcquisitionBlock(np.full(40, 15.), np.full(40, 5.), TE=2.71)
 
 waittimes = [total_dur/len(prep_order) - BLOCKS[name]['ti']-BLOCKS[name]['t2te']-sum(acq_block.tr) for name in prep_order]
 
 mrf_seq = MRFSequence(prep_order, waittimes)
 
 #%%
-timestamp = '231006_180622'
+timestamp = '231009_094134'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -60,7 +64,7 @@ for i, waittime in enumerate(waittimes):
 PH_FISP = np.zeros_like(FA_FISP)
 
 #%% save lists
-savepath = Path('/home/tomgr/Documents/MRF_sim_for_tom/Sequences/medium_10s')
+savepath = Path(f'/home/tomgr/Documents/MRF_sim_for_tom/Sequences/{name}')
 savepath.mkdir(exist_ok=True)
 np.savetxt(savepath/'PREP_FISP.txt', mrf_seq.PREP, fmt='%i')
 np.savetxt(savepath/'TI_FISP.txt', mrf_seq.TI, fmt='%f')
@@ -76,6 +80,10 @@ target_tissue = TargetTissue(660, 40, 1)
 mrf_seq.calc_signal(acq_block, target_tissue, inversion_efficiency=0.95)
 
 plt.plot(-np.imag(mrf_seq.signal)/np.linalg.norm(np.imag(mrf_seq.signal)))
+
+# plt.ylim(0.12, 0.28)
+
+plt.show()
 
 #%%
 np.savetxt(savepath/f'signal_{target_tissue.T1}_{target_tissue.T2}.txt', -np.imag(mrf_seq.signal)/np.linalg.norm(np.imag(mrf_seq.signal)))
