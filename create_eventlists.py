@@ -7,17 +7,17 @@ import json
 
 from abdominal_tools import MRFSequence, AcquisitionBlock, TargetTissue, BLOCKS, RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 # %%
-prep_order = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI12', 'noPrep']
+prep_order = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
 
 prep_order = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
 
 prep_order = ['noPrep']
 
-name = 'optim_20s'
+name = 'jaubert_mod_10s'
 
 
 #%%
-total_dur = 2e4
+total_dur = 1e4
 
 acq_block = AcquisitionBlock(np.full(40, 15.), np.full(40, 5.), TE=2.71)
 

@@ -31,7 +31,7 @@ plt.plot([len(sequence.PREP) for sequence in sequences], '.', ms=1)
 plt.show()
 
 #%% Compare to reference
-prep_order_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep160', 'TI12', 'noPrep']
+prep_order_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
 prep_order_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
 
 waittimes_jaubert = [prot['total_dur']/12 - BLOCKS[name]['ti']-BLOCKS[name]['t2te']-sum(acq_block.tr) for name in prep_order_jaubert]
@@ -47,7 +47,8 @@ mrf_sequence_hamilton.calc_crlb(acq_block, target_tissue)
 visualize_crlb(sequences, weightingmatrix)
 plt.axhline(np.sum(np.multiply(weightingmatrix, mrf_sequence_jaubert.crlb)), ls='--', label='Jaubert')
 plt.axhline(np.sum(np.multiply(weightingmatrix, mrf_sequence_hamilton.crlb)), ls=':', label='Hamilton')
-plt.ylim(0, 20)
+plt.ylim(0, 5)
+plt.xlim(0, 400)
 plt.legend()
 plt.show()
 
