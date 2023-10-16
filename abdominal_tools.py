@@ -21,6 +21,7 @@ BLOCKS = {
     'TI300': {'prep': 1, 'ti': 300, 't2te': 0},
     'TI400': {'prep': 1, 'ti': 400, 't2te': 0},
     'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
+    'T2prep50': {'prep': 2, 'ti': 0, 't2te': 50},
     'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
     'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
     'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
