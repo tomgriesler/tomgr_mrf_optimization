@@ -79,18 +79,17 @@ def visualize_crlb(sequences, weightingmatrix):
 
 def create_weightingmatrix(target_tissue, weighting):
 
-    if weighting == '1, 1, 0':
-        weightingmatrix = np.array([1, 1, 0])
-    elif weighting == '1/T1, 1/T2, 0':
-        weightingmatrix = np.array([1/target_tissue.T1, 1/target_tissue.T2, 0])
-    elif weighting == '1/T1, 1/T2, 1/M0':
-        weightingmatrix = np.array([1/target_tissue.T1, 1/target_tissue.T2, 1/target_tissue.M0])
-    elif weighting == '1/T1**2, 1/T2**2, 0':
-        weightingmatrix = np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 0])
-    elif weighting == '1/T1**2, 1/T2**2, 1/M0**2':
-        weightingmatrix = np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 1/target_tissue.M0**2])
+    WEIGHTINGMATRICES = {
+        '1, 1, 0': np.array([1, 1, 0]),
+        '1/T1, 0, 0': np.array([1/target_tissue.T1, 0, 0]),
+        '0, 1/T2, 0': np.array([0, 1/target_tissue.T2, 0]),
+        '1/T1, 1/T2, 0': np.array([1/target_tissue.T1, 1/target_tissue.T2, 0]),
+        '1/T1, 1/T2, 1/M0': np.array([1/target_tissue.T1, 1/target_tissue.T2, 1/target_tissue.M0]),
+        '1/T1**2, 1/T2**2, 0': np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 0]),
+        '1/T1**2, 1/T2**2, 1/M0**2': np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 1/target_tissue.M0**2])
+    }
         
-    return weightingmatrix
+    return WEIGHTINGMATRICES[weighting]
 
 
 def sort_sequences(sequences, weightingmatrix):
