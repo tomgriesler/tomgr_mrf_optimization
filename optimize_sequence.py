@@ -5,7 +5,7 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 
-def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, N_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1):
+def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, min_num_preps=1, N_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1):
 
     sequences = []
 
@@ -21,7 +21,7 @@ def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, N_iter_
     try:
         while True:
 
-            num_acq_blocks = random.randint(1, max_num_preps)
+            num_acq_blocks = random.randint(min_num_preps, max_num_preps)
 
             prep_order = random.choices(prep_modules, k=num_acq_blocks)
 
