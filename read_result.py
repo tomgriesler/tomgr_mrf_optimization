@@ -22,6 +22,8 @@ with open(resultspath/'prot.json', 'r') as handle:
 target_tissue = TargetTissue(prot['target_tissue']['T1'], prot['target_tissue']['T2'], prot['target_tissue']['M0'])
 
 #%%
+weighting = '1/T1, 0, 0'
+weighting = '0, 1/T2, 0'
 weighting = '1/T1, 1/T2, 0'
 weightingmatrix = create_weightingmatrix(target_tissue, weighting)
 sort_sequences(sequences, weightingmatrix)
@@ -48,7 +50,7 @@ visualize_crlb(sequences, weightingmatrix)
 plt.axhline(np.sum(np.multiply(weightingmatrix, mrf_sequence_jaubert.crlb)), ls='--', label='Jaubert')
 plt.axhline(np.sum(np.multiply(weightingmatrix, mrf_sequence_hamilton.crlb)), ls=':', label='Hamilton')
 plt.ylim(0, 5)
-plt.xlim(0, 400)
+# plt.xlim(0, 400)
 plt.legend()
 plt.show()
 

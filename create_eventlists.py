@@ -13,7 +13,7 @@ prep_order = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2pr
 
 prep_order = ['noPrep']
 
-name = 'jaubert_mod_10s'
+name = 'optim_T2_10s'
 
 
 #%%
@@ -26,7 +26,7 @@ waittimes = [total_dur/len(prep_order) - BLOCKS[name]['ti']-BLOCKS[name]['t2te']
 mrf_seq = MRFSequence(prep_order, waittimes)
 
 #%%
-timestamp = '231009_094134'
+timestamp = '231006_180622'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -42,7 +42,8 @@ target_tissue = TargetTissue(prot['target_tissue']['T1'], prot['target_tissue'][
 inversion_efficiency = prot['inversion_efficiency']
 delta_B1 = prot['delta_B1']
 
-weighting = '1/T1, 1/T2, 0'
+#%%
+weighting = '0, 1/T2, 0'
 weightingmatrix = create_weightingmatrix(target_tissue, weighting)
 sort_sequences(sequences, weightingmatrix)
 
