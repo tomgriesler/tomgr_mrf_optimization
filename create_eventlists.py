@@ -7,21 +7,54 @@ import json
 
 from abdominal_tools import MRFSequence, AcquisitionBlock, TargetTissue, BLOCKS, RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 # %%
+
+# Jaubert mod 12
+name = 'jaubert_mod_10s_12'
 prep_order = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
 
+# Jaubert mod 16
+name = 'jaubert_mod_10s_16'
+prep_order = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300']
+
+# Jaubert mod 20
+name = 'jaubert_mod_10s_20'
+prep_order = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120']
+
+# Hamilton 12
+name = 'hamilton_10s_12'
+prep_order = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80']
+
+# Hamilton 16
+name = 'hamilton_10s_16'
 prep_order = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
 
-prep_order = ['noPrep']
+# Hamilton 20
+name = 'hamilton_10s_20'
+prep_order = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80', 'TI21', 'noPrep', 'T2prep40', 'T2prep80']
 
+# 3D QALAS 12
+name = '3dqalas_10s_12'
+prep_order = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100']
+
+# 3D QALAS 16
+name = '3dqalas_10s_16'
+prep_order = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50']
+
+# 3D QALAS 20
+name = '3dqalas_10s_20'
+prep_order = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep']
+
+#%%
 name = 'optim_T2_10s'
-
 
 #%%
 total_dur = 1e4
 
-acq_block = AcquisitionBlock(np.full(40, 15.), np.full(40, 5.), TE=2.71)
+acq_block = AcquisitionBlock(np.full(40, 15.), np.full(40, 5.), TE=1.4)
 
-waittimes = [total_dur/len(prep_order) - BLOCKS[name]['ti']-BLOCKS[name]['t2te']-sum(acq_block.tr) for name in prep_order]
+# waittimes = [total_dur/len(prep_order) - BLOCKS[name]['ti']-BLOCKS[name]['t2te']-sum(acq_block.tr) for name in prep_order]
+
+waittimes = np.concatenate((np.full(len(prep_order)-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + sum(acq_block.tr) for prep in prep_order]))/(len(prep_order)-1), [0]))
 
 mrf_seq = MRFSequence(prep_order, waittimes)
 
