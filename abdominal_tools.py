@@ -41,41 +41,44 @@ def visualize_sequence(mrf_sequence, acq_block):
     prep_pulse_timings = [i*sum(acq_block.tr) + sum(mrf_sequence.TI[:i]) + sum(mrf_sequence.T2TE[:i]) + sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.PREP))]
 
     map = {
-        0: {'color': 'gray', 'label': 'noPrep'},
-        1: {'color': 'tab:blue', 'label': 'T1'},
-        2: {'color': 'tab:red', 'label': 'T2'}
+        0: {'color': 'white', 'label': None},
+        1: {'color': 'tab:blue', 'label': 'T1 prep'},
+        2: {'color': 'tab:red', 'label': 'T2 prep'}
     }
 
     for i, prep in enumerate(mrf_sequence.PREP):
         prep_length = mrf_sequence.TI[i] + mrf_sequence.T2TE[i]
-        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=0.5)
+        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=1)
         plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
         plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
         plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
-        plt.plot(prep_pulse_timings[i]+prep_length+[sum(acq_block.tr[:i]) for i in range(len(acq_block.tr))], acq_block.fa, '.', color='black', label='excitation')
+        # plt.plot(prep_pulse_timings[i]+prep_length+[sum(acq_block.tr[:i]) for i in range(len(acq_block.tr))], acq_block.fa, '.', color='black', label='excitation')
 
-    handles, labels = plt.gca().get_legend_handles_labels()
-    by_label = dict(zip(labels, handles))
-    plt.legend(by_label.values(), by_label.keys(), loc='upper right', ncols=2)
+    # handles, labels = plt.gca().get_legend_handles_labels()
+    # by_label = dict(zip(labels, handles))
+    # plt.legend(by_label.values(), by_label.keys(), loc='upper right', ncols=2)
 
-    plt.ylim(0, max(acq_block.fa)*4/3)
+    # plt.ylim(0, max(acq_block.fa)*4/3)
 
-    plt.xlabel('Time [ms]')
-    plt.ylabel('FA [deg]')
+    # plt.xlabel('Time [ms]')
+    # plt.ylabel('FA [deg]')
 
 
 def visualize_crlb(sequences, weightingmatrix):
 
     crlbs = np.array([np.multiply(weightingmatrix, sequence.crlb) for sequence in sequences])
 
-    plt.plot(np.sum(crlbs, axis=1), label='total')
-    plt.plot(crlbs[:, 0], label='T1')
-    plt.plot(crlbs[:, 1], label='T2')
-    plt.plot(crlbs[:, 2], label='M0')
-    plt.legend()
+    if weightingmatrix[0]:
+        plt.plot(crlbs[:, 0], '.', label='$cost_1$', alpha=0.5, ms=0.1, color='tab:blue')
+    if weightingmatrix[1]:
+        plt.plot(crlbs[:, 1], '.', label='$cost_2$', alpha=0.5, ms=0.1, color='tab:red')
+    if weightingmatrix[0] and weightingmatrix[1]:
+        plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_3$', ms=0.1, color='tab:green')
+    
+    # plt.legend()
 
-    plt.xlabel('N')
-    plt.ylabel('rel. CRLB')
+    # plt.xlabel('N')
+    # plt.ylabel('cost function value')
 
 
 def create_weightingmatrix(target_tissue, weighting):
