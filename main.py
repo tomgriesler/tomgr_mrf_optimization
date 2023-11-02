@@ -16,7 +16,7 @@ inversion_efficiency = 1
 delta_B1 = 1
 
 #%% Create acquisition block
-acq_block = AcquisitionBlock(np.full(40, 15), np.full(40, 5), 1.4)
+acq_block = AcquisitionBlock(np.full(37, 15.), np.full(37, 5.4), 1.4)
 
 #%% Perform optimization
 sequences = optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, prep_module_weights=prep_module_weights, min_num_preps=min_num_preps, N_iter_max=1e7, inversion_efficiency=inversion_efficiency, delta_B1=delta_B1)

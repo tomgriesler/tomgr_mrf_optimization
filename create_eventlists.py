@@ -72,7 +72,8 @@ prep_order = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI
 total_dur = 1e4
 
 # acq_block = AcquisitionBlock(np.full(40, 15.), np.full(40, 5.), TE=1.4)
-acq_block = AcquisitionBlock(np.full(37, 15.), np.full(37, 5.4), TE=1.4)
+# acq_block = AcquisitionBlock(np.full(37, 15.), np.full(37, 5.4), TE=1.4)
+acq_block = AcquisitionBlock(np.full(35, 15.), np.full(35, 5.7), TE=1.4)
 
 waittimes = np.concatenate((np.full(len(prep_order)-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + sum(acq_block.tr) for prep in prep_order]))/(len(prep_order)-1), [0]))
 
@@ -88,7 +89,8 @@ with open(resultspath/'sequences.pkl', 'rb') as handle:
 # with open(resultspath/'acq_block.pkl', 'rb') as handle: 
 #     acq_block = pickle.load(handle)
 
-acq_block = AcquisitionBlock(np.full(37, 15.), np.full(37, 5.4), 1.4)
+# acq_block = AcquisitionBlock(np.full(37, 15.), np.full(37, 5.4), 1.4)
+acq_block = AcquisitionBlock(np.full(35, 15.), np.full(35, 5.7), 1.4)
 
 with open(resultspath/'prot.json', 'r') as handle: 
     prot = json.load(handle)
@@ -117,7 +119,7 @@ waittimes = mrf_seq.waittimes
 visualize_sequence(mrf_seq, acq_block)
 
 #%%
-name = timestamp + '_worst_T2'
+name = timestamp + '_worst_T2_35'
 
 # %%
 FA_FISP = np.tile(acq_block.fa, len(mrf_seq.PREP))
@@ -128,7 +130,8 @@ FA_FISP = np.tile(acq_block.fa, len(mrf_seq.PREP))
 
 TR_FISP = np.zeros_like(FA_FISP)
 for i, waittime in enumerate(waittimes):
-    TR_FISP[len(acq_block.tr)*(i+1)-1] = (waittime + 0.2) * 1e3
+    # TR_FISP[len(acq_block.tr)*(i+1)-1] = (waittime + 0.2) * 1e3
+    TR_FISP[len(acq_block.tr)*(i+1)-1] = (waittime + 0.5) * 1e3
 
 PH_FISP = np.zeros_like(FA_FISP)
 

@@ -165,7 +165,7 @@ ax.set_yticks([])
 
 plt.subplot(7, 1, 6)
 visualize_sequence(seqs_sorted_T1T2[-1], acq_block)
-plt.title('Highest $cost_3$')N
+plt.title('Highest $cost_3$')
 plt.xlim(0, 10000)
 ax = plt.gca()
 ax.set_xticklabels([])
