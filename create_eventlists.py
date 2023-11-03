@@ -72,7 +72,6 @@ prep_order = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI
 total_dur = 1e4
 
 # acq_block = AcquisitionBlock(np.full(40, 15.), np.full(40, 5.), TE=1.4)
-# acq_block = AcquisitionBlock(np.full(37, 15.), np.full(37, 5.4), TE=1.4)
 acq_block = AcquisitionBlock(np.full(35, 15.), np.full(35, 5.7), TE=1.4)
 
 waittimes = np.concatenate((np.full(len(prep_order)-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + sum(acq_block.tr) for prep in prep_order]))/(len(prep_order)-1), [0]))
@@ -86,10 +85,12 @@ resultspath = RESULTSPATH/timestamp
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
     sequences = pickle.load(handle)
 
+# Load acq block from optimization folder
 # with open(resultspath/'acq_block.pkl', 'rb') as handle: 
 #     acq_block = pickle.load(handle)
-
 # acq_block = AcquisitionBlock(np.full(37, 15.), np.full(37, 5.4), 1.4)
+
+# Create custom acq block
 acq_block = AcquisitionBlock(np.full(35, 15.), np.full(35, 5.7), 1.4)
 
 with open(resultspath/'prot.json', 'r') as handle: 
@@ -110,7 +111,7 @@ weightingmatrix = create_weightingmatrix(target_tissue, weighting)
 sort_sequences(sequences, weightingmatrix)
 
 #%%
-mrf_seq = sequences[-1]
+mrf_seq = sequences[-91]
 
 #%%
 waittimes = mrf_seq.waittimes
@@ -119,7 +120,7 @@ waittimes = mrf_seq.waittimes
 visualize_sequence(mrf_seq, acq_block)
 
 #%%
-name = timestamp + '_worst_T2_35'
+name = timestamp + '_worst_T1T2_35'
 
 # %%
 FA_FISP = np.tile(acq_block.fa, len(mrf_seq.PREP))
@@ -145,21 +146,3 @@ np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.T2TE, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', FA_FISP, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', TR_FISP, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', PH_FISP, fmt='%f')
-
-
-#%%
-target_tissue = TargetTissue(660, 40, 1)
-
-mrf_seq.calc_signal(acq_block, target_tissue, inversion_efficiency=0.95)
-
-plt.plot(-np.imag(mrf_seq.signal)/np.linalg.norm(np.imag(mrf_seq.signal)))
-
-# plt.ylim(0.12, 0.28)
-
-plt.show()
-
-#%%
-np.savetxt(savepath/f'signal_{target_tissue.T1}_{target_tissue.T2}.txt', -np.imag(mrf_seq.signal)/np.linalg.norm(np.imag(mrf_seq.signal)))
-
-
-# %%
