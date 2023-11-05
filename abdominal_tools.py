@@ -9,7 +9,7 @@ from datetime import datetime
 from signalmodel_abdominal import calculate_signal_abdominal, calculate_crlb_abdominal
 
 
-RESULTSPATH = Path('/home/tomgr/Documents/code/abdominal/results_optim')
+RESULTSPATH = Path('/home/tomgr/Documents/abdominal/results_optim')
 
 
 BLOCKS = {
