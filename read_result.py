@@ -7,7 +7,7 @@ import numpy as np
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_crlb,create_weightingmatrix,sort_sequences, TargetTissue, MRFSequence
 
 #%%
-timestamp = '231020_074613'
+timestamp = '231105_070955'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -121,6 +121,8 @@ plt.tight_layout()
 plt.show()
 
 # %%
+plt.rcParams.update({'font.size': 20})
+
 fig = plt.figure(figsize=(16, 9))
 
 plt.subplot(7, 1, 1)
@@ -185,5 +187,5 @@ plt.legend([list(by_label.values())[0], list(by_label.values())[2], list(by_labe
 
 fig.subplots_adjust(hspace=1)
 
-plt.savefig(f'sequences_{timestamp}.png', dpi=300, bbox_inches='tight')
+# plt.savefig(f'sequences_{timestamp}.png', dpi=300, bbox_inches='tight')
 # %%
