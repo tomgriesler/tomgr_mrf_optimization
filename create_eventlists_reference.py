@@ -95,3 +95,5 @@ np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.T2TE, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', FA_FISP, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', TR_FISP, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', PH_FISP, fmt='%f')
+
+# %%

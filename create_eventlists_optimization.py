@@ -34,16 +34,14 @@ weightingmatrix = create_weightingmatrix(target_tissue, weighting)
 sort_sequences(sequences, weightingmatrix)
 
 #%%
-mrf_seq = sequences[0]
+mrf_seq = sequences[-2]
+name = timestamp + '_worst_1_T1T2'
 
 #%%
 waittimes = mrf_seq.waittimes
 
 #%%
 visualize_sequence(mrf_seq, acq_block)
-
-#%%
-name = timestamp + '_worst_T1T2_35'
 
 # %%
 FA_FISP = np.tile(acq_block.fa, len(mrf_seq.PREP))
@@ -63,3 +61,13 @@ np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.T2TE, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', FA_FISP, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', TR_FISP, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', PH_FISP, fmt='%f')
+
+# %%
+ii = -65
+while True:
+    if 1 in sequences[ii].PREP and 2 in sequences[ii].PREP:
+        print(ii)
+        break
+    else:
+        ii -= 1
+# %%
