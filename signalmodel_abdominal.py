@@ -69,16 +69,13 @@ def epg_grad(Omega):
     return Omega
 
 
-def calculate_signal_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T2TE, waittimes, TE, inversion_efficiency=0.95, delta_B1=1):
+def calculate_signal_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T2TE, waittimes, TE, inversion_efficiency=0.95, delta_B1=1, phase=np.pi/2):
 
     acq_block_fa *= delta_B1
 
     etl = len(PREP) * len(acq_block_fa)
 
     R_TE = r(T1, T2, TE)
-
-    phase = np.pi/2
-    phase_inc = np.pi
 
     Omega = np.vstack((0., 0., M0))
 
@@ -106,7 +103,6 @@ def calculate_signal_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI,
             Omega = epg_grad(r(T1, T2, tr) @ Q @ Omega)
             Omega[2, 0] += M0 * b(T1, tr)
 
-            phase = (phase + phase_inc) % (2*np.pi)
             count += 1
 
         Omega = r(T1, T2, waittime) @ Omega
@@ -115,16 +111,13 @@ def calculate_signal_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI,
     return signal
 
 
-def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T2TE, waittimes, TE, inversion_efficiency=0.95, delta_B1=1, sigma=1):
+def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T2TE, waittimes, TE, inversion_efficiency=0.95, delta_B1=1, sigma=1, phase=np.pi/2):
 
     acq_block_fa *= delta_B1
 
     R_TE = r(T1, T2, TE)
     dR_TE_dT1 = dr_dT1(T1, TE)
     dR_TE_dT2 = dr_dT2(T2, TE)    
-
-    phase = np.pi/2
-    phase_inc = np.pi
 
     Omega = np.vstack((0., 0., M0))
     dOmega_dT1 = np.zeros((3, 1))
@@ -212,9 +205,6 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
             # Update Magnetization
             Omega = epg_grad(R_TR @ Q @ Omega)
             Omega[2, 0] += B_TR
-
-            # Update phase
-            phase = (phase + phase_inc) % (2*np.pi)
 
         Omega = r(T1, T2, waittime) @ Omega
         Omega[2, 0] += M0 * b(T1, waittime)

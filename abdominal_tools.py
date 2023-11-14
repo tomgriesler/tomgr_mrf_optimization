@@ -52,16 +52,6 @@ def visualize_sequence(mrf_sequence, acq_block):
         plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
         plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
         plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
-        # plt.plot(prep_pulse_timings[i]+prep_length+[sum(acq_block.tr[:i]) for i in range(len(acq_block.tr))], acq_block.fa, '.', color='black', label='excitation')
-
-    # handles, labels = plt.gca().get_legend_handles_labels()
-    # by_label = dict(zip(labels, handles))
-    # plt.legend(by_label.values(), by_label.keys(), loc='upper right', ncols=2)
-
-    # plt.ylim(0, max(acq_block.fa)*4/3)
-
-    # plt.xlabel('Time [ms]')
-    # plt.ylabel('FA [deg]')
 
 
 def visualize_crlb(sequences, weightingmatrix):
@@ -74,11 +64,6 @@ def visualize_crlb(sequences, weightingmatrix):
         plt.plot(crlbs[:, 1], '.', label='$cost_2$', alpha=0.5, ms=0.1, color='tab:red')
     if weightingmatrix[0] and weightingmatrix[1]:
         plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_3$', ms=0.1, color='tab:green')
-    
-    # plt.legend()
-
-    # plt.xlabel('N')
-    # plt.ylabel('cost function value')
 
 
 def create_weightingmatrix(target_tissue, weighting):
@@ -141,12 +126,12 @@ class MRFSequence:
         self.TI = [BLOCKS[name]['ti'] for name in prep_order]
         self.T2TE = [BLOCKS[name]['t2te'] for name in prep_order]
         
-    def calc_signal(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1):
+    def calc_signal(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, phase=np.pi/2):
 
-        self.signal = calculate_signal_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1)
+        self.signal = calculate_signal_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, phase)
 
-    def calc_crlb(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, sigma=1):
+    def calc_crlb(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, sigma=1, phase=np.pi/2):
 
-        V = calculate_crlb_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, sigma)
+        V = calculate_crlb_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, sigma, phase)
 
         self.crlb = np.sqrt(np.diagonal(V))
