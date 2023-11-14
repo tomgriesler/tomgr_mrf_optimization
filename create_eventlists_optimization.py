@@ -34,8 +34,8 @@ weightingmatrix = create_weightingmatrix(target_tissue, weighting)
 sort_sequences(sequences, weightingmatrix)
 
 #%%
-mrf_seq = sequences[-2]
-name = timestamp + '_worst_1_T1T2'
+mrf_seq = sequences[-1]
+name = timestamp + '_worst_T1'
 
 #%%
 waittimes = mrf_seq.waittimes
