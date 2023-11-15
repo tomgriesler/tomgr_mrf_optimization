@@ -7,7 +7,7 @@ import numpy as np
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_crlb,create_weightingmatrix,sort_sequences, TargetTissue, MRFSequence
 
 #%%
-timestamp = '231105_070955'
+timestamp = '231115_124351'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 

@@ -7,7 +7,7 @@ import json
 from abdominal_tools import TargetTissue, RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 
 #%%
-timestamp = '231105_070955'
+timestamp = '231115_124351'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -34,8 +34,8 @@ weightingmatrix = create_weightingmatrix(target_tissue, weighting)
 sort_sequences(sequences, weightingmatrix)
 
 #%%
-mrf_seq = sequences[-1]
-name = timestamp + '_worst_T1'
+mrf_seq = sequences[0]
+name = timestamp + '_best_T1T2'
 
 #%%
 waittimes = mrf_seq.waittimes
@@ -53,7 +53,7 @@ for i, waittime in enumerate(waittimes):
 PH_FISP = np.zeros_like(FA_FISP)
 
 #%% save lists
-savepath = Path(f'/home/tomgr/Documents/shared_files/{name}')
+savepath = Path(f'/home/tomgr/Documents/temp/{name}')
 savepath.mkdir(exist_ok=True)
 np.savetxt(savepath/'PREP_FISP.txt', mrf_seq.PREP, fmt='%i')
 np.savetxt(savepath/'TI_FISP.txt', mrf_seq.TI, fmt='%f')
