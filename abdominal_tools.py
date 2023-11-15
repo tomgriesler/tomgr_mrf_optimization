@@ -14,17 +14,17 @@ RESULTSPATH = Path('/home/tomgr/Documents/abdominal/results_optim')
 
 BLOCKS = {
     'noPrep': {'prep': 0, 'ti': 0, 't2te': 0},
-    'TI12': {'prep': 1, 'ti': 12, 't2te': 0},
-    'TI21': {'prep': 1, 'ti': 21, 't2te': 0},
-    'TI100': {'prep': 1, 'ti': 100, 't2te': 0},
-    'TI250': {'prep': 1, 'ti': 250, 't2te': 0},
-    'TI300': {'prep': 1, 'ti': 300, 't2te': 0},
-    'TI400': {'prep': 1, 'ti': 400, 't2te': 0},
-    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
-    'T2prep50': {'prep': 2, 'ti': 0, 't2te': 50},
-    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
-    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
-    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
+    'ti12': {'prep': 1, 'ti': 12, 't2te': 0},
+    'ti21': {'prep': 1, 'ti': 21, 't2te': 0},
+    'ti100': {'prep': 1, 'ti': 100, 't2te': 0},
+    'ti250': {'prep': 1, 'ti': 250, 't2te': 0},
+    'ti300': {'prep': 1, 'ti': 300, 't2te': 0},
+    'ti400': {'prep': 1, 'ti': 400, 't2te': 0},
+    't2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
+    't2prep50': {'prep': 2, 'ti': 0, 't2te': 50},
+    't2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
+    't2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
+    't2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
 }
 
 
@@ -38,16 +38,16 @@ def divide_into_random_integers(N, n):
 
 def visualize_sequence(mrf_sequence, acq_block):
 
-    prep_pulse_timings = [i*sum(acq_block.tr) + sum(mrf_sequence.TI[:i]) + sum(mrf_sequence.T2TE[:i]) + sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.PREP))]
+    prep_pulse_timings = [i*sum(acq_block.tr) + sum(mrf_sequence.ti[:i]) + sum(mrf_sequence.t2te[:i]) + sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.prep))]
 
     map = {
         0: {'color': 'white', 'label': None},
-        1: {'color': 'tab:blue', 'label': 'T1 prep'},
-        2: {'color': 'tab:red', 'label': 'T2 prep'}
+        1: {'color': 'tab:blue', 'label': 't1 prep'},
+        2: {'color': 'tab:red', 'label': 't2 prep'}
     }
 
-    for i, prep in enumerate(mrf_sequence.PREP):
-        prep_length = mrf_sequence.TI[i] + mrf_sequence.T2TE[i]
+    for i, prep in enumerate(mrf_sequence.prep):
+        prep_length = mrf_sequence.ti[i] + mrf_sequence.t2te[i]
         plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=1)
         plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
         plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
@@ -70,12 +70,12 @@ def create_weightingmatrix(target_tissue, weighting):
 
     WEIGHTINGMATRICES = {
         '1, 1, 0': np.array([1, 1, 0]),
-        '1/T1, 0, 0': np.array([1/target_tissue.T1, 0, 0]),
-        '0, 1/T2, 0': np.array([0, 1/target_tissue.T2, 0]),
-        '1/T1, 1/T2, 0': np.array([1/target_tissue.T1, 1/target_tissue.T2, 0]),
-        '1/T1, 1/T2, 1/M0': np.array([1/target_tissue.T1, 1/target_tissue.T2, 1/target_tissue.M0]),
-        '1/T1**2, 1/T2**2, 0': np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 0]),
-        '1/T1**2, 1/T2**2, 1/M0**2': np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 1/target_tissue.M0**2])
+        '1/t1, 0, 0': np.array([1/target_tissue.t1, 0, 0]),
+        '0, 1/t2, 0': np.array([0, 1/target_tissue.t2, 0]),
+        '1/t1, 1/t2, 0': np.array([1/target_tissue.t1, 1/target_tissue.t2, 0]),
+        '1/t1, 1/t2, 1/m0': np.array([1/target_tissue.t1, 1/target_tissue.t2, 1/target_tissue.m0]),
+        '1/t1**2, 1/t2**2, 0': np.array([1/target_tissue.t1**2, 1/target_tissue.t2**2, 0]),
+        '1/t1**2, 1/t2**2, 1/m0**2': np.array([1/target_tissue.t1**2, 1/target_tissue.t2**2, 1/target_tissue.m0**2])
     }
         
     return WEIGHTINGMATRICES[weighting]
@@ -86,7 +86,7 @@ def sort_sequences(sequences, weightingmatrix):
     sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.crlb)))
 
 
-def store_optimization(sequences, acq_block, prot):
+def store_optimization(sequences, prot):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')[2:]
     resultspath = RESULTSPATH/timestamp
@@ -95,43 +95,38 @@ def store_optimization(sequences, acq_block, prot):
     with open(resultspath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
-    with open(resultspath/'acq_block.pkl', 'wb') as handle:
-        pickle.dump(acq_block, handle)
-
     with open(resultspath/'prot.json', 'w') as handle: 
         json.dump(prot, handle, indent='\t')
 
 
-class AcquisitionBlock:
-
-    def __init__(self, fa, tr, TE):
-        self.fa = fa
-        self.tr = tr
-        self.TE = TE
-
-
 class TargetTissue:
 
-    def __init__(self, T1, T2, M0):
-        self.T1 = T1
-        self.T2 = T2
-        self.M0 = M0
+    def __init__(self, t1, t2, m0):
+        self.t1 = t1
+        self.t2 = t2
+        self.m0 = m0
 
 
 class MRFSequence:
 
-    def __init__(self, prep_order, waittimes):
-        self.waittimes = waittimes
-        self.PREP = [BLOCKS[name]['prep'] for name in prep_order]
-        self.TI = [BLOCKS[name]['ti'] for name in prep_order]
-        self.T2TE = [BLOCKS[name]['t2te'] for name in prep_order]
+    def __init__(self, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
+        self.blocks = blocks
+        self.shots = shots
+        self.fa = np.array(fa)
+        self.tr = np.array(tr)
+        self.ph = np.array(ph)
+        self.prep = np.array(prep)
+        self.ti = np.array(ti)
+        self.t2te = np.array(t2te)
+        self.tr_offset = tr_offset
+        self.te = te
         
-    def calc_signal(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, phase=np.pi/2):
+    def calc_signal(self, t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
 
-        self.signal = calculate_signal_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, phase)
+        self.signal = calculate_signal_abdominal(t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency, delta_B1)
 
-    def calc_crlb(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, sigma=1, phase=np.pi/2):
+    def calc_crlb(self, t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1., sigma=1.):
 
-        V = calculate_crlb_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, sigma, phase)
+        v = calculate_crlb_abdominal(t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency, delta_B1, sigma)
 
-        self.crlb = np.sqrt(np.diagonal(V))
+        self.crlb = np.sqrt(np.diagonal(v))

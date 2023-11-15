@@ -15,10 +15,10 @@ def q(alpha, phi=np.pi/2):
     return mat
 
 
-def r(T1, T2, t):
+def r(t1, t2, t):
 
-    E1 = np.exp(-t/T1)
-    E2 = np.exp(-t/T2)
+    E1 = np.exp(-t/t1)
+    E2 = np.exp(-t/t2)
 
     mat = np.array([
         [E2, 0, 0],
@@ -29,186 +29,180 @@ def r(T1, T2, t):
     return mat
 
 
-def dr_dT1(T1, t):
+def dr_dt1(t1, t):
     
-    mat = t/T1**2 * np.exp(-t/T1) * np.array([[0, 0, 0],
+    mat = t/t1**2 * np.exp(-t/t1) * np.array([[0, 0, 0],
                                               [0, 0, 0],
                                               [0, 0, 1]])
     
     return mat
 
 
-def dr_dT2(T2, t):
+def dr_dt2(t2, t):
     
-    mat = t/T2**2 * np.exp(-t/T2) * np.array([[1, 0, 0],
+    mat = t/t2**2 * np.exp(-t/t2) * np.array([[1, 0, 0],
                                               [0, 1, 0],
                                               [0, 0, 0]])
     
     return mat
 
 
-def b(T1, t):
+def b(t1, t):
 
-    return (1-np.exp(-t/T1))
-
-
-def db_dT1(T1, t):
-
-    return (-t/T1**2 * np.exp(-t/T1))
+    return (1-np.exp(-t/t1))
 
 
-def epg_grad(Omega):
+def db_dt1(t1, t):
 
-    Omega = np.hstack((Omega, np.zeros((3, 1))))
-
-    Omega[0, 1:] = Omega[0, :-1]
-    Omega[1, :-1] = Omega[1, 1:]
-    Omega[1, -1] = 0
-    Omega[0, 0] = np.conj(Omega[1,0])
-
-    return Omega
+    return (-t/t1**2 * np.exp(-t/t1))
 
 
-def calculate_signal_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T2TE, waittimes, TE, inversion_efficiency=0.95, delta_B1=1, phase=np.pi/2):
+def epg_grad(omega):
 
-    acq_block_fa *= delta_B1
+    omega = np.hstack((omega, np.zeros((3, 1))))
 
-    etl = len(PREP) * len(acq_block_fa)
+    omega[0, 1:] = omega[0, :-1]
+    omega[1, :-1] = omega[1, 1:]
+    omega[1, -1] = 0
+    omega[0, 0] = np.conj(omega[1,0])
 
-    R_TE = r(T1, T2, TE)
+    return omega
 
-    Omega = np.vstack((0., 0., M0))
 
-    signal = np.empty(etl, dtype=np.complex64)
-    count = 0
+def calculate_signal_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
 
-    for prep, ti, t2te, waittime in zip(PREP, TI, T2TE, waittimes):
+    n_ex = beats * shots
 
-        if prep == 1:
-            Omega[:2, :] = 0.
-            Omega[2, :] *= -inversion_efficiency
-            Omega = r(T1, T2, ti) @ Omega
-            Omega[2, 0] += M0 * b(T1, ti)
+    r_te = r(t1, t2, te)
+    b_te = b(t1, te)
 
-        elif prep == 2:
-            Omega[:2, :] = 0.
-            Omega[2, :] *= np.exp(-t2te/T2)
+    omega = np.vstack((0., 0., m0))
 
-        for fa, tr in zip(acq_block_fa, acq_block_tr):
+    signal = np.empty(n_ex, dtype=complex)
+    
+    for ii in range(beats):
+        
+        if prep[ii] == 1:
+            omega[:2, :] = 0.
+            omega[2, :] *= -inversion_efficiency
+            omega = r(t1, t2, ti[ii]) @ omega
+            omega[2, 0] += m0 * b(t1, ti[ii])
 
-            Q = q(np.deg2rad(fa), phase)
+        elif prep[ii] == 2: 
+            omega[:2, :] = 0.
+            omega[2, :] *= np.exp(-t2te[ii]/t2)
 
-            signal[count] = (R_TE @ Q @ Omega)[0, 0] * np.exp(-1j*phase)
+        for jj in range(shots):
 
-            Omega = epg_grad(r(T1, T2, tr) @ Q @ Omega)
-            Omega[2, 0] += M0 * b(T1, tr)
+            n = ii*shots+jj
 
-            count += 1
+            q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
 
-        Omega = r(T1, T2, waittime) @ Omega
-        Omega[2, 0] += M0 * b(T1, waittime)
+            omega = r_te @ q_n @ omega
+            omega[2, 0] += m0 * b_te
+
+            signal[n] = omega[0, 0] * np.exp(-1j*np.deg2rad(ph[n]))
+
+            omega = epg_grad(r(t1, t2, tr_offset+tr[n]*1e-3-te) @ omega)
+            omega[2, 0] += m0 * b(t1, tr_offset+tr[n]*1e-3-te)
 
     return signal
 
+def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1., sigma=1.):
 
-def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T2TE, waittimes, TE, inversion_efficiency=0.95, delta_B1=1, sigma=1, phase=np.pi/2):
+    n_ex = beats * shots
 
-    acq_block_fa *= delta_B1
+    r_te = r(t1, t2, te)
+    dr_te_dt1 = dr_dt1(t1, te)
+    dr_te_dt2 = dr_dt2(t2, te)    
 
-    R_TE = r(T1, T2, TE)
-    dR_TE_dT1 = dr_dT1(T1, TE)
-    dR_TE_dT2 = dr_dT2(T2, TE)    
+    omega = np.vstack((0., 0., m0))
+    domega_dt1 = np.zeros((3, 1))
+    domega_dt2 = np.zeros((3, 1))
+    domega_dm0 = np.vstack((0., 0., 1.))
 
-    Omega = np.vstack((0., 0., M0))
-    dOmega_dT1 = np.zeros((3, 1))
-    dOmega_dT2 = np.zeros((3, 1))
-    dOmega_dM0 = np.vstack((0., 0., 1.))
+    fim = np.zeros((3, 3))
 
-    I = np.zeros((3, 3))
+    for ii in range(beats): 
 
-    for prep, ti, t2te, waittime in zip(PREP, TI, T2TE, waittimes): 
+        if prep[ii] == 1:
 
-        if prep == 1:
+            r_ti = r(t1, t2, ti[ii])
 
-            R_TI = r(T1, T2, ti)
+            omega[:2, :] = 0.
+            omega[2, :] *= -inversion_efficiency
 
-            Omega[:2, :] = 0.
-            Omega[2, :] *= -inversion_efficiency
+            domega_dt1[:2, :] = 0.
+            domega_dt1[2, :] *= -inversion_efficiency
+            domega_dt1 = dr_dt1(t1, ti[ii]) @ omega + r_ti @ domega_dt1
+            domega_dt1[2, 0] += m0 * db_dt1(t1, ti[ii])
 
-            dOmega_dT1[:2, :] = 0.
-            dOmega_dT1[2, :] *= -inversion_efficiency
-            dOmega_dT1 = dr_dT1(T1, ti) @ Omega + R_TI @ dOmega_dT1
-            dOmega_dT1[2, 0] += M0 * db_dT1(T1, ti)
+            domega_dt2[:2, :] = 0.
+            domega_dt2[2, :] *= -inversion_efficiency
+            domega_dt2 = dr_dt2(t2, ti[ii]) @ omega + r_ti @ domega_dt2
 
-            dOmega_dT2[:2, :] = 0.
-            dOmega_dT2[2, :] *= -inversion_efficiency
-            dOmega_dT2 = dr_dT2(T2, ti) @ Omega + R_TI @ dOmega_dT2
+            domega_dm0[:2, :] = 0.
+            domega_dm0[2, :] *= -inversion_efficiency
+            domega_dm0 = r_ti @ domega_dm0
 
-            dOmega_dM0[:2, :] = 0.
-            dOmega_dM0[2, :] *= -inversion_efficiency
-            dOmega_dM0 = R_TI @ dOmega_dM0
-
-            Omega = R_TI @ Omega
-            Omega[2, 0] += M0 * b(T1, ti)
+            omega = r_ti @ omega
+            omega[2, 0] += m0 * b(t1, ti[ii])
 
         elif prep == 2:
 
-            Omega[:2, :] = 0.
+            omega[:2, :] = 0.
 
-            dOmega_dT1[:2, :] = 0
-            dOmega_dT1 *= np.exp(-t2te/T2)
+            domega_dt1[:2, :] = 0
+            domega_dt1 *= np.exp(-t2te[ii]/t2)
 
-            dOmega_dT2[:2, :] = 0
-            dOmega_dT2 = np.exp(-t2te/T2) * (t2te/T2**2 * Omega + dOmega_dT2)
+            domega_dt2[:2, :] = 0
+            domega_dt2 = np.exp(-t2te[ii]/t2) * (t2te[ii]/t2**2 * omega + domega_dt2)
 
-            dOmega_dM0[:2, :] = 0
-            dOmega_dM0 *= np.exp(-t2te/T2)
+            domega_dm0[:2, :] = 0
+            domega_dm0 *= np.exp(-t2te[ii]/t2)
 
-            Omega[2, :] *= np.exp(-t2te/T2)
+            omega[2, :] *= np.exp(-t2te[ii]/t2)
 
-        for fa, tr in zip(acq_block_fa, acq_block_tr): 
+        for jj in range(shots):
 
-            Q = q(np.deg2rad(fa), phase)
-            R_TR = r(T1, T2, tr)
-            dR_TR_dT1 = dr_dT1(T1, tr)
-            dR_TR_dT2 = dr_dT2(T2, tr)
-            b_TR = b(T1, tr)
-            B_TR = M0 * b_TR
-            dB_TR_dT1 = M0 * db_dT1(T1, tr)
-            dB_TR_dM0 = b_TR
+            n = ii*shots + jj
+
+            q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
+
+            r_tr = r(t1, t2, tr_offset+tr[n]*1e-3)
+            dr_tr_dt1 = dr_dt1(t1, tr_offset+tr[n]*1e-3)
+            dr_tr_dt2 = dr_dt2(t2, tr_offset+tr[n]*1e-3)
+            b_tr = m0 * b(t1, tr_offset+tr[n]*1e-3)
+            db_tr_dt1 = m0 * db_dt1(t1, tr_offset+tr[n]*1e-3)
+            db_tr_dm0 = b_tr/m0
 
             # Calculate derivatives of signal 
-            dsignal_dT1 = (dR_TE_dT1 @ Q @ Omega + R_TE @ Q @ dOmega_dT1)[0, 0]
-            dsignal_dT2 = (dR_TE_dT2 @ Q @ Omega + R_TE @ Q @ dOmega_dT2)[0, 0]
-            dsignal_dM0 = (R_TE @ Q @ dOmega_dM0)[0, 0]
+            dsignal_dt1 = (dr_te_dt1 @ q_n @ omega + r_te @ q_n @ domega_dt1)[0, 0]
+            dsignal_dt2 = (dr_te_dt2 @ q_n @ omega + r_te @ q_n @ domega_dt2)[0, 0]
+            dsignal_dm0 = (r_te @ q_n @ domega_dm0)[0, 0]
 
             # Calculate Jacobian
             J_n = np.array([
-                [np.real(dsignal_dT1), np.real(dsignal_dT2), np.real(dsignal_dM0)],
-                [np.imag(dsignal_dT1), np.imag(dsignal_dT2), np.imag(dsignal_dM0)]
+                [np.real(dsignal_dt1), np.real(dsignal_dt2), np.real(dsignal_dm0)],
+                [np.imag(dsignal_dt1), np.imag(dsignal_dt2), np.imag(dsignal_dm0)]
             ])
 
             J_n_t = np.transpose(J_n)
 
             # Calculate FIM
-            I = I + 1/sigma**2 * (J_n_t @ J_n)
+            fim = fim + 1/sigma**2 * (J_n_t @ J_n)
             
             # Calculate new state matrix and derivatives
-            dOmega_dT1 = epg_grad(dR_TR_dT1 @ Q @ Omega + R_TR @ Q @ dOmega_dT1) 
-            dOmega_dT1[2, 0] += dB_TR_dT1
+            domega_dt1 = epg_grad(dr_tr_dt1 @ q_n @ omega + r_tr @ q_n @ domega_dt1) 
+            domega_dt1[2, 0] += db_tr_dt1
 
-            dOmega_dT2 = epg_grad(dR_TR_dT2 @ Q @ Omega + R_TR @ Q @ dOmega_dT2)
+            domega_dt2 = epg_grad(dr_tr_dt2 @ q_n @ omega + r_tr @ q_n @ domega_dt2)
 
-            dOmega_dM0 = epg_grad(R_TR @ Q @ dOmega_dM0)
-            dOmega_dM0[2, 0] += dB_TR_dM0
+            domega_dm0 = epg_grad(r_tr @ q_n @ domega_dm0)
+            domega_dm0[2, 0] += db_tr_dm0
 
             # Update Magnetization
-            Omega = epg_grad(R_TR @ Q @ Omega)
-            Omega[2, 0] += B_TR
+            omega = epg_grad(r_tr @ q_n @ omega)
+            omega[2, 0] += b_tr
 
-        Omega = r(T1, T2, waittime) @ Omega
-        Omega[2, 0] += M0 * b(T1, waittime)
-
-    V = np.linalg.inv(I)
-
-    return V
+    return np.linalg.inv(fim)
