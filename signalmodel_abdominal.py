@@ -206,16 +206,16 @@ def calculate_crlb_abdominal(T1, T2, M0, acq_block_fa, acq_block_tr, PREP, TI, T
             Omega = epg_grad(R_TR @ Q @ Omega)
             Omega[2, 0] += B_TR
 
-        Omega = r(T1, T2, waittime) @ Omega
-        Omega[2, 0] += M0 * b(T1, waittime)
-
         dOmega_dT1 = dr_dT1(T1, waittime) @ Omega + r(T1, T2, waittime) @ dOmega_dT1
         dOmega_dT1[2, 0] += M0 * db_dT1(T1, waittime)
 
-        dOmega_dT2 = dr_dT2(T2, waittime) @ Omega + r(T1, T2, waittime) @ dOmega_dT1
+        dOmega_dT2 = dr_dT2(T2, waittime) @ Omega + r(T1, T2, waittime) @ dOmega_dT2
 
         dOmega_dM0 = r(T1, T2, waittime) @ dOmega_dM0
         dOmega_dM0[2, 0] += b(T1, waittime)
+
+        Omega = r(T1, T2, waittime) @ Omega
+        Omega[2, 0] += M0 * b(T1, waittime)
 
     V = np.linalg.inv(I)
 
