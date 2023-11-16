@@ -22,4 +22,8 @@ mrf_seq.calc_signal(acq_block, target_tissue)
 # %%
 plt.plot(np.real(mrf_seq.signal))
 plt.plot(np.imag(mrf_seq.signal))
+
+# %%
+mrf_seq.calc_crlb(acq_block, target_tissue)
+print(mrf_seq.crlb)
 # %%
