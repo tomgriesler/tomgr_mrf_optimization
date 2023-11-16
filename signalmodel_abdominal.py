@@ -107,7 +107,7 @@ def calculate_signal_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t
 
     return signal
 
-def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1., sigma=1.):
+def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
 
     r_te = r(t1, t2, te)
     dr_te_dt1 = dr_dt1(t1, te)
@@ -164,8 +164,7 @@ def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2t
 
             n = ii*shots + jj
 
-            q_n = q(delta_B1*np.deg2rad(fa[n]), np.pi/2)
-            # q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
+            q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
 
             r_tr = r(t1, t2, tr_offset+tr[n]*1e-3)
             dr_tr_dt1 = dr_dt1(t1, tr_offset+tr[n]*1e-3)
@@ -188,7 +187,7 @@ def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2t
             J_n_t = np.transpose(J_n)
 
             # Calculate FIM
-            fim = fim + 1/sigma**2 * (J_n_t @ J_n)
+            fim = fim + (J_n_t @ J_n)
             
             # Calculate new state matrix and derivatives
             domega_dt1 = epg_grad(dr_tr_dt1 @ q_n @ omega + r_tr @ q_n @ domega_dt1) 

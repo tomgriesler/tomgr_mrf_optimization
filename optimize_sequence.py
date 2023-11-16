@@ -5,7 +5,7 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 
-def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, N_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1, phase_inc=0):
+def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1., phase_inc=0.):
 
     sequences = []
 
@@ -23,8 +23,13 @@ def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr
         while True:
 
             beats = random.randint(min_num_preps, max_num_preps)
+            
+            n_ex = beats*shots
 
             prep_order = random.choices(prep_modules, weights=prep_module_weights, k=beats)
+            prep = [BLOCKS[name]['prep'] for name in prep_order]
+            ti = [BLOCKS[name]['ti'] for name in prep_order]
+            t2te = [BLOCKS[name]['t2te'] for name in prep_order]
 
             prep_time_tot = sum([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_order])
 
@@ -38,11 +43,11 @@ def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr
             for ii in range(1, len(waittimes)):
                 tr[ii*shots-1] += waittimes[ii-1]
 
-            ## CONTINUE HERE
+            ph = phase_inc*np.arange(n_ex).cumsum()
 
-            mrf_sequence = MRFSequence(prep_order, waittimes)
+            mrf_sequence = MRFSequence(beats, shots, fa, tr*1e-3, ph, prep, ti, t2te, const_tr, te)
 
-            mrf_sequence.calc_crlb(acq_block, target_tissue, inversion_efficiency, delta_B1)
+            mrf_sequence.calc_crlb(target_t1, target_t2, target_m0, inversion_efficiency, delta_B1)
 
             sequences.append(mrf_sequence)
 
@@ -52,7 +57,7 @@ def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr
 
             print(f'{count} iters. Time: {str(timediff).split(".")[0]}. {count/timediff.total_seconds():.2f} its/s.', end='\r')
 
-            if count >= N_iter_max:
+            if count >= n_iter_max:
                 break
 
     except KeyboardInterrupt:

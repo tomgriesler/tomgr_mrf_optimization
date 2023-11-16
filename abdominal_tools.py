@@ -6,6 +6,7 @@ import json
 import pickle
 from datetime import datetime
 
+
 from signalmodel_abdominal import calculate_signal_abdominal, calculate_crlb_abdominal
 
 
@@ -69,16 +70,16 @@ def visualize_crlb(sequences, weightingmatrix):
         plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_3$', ms=0.1, color='tab:green')
 
 
-def create_weightingmatrix(target_tissue, weighting):
+def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
 
     WEIGHTINGMATRICES = {
         '1, 1, 0': np.array([1, 1, 0]),
-        '1/t1, 0, 0': np.array([1/target_tissue.t1, 0, 0]),
-        '0, 1/t2, 0': np.array([0, 1/target_tissue.t2, 0]),
-        '1/t1, 1/t2, 0': np.array([1/target_tissue.t1, 1/target_tissue.t2, 0]),
-        '1/t1, 1/t2, 1/m0': np.array([1/target_tissue.t1, 1/target_tissue.t2, 1/target_tissue.m0]),
-        '1/t1**2, 1/t2**2, 0': np.array([1/target_tissue.t1**2, 1/target_tissue.t2**2, 0]),
-        '1/t1**2, 1/t2**2, 1/m0**2': np.array([1/target_tissue.t1**2, 1/target_tissue.t2**2, 1/target_tissue.m0**2])
+        '1/T1, 0, 0': np.array([1/target_t1, 0, 0]),
+        '0, 1/T2, 0': np.array([0, 1/target_t2, 0]),
+        '1/T1, 1/T2, 0': np.array([1/target_t1, 1/target_t2, 0]),
+        '1/T1, 1/T2, 1/M0': np.array([1/target_t1, 1/target_t2, 1/target_m0]),
+        '1/T1**2, 1/T2**2, 0': np.array([1/target_t1**2, 1/target_t2**2, 0]),
+        '1/T1**2, 1/T2**2, 1/M0**2': np.array([1/target_t1**2, 1/target_t2**2, 1/target_m0**2])
     }
         
     return WEIGHTINGMATRICES[weighting]
@@ -89,20 +90,17 @@ def sort_sequences(sequences, weightingmatrix):
     sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.crlb)))
 
 
-def store_optimization(sequences, prot, fa, tr):
+def store_optimization(resultspath, sequences, prot):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')[2:]
-    resultspath = RESULTSPATH/timestamp
-    resultspath.mkdir()
+    timestamppath = resultspath/timestamp
+    timestamppath.mkdir()
 
-    with open(resultspath/'sequences.pkl', 'wb') as handle:
+    with open(timestamppath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
-    with open(resultspath/'prot.json', 'w') as handle: 
+    with open(timestamppath/'prot.json', 'w') as handle: 
         json.dump(prot, handle, indent='\t')
-
-    np.savetxt(resultspath/'FA.txt', fa)
-    np.savetxt(resultspath/'TR.txt', tr)
 
 
 class TargetTissue:
@@ -118,12 +116,12 @@ class MRFSequence:
     def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
         self.beats = beats
         self.shots = shots
-        self.fa = np.array(fa)
-        self.tr = np.array(tr)
-        self.ph = np.array(ph)
-        self.prep = np.array(prep)
-        self.ti = np.array(ti)
-        self.t2te = np.array(t2te)
+        self.fa = np.array(fa, dtype=np.float32)
+        self.tr = np.array(tr, dtype=np.float32)
+        self.ph = np.array(ph, dtype=np.float32)
+        self.prep = np.array(prep, dtype=np.float32)
+        self.ti = np.array(ti, dtype=np.float32)
+        self.t2te = np.array(t2te, dtype=np.float32)
         self.tr_offset = tr_offset
         self.te = te
         
@@ -131,8 +129,8 @@ class MRFSequence:
 
         self.signal = calculate_signal_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
-    def calc_crlb(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1., sigma=1.):
+    def calc_crlb(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 
-        v = calculate_crlb_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1, sigma)
+        v = calculate_crlb_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
         self.crlb = np.sqrt(np.diagonal(v))
