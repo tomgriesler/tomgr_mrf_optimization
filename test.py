@@ -1,5 +1,6 @@
 #%%
 import numpy as np
+import matplotlib.pyplot as plt
 
 from abdominal_tools import MRFSequence, AcquisitionBlock, TargetTissue, BLOCKS
 
@@ -18,4 +19,7 @@ mrf_seq = MRFSequence(prep_order_hamilton, waittimes_hamilton)
 target_tissue = TargetTissue(660, 40, 1.)
 
 mrf_seq.calc_signal(acq_block, target_tissue)
+# %%
+plt.plot(np.real(mrf_seq.signal))
+plt.plot(np.imag(mrf_seq.signal))
 # %%
