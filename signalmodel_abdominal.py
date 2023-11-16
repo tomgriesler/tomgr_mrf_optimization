@@ -164,7 +164,8 @@ def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2t
 
             n = ii*shots + jj
 
-            q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
+            q_n = q(delta_B1*np.deg2rad(fa[n]), np.pi/2)
+            # q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
 
             r_tr = r(t1, t2, tr_offset+tr[n]*1e-3)
             dr_tr_dt1 = dr_dt1(t1, tr_offset+tr[n]*1e-3)
