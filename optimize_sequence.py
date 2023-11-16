@@ -5,7 +5,7 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 
-def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, prep_module_weights=None, min_num_preps=1, N_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1):
+def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, N_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1, phase_inc=0):
 
     sequences = []
 
@@ -13,7 +13,8 @@ def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, prep_mo
 
     max_prep_dur = max([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_modules])
 
-    max_num_preps = total_dur // (max_prep_dur+sum(acq_block.tr))
+    max_num_preps = total_dur // (max_prep_dur+shots*const_tr)
+
     print(f'Total sequence duration: {total_dur:.0f} ms.\nMax num of preps: {max_num_preps:.0f}.')
 
     t0 = datetime.now()
@@ -21,15 +22,23 @@ def optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, prep_mo
     try:
         while True:
 
-            num_acq_blocks = random.randint(min_num_preps, max_num_preps)
+            beats = random.randint(min_num_preps, max_num_preps)
 
-            prep_order = random.choices(prep_modules, weights=prep_module_weights, k=num_acq_blocks)
+            prep_order = random.choices(prep_modules, weights=prep_module_weights, k=beats)
 
             prep_time_tot = sum([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_order])
 
-            waittime_tot = int(total_dur - num_acq_blocks*sum(acq_block.tr) - prep_time_tot)
+            waittime_tot = int(total_dur - beats*shots*const_tr - prep_time_tot)
 
-            waittimes = divide_into_random_integers(waittime_tot, num_acq_blocks)
+            waittimes = divide_into_random_integers(waittime_tot, beats-1)
+
+            fa = np.full(beats*shots, const_fa)
+            tr = np.full(beats*shots, const_tr)
+
+            for ii in range(1, len(waittimes)):
+                tr[ii*shots-1] += waittimes[ii-1]
+
+            ## CONTINUE HERE
 
             mrf_sequence = MRFSequence(prep_order, waittimes)
 

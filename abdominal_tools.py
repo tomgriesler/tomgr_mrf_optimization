@@ -14,17 +14,17 @@ RESULTSPATH = Path('/home/tomgr/Documents/abdominal/results_optim')
 
 BLOCKS = {
     'noPrep': {'prep': 0, 'ti': 0, 't2te': 0},
-    'ti12': {'prep': 1, 'ti': 12, 't2te': 0},
-    'ti21': {'prep': 1, 'ti': 21, 't2te': 0},
-    'ti100': {'prep': 1, 'ti': 100, 't2te': 0},
-    'ti250': {'prep': 1, 'ti': 250, 't2te': 0},
-    'ti300': {'prep': 1, 'ti': 300, 't2te': 0},
-    'ti400': {'prep': 1, 'ti': 400, 't2te': 0},
-    't2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
-    't2prep50': {'prep': 2, 'ti': 0, 't2te': 50},
-    't2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
-    't2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
-    't2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
+    'TI12': {'prep': 1, 'ti': 12, 't2te': 0},
+    'TI21': {'prep': 1, 'ti': 21, 't2te': 0},
+    'TI100': {'prep': 1, 'ti': 100, 't2te': 0},
+    'TI250': {'prep': 1, 'ti': 250, 't2te': 0},
+    'TI300': {'prep': 1, 'ti': 300, 't2te': 0},
+    'TI400': {'prep': 1, 'ti': 400, 't2te': 0},
+    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
+    'T2prep50': {'prep': 2, 'ti': 0, 't2te': 50},
+    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
+    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
+    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
 }
 
 
@@ -37,7 +37,7 @@ def divide_into_random_integers(N, n):
 
 
 '''
-TODO refactor
+TODO update
 '''
 def visualize_sequence(mrf_sequence, acq_block):
 
@@ -45,8 +45,8 @@ def visualize_sequence(mrf_sequence, acq_block):
 
     map = {
         0: {'color': 'white', 'label': None},
-        1: {'color': 'tab:blue', 'label': 't1 prep'},
-        2: {'color': 'tab:red', 'label': 't2 prep'}
+        1: {'color': 'tab:blue', 'label': 'T1 prep'},
+        2: {'color': 'tab:red', 'label': 'T2 prep'}
     }
 
     for i, prep in enumerate(mrf_sequence.prep):
