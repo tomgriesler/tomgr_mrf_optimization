@@ -145,7 +145,7 @@ def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2t
             omega = r_ti @ omega
             omega[2, 0] += m0 * b(t1, ti[ii])
 
-        elif prep == 2:
+        elif prep[ii] == 2:
 
             omega[:2, :] = 0.
 
