@@ -18,8 +18,8 @@ t2te = [0, 0, 40, 80] * 4
 te = 1.
 total_dur = 1e4
 
-for ii in range(beats):
-    tr[(ii+1)*shots-1] += (total_dur - np.sum(ti) - np.sum(t2te) - beats*shots*tr_offset)*1e3/beats
+for ii in range(1, beats):
+    tr[ii*shots-1] += (total_dur - np.sum(ti) - np.sum(t2te) - beats*shots*tr_offset)*1e3/(beats-1)
 
 t1 = 660
 t2 = 40
