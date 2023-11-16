@@ -1,6 +1,5 @@
 import numpy as np
 
-dtype = np.float64
 
 def q(alpha, phi=np.pi/2):
     '''
@@ -109,8 +108,6 @@ def calculate_signal_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t
     return signal
 
 def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1., sigma=1.):
-
-    n_ex = beats * shots
 
     r_te = r(t1, t2, te)
     dr_te_dt1 = dr_dt1(t1, te)

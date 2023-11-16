@@ -36,6 +36,9 @@ def divide_into_random_integers(N, n):
     return integers
 
 
+'''
+TODO refactor
+'''
 def visualize_sequence(mrf_sequence, acq_block):
 
     prep_pulse_timings = [i*sum(acq_block.tr) + sum(mrf_sequence.ti[:i]) + sum(mrf_sequence.t2te[:i]) + sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.prep))]
@@ -86,7 +89,7 @@ def sort_sequences(sequences, weightingmatrix):
     sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.crlb)))
 
 
-def store_optimization(sequences, prot):
+def store_optimization(sequences, prot, fa, tr):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')[2:]
     resultspath = RESULTSPATH/timestamp
@@ -97,6 +100,9 @@ def store_optimization(sequences, prot):
 
     with open(resultspath/'prot.json', 'w') as handle: 
         json.dump(prot, handle, indent='\t')
+
+    np.savetxt(resultspath/'FA.txt', fa)
+    np.savetxt(resultspath/'TR.txt', tr)
 
 
 class TargetTissue:
@@ -109,8 +115,8 @@ class TargetTissue:
 
 class MRFSequence:
 
-    def __init__(self, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
-        self.blocks = blocks
+    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
+        self.beats = beats
         self.shots = shots
         self.fa = np.array(fa)
         self.tr = np.array(tr)
@@ -121,12 +127,12 @@ class MRFSequence:
         self.tr_offset = tr_offset
         self.te = te
         
-    def calc_signal(self, t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+    def calc_signal(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 
-        self.signal = calculate_signal_abdominal(t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency, delta_B1)
+        self.signal = calculate_signal_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
-    def calc_crlb(self, t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1., sigma=1.):
+    def calc_crlb(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1., sigma=1.):
 
-        v = calculate_crlb_abdominal(t1, t2, m0, blocks, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency, delta_B1, sigma)
+        v = calculate_crlb_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1, sigma)
 
         self.crlb = np.sqrt(np.diagonal(v))

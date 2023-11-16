@@ -30,7 +30,8 @@ prot = {
     'min_num_preps': min_num_preps,
     'target_tissue': target_tissue.__dict__,
     'inversion_efficiency': inversion_efficiency,
-    'delta_B1': delta_B1
+    'delta_B1': delta_B1,
+    'tr_offset': tr_offset
 }
-store_optimization(sequences, acq_block, prot)
+store_optimization(sequences, prot)
 # %%
