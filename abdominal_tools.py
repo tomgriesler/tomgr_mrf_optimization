@@ -58,6 +58,21 @@ def visualize_sequence(mrf_sequence, acq_block):
         plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
 
 
+
+def visualize_sequence(beats, shots, tr, tr_offset):
+    
+    prep_pulse_timings = [ii*shots*tr_offset+np.sum(tr[0:ii*shots])*1e-3 for ii in range(beats)]
+
+    map = {
+        0: {'color': 'white', 'label': None},
+        1: {'color': 'tab:blue', 'label': 'T1 prep'},
+        2: {'color': 'tab:red', 'label': 'T2 prep'}
+    }
+
+    for ii in range(beats): 
+        prep_length = 
+
+
 def visualize_crlb(sequences, weightingmatrix):
 
     crlbs = np.array([np.multiply(weightingmatrix, sequence.crlb) for sequence in sequences])
