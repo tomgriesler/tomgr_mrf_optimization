@@ -32,36 +32,36 @@ BLOCKS = {
 def divide_into_random_integers(N, n):
 
     positions = [0] + sorted(list(random.sample(range(1, N), n-1))) + [N]
-    integers = [positions[i+1]-positions[i] for i in range(n)]
+    integers = [positions[ii+1]-positions[ii] for ii in range(n)]
 
     return integers
 
 
-'''
-TODO update
-'''
-def visualize_sequence(mrf_sequence, acq_block):
+# '''
+# TODO update
+# '''
+# def visualize_sequence(mrf_sequence, acq_block):
 
-    prep_pulse_timings = [i*sum(acq_block.tr) + sum(mrf_sequence.ti[:i]) + sum(mrf_sequence.t2te[:i]) + sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.prep))]
+#     prep_pulse_timings = [ii*sum(acq_block.tr) + sum(mrf_sequence.ti[:ii]) + sum(mrf_sequence.t2te[:ii]) + sum(mrf_sequence.waittimes[:ii]) for ii in range(len(mrf_sequence.prep))]
 
-    map = {
-        0: {'color': 'white', 'label': None},
-        1: {'color': 'tab:blue', 'label': 'T1 prep'},
-        2: {'color': 'tab:red', 'label': 'T2 prep'}
-    }
+#     map = {
+#         0: {'color': 'white', 'label': None},
+#         1: {'color': 'tab:blue', 'label': 'T1 prep'},
+#         2: {'color': 'tab:red', 'label': 'T2 prep'}
+#     }
 
-    for i, prep in enumerate(mrf_sequence.prep):
-        prep_length = mrf_sequence.ti[i] + mrf_sequence.t2te[i]
-        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=1)
-        plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
-        plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
-        plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
+#     for i, prep in enumerate(mrf_sequence.prep):
+#         prep_length = mrf_sequence.ti[i] + mrf_sequence.t2te[i]
+#         plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=1)
+#         plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
+#         plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
+#         plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
 
 
 
-def visualize_sequence(beats, shots, tr, tr_offset):
+def visualize_sequence(mrf_sequence):
     
-    prep_pulse_timings = [ii*shots*tr_offset+np.sum(tr[0:ii*shots])*1e-3 for ii in range(beats)]
+    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
 
     map = {
         0: {'color': 'white', 'label': None},
@@ -69,8 +69,12 @@ def visualize_sequence(beats, shots, tr, tr_offset):
         2: {'color': 'tab:red', 'label': 'T2 prep'}
     }
 
-    for ii in range(beats): 
-        prep_length = 
+    for ii in range(mrf_sequence.beats): 
+        prep_length = mrf_sequence.ti[ii] + mrf_sequence.t2te[ii]
+        plt.axvspan(prep_pulse_timings[ii], prep_pulse_timings[ii]+prep_length, color=map[mrf_sequence.prep[ii]]['color'], label=map[mrf_sequence.prep[ii]]['label'], alpha=1)
+        plt.axvline(prep_pulse_timings[ii], color=map[mrf_sequence.prep[ii]]['color'])
+        plt.axvline(prep_pulse_timings[ii]+prep_length, color=map[mrf_sequence.prep[ii]]['color'])
+        plt.axvspan(prep_pulse_timings[ii]+prep_length, prep_pulse_timings[ii]+prep_length+sum(mrf_sequence.tr[ii*mrf_sequence.shots:(ii+1)*mrf_sequence.shots-1])*1e-3+mrf_sequence.shots*mrf_sequence.tr_offset, color='gray', alpha=0.2, label='acquisition')
 
 
 def visualize_crlb(sequences, weightingmatrix):
