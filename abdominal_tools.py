@@ -37,28 +37,6 @@ def divide_into_random_integers(N, n):
     return integers
 
 
-# '''
-# TODO update
-# '''
-# def visualize_sequence(mrf_sequence, acq_block):
-
-#     prep_pulse_timings = [ii*sum(acq_block.tr) + sum(mrf_sequence.ti[:ii]) + sum(mrf_sequence.t2te[:ii]) + sum(mrf_sequence.waittimes[:ii]) for ii in range(len(mrf_sequence.prep))]
-
-#     map = {
-#         0: {'color': 'white', 'label': None},
-#         1: {'color': 'tab:blue', 'label': 'T1 prep'},
-#         2: {'color': 'tab:red', 'label': 'T2 prep'}
-#     }
-
-#     for i, prep in enumerate(mrf_sequence.prep):
-#         prep_length = mrf_sequence.ti[i] + mrf_sequence.t2te[i]
-#         plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=1)
-#         plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
-#         plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
-#         plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
-
-
-
 def visualize_sequence(mrf_sequence):
     
     prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
