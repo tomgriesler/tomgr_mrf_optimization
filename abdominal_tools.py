@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import json
 import pickle
 from datetime import datetime
+import subprocess
 
 
 from signalmodel_abdominal import calculate_signal_abdominal, calculate_crlb_abdominal
@@ -98,6 +99,14 @@ def store_optimization(resultspath, sequences, prot):
 
     with open(timestamppath/'prot.json', 'w') as handle: 
         json.dump(prot, handle, indent='\t')
+
+
+def get_githash() -> str:
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+
+
+def get_gitbranch() -> str:
+    return str(subprocess.check_output(['git', 'branch'])).split("* ")[1].split("\\n")[0]
 
 
 class TargetTissue:

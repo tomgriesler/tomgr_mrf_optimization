@@ -1,6 +1,6 @@
 #%%
 from optimize_sequence import optimize_sequence
-from abdominal_tools import store_optimization, RESULTSPATH
+from abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
 target_t1 = 660.
@@ -41,7 +41,9 @@ prot = {
     'n_iter_max': n_iter_max,
     'inversion_efficiency': inversion_efficiency,
     'delta_B1': delta_B1,
-    'phase_inc': phase_inc
+    'phase_inc': phase_inc, 
+    'gitbranch': get_gitbranch(),
+    'githash': get_githash()
 }
 store_optimization(RESULTSPATH, sequences, prot)
 # %%
