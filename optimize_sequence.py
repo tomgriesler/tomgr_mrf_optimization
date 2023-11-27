@@ -38,14 +38,14 @@ def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr
             waittimes = divide_into_random_integers(waittime_tot, beats-1)
 
             fa = np.full(beats*shots, const_fa)
-            tr = np.full(beats*shots, const_tr)
+            tr = np.full(beats*shots, 0)
 
-            for ii in range(1, len(waittimes)):
-                tr[ii*shots-1] += waittimes[ii-1]
+            for ii in range(len(waittimes)):
+                tr[(ii+1)*shots-1] += waittimes[ii]*1e3
 
             ph = phase_inc*np.arange(n_ex).cumsum()
 
-            mrf_sequence = MRFSequence(beats, shots, fa, tr*1e-3, ph, prep, ti, t2te, const_tr, te)
+            mrf_sequence = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te)
 
             mrf_sequence.calc_crlb(target_t1, target_t2, target_m0, inversion_efficiency, delta_B1)
 
