@@ -6,6 +6,7 @@ import json
 import pickle
 from datetime import datetime
 
+
 from signalmodel_abdominal import calculate_signal_abdominal, calculate_crlb_abdominal
 
 
@@ -31,14 +32,14 @@ BLOCKS = {
 def divide_into_random_integers(N, n):
 
     positions = [0] + sorted(list(random.sample(range(1, N), n-1))) + [N]
-    integers = [positions[i+1]-positions[i] for i in range(n)]
+    integers = [positions[ii+1]-positions[ii] for ii in range(n)]
 
     return integers
 
 
-def visualize_sequence(mrf_sequence, acq_block):
-
-    prep_pulse_timings = [i*sum(acq_block.tr) + sum(mrf_sequence.TI[:i]) + sum(mrf_sequence.T2TE[:i]) + sum(mrf_sequence.waittimes[:i]) for i in range(len(mrf_sequence.PREP))]
+def visualize_sequence(mrf_sequence):
+    
+    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
 
     map = {
         0: {'color': 'white', 'label': None},
@@ -46,12 +47,12 @@ def visualize_sequence(mrf_sequence, acq_block):
         2: {'color': 'tab:red', 'label': 'T2 prep'}
     }
 
-    for i, prep in enumerate(mrf_sequence.PREP):
-        prep_length = mrf_sequence.TI[i] + mrf_sequence.T2TE[i]
-        plt.axvspan(prep_pulse_timings[i], prep_pulse_timings[i]+prep_length, color=map[prep]['color'], label=map[prep]['label'], alpha=1)
-        plt.axvline(prep_pulse_timings[i], color=map[prep]['color'])
-        plt.axvline(prep_pulse_timings[i]+prep_length, color=map[prep]['color'])
-        plt.axvspan(prep_pulse_timings[i]+prep_length, prep_pulse_timings[i]+prep_length+sum(acq_block.tr), color='gray', alpha=0.2, label='acquisition')
+    for ii in range(mrf_sequence.beats): 
+        prep_length = mrf_sequence.ti[ii] + mrf_sequence.t2te[ii]
+        plt.axvspan(prep_pulse_timings[ii], prep_pulse_timings[ii]+prep_length, color=map[mrf_sequence.prep[ii]]['color'], label=map[mrf_sequence.prep[ii]]['label'], alpha=1)
+        plt.axvline(prep_pulse_timings[ii], color=map[mrf_sequence.prep[ii]]['color'])
+        plt.axvline(prep_pulse_timings[ii]+prep_length, color=map[mrf_sequence.prep[ii]]['color'])
+        plt.axvspan(prep_pulse_timings[ii]+prep_length, prep_pulse_timings[ii]+prep_length+sum(mrf_sequence.tr[ii*mrf_sequence.shots:(ii+1)*mrf_sequence.shots-1])*1e-3+mrf_sequence.shots*mrf_sequence.tr_offset, color='gray', alpha=0.2, label='acquisition')
 
 
 def visualize_crlb(sequences, weightingmatrix):
@@ -66,16 +67,16 @@ def visualize_crlb(sequences, weightingmatrix):
         plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_3$', ms=0.1, color='tab:green')
 
 
-def create_weightingmatrix(target_tissue, weighting):
+def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
 
     WEIGHTINGMATRICES = {
         '1, 1, 0': np.array([1, 1, 0]),
-        '1/T1, 0, 0': np.array([1/target_tissue.T1, 0, 0]),
-        '0, 1/T2, 0': np.array([0, 1/target_tissue.T2, 0]),
-        '1/T1, 1/T2, 0': np.array([1/target_tissue.T1, 1/target_tissue.T2, 0]),
-        '1/T1, 1/T2, 1/M0': np.array([1/target_tissue.T1, 1/target_tissue.T2, 1/target_tissue.M0]),
-        '1/T1**2, 1/T2**2, 0': np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 0]),
-        '1/T1**2, 1/T2**2, 1/M0**2': np.array([1/target_tissue.T1**2, 1/target_tissue.T2**2, 1/target_tissue.M0**2])
+        '1/T1, 0, 0': np.array([1/target_t1, 0, 0]),
+        '0, 1/T2, 0': np.array([0, 1/target_t2, 0]),
+        '1/T1, 1/T2, 0': np.array([1/target_t1, 1/target_t2, 0]),
+        '1/T1, 1/T2, 1/M0': np.array([1/target_t1, 1/target_t2, 1/target_m0]),
+        '1/T1**2, 1/T2**2, 0': np.array([1/target_t1**2, 1/target_t2**2, 0]),
+        '1/T1**2, 1/T2**2, 1/M0**2': np.array([1/target_t1**2, 1/target_t2**2, 1/target_m0**2])
     }
         
     return WEIGHTINGMATRICES[weighting]
@@ -86,52 +87,47 @@ def sort_sequences(sequences, weightingmatrix):
     sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.crlb)))
 
 
-def store_optimization(sequences, acq_block, prot):
+def store_optimization(resultspath, sequences, prot):
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')[2:]
-    resultspath = RESULTSPATH/timestamp
-    resultspath.mkdir()
+    timestamppath = resultspath/timestamp
+    timestamppath.mkdir()
 
-    with open(resultspath/'sequences.pkl', 'wb') as handle:
+    with open(timestamppath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
-    with open(resultspath/'acq_block.pkl', 'wb') as handle:
-        pickle.dump(acq_block, handle)
-
-    with open(resultspath/'prot.json', 'w') as handle: 
+    with open(timestamppath/'prot.json', 'w') as handle: 
         json.dump(prot, handle, indent='\t')
-
-
-class AcquisitionBlock:
-
-    def __init__(self, fa, tr, TE):
-        self.fa = fa
-        self.tr = tr
-        self.TE = TE
 
 
 class TargetTissue:
 
-    def __init__(self, T1, T2, M0):
-        self.T1 = T1
-        self.T2 = T2
-        self.M0 = M0
+    def __init__(self, t1, t2, m0):
+        self.t1 = t1
+        self.t2 = t2
+        self.m0 = m0
 
 
 class MRFSequence:
 
-    def __init__(self, prep_order, waittimes):
-        self.waittimes = waittimes
-        self.PREP = [BLOCKS[name]['prep'] for name in prep_order]
-        self.TI = [BLOCKS[name]['ti'] for name in prep_order]
-        self.T2TE = [BLOCKS[name]['t2te'] for name in prep_order]
+    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
+        self.beats = beats
+        self.shots = shots
+        self.fa = np.array(fa, dtype=np.float32)
+        self.tr = np.array(tr, dtype=np.float32)
+        self.ph = np.array(ph, dtype=np.float32)
+        self.prep = np.array(prep, dtype=np.float32)
+        self.ti = np.array(ti, dtype=np.float32)
+        self.t2te = np.array(t2te, dtype=np.float32)
+        self.tr_offset = tr_offset
+        self.te = te
         
-    def calc_signal(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, phase=np.pi/2):
+    def calc_signal(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 
-        self.signal = calculate_signal_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, phase)
+        self.signal = calculate_signal_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
-    def calc_crlb(self, acq_block, target_tissue, inversion_efficiency=0.95, delta_B1=1, sigma=1, phase=np.pi/2):
+    def calc_crlb(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 
-        V = calculate_crlb_abdominal(target_tissue.T1, target_tissue.T2, target_tissue.M0, acq_block.fa, acq_block.tr, self.PREP, self.TI, self.T2TE, self.waittimes, acq_block.TE, inversion_efficiency, delta_B1, sigma, phase)
+        v = calculate_crlb_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
-        self.crlb = np.sqrt(np.diagonal(V))
+        self.crlb = np.sqrt(np.diagonal(v))

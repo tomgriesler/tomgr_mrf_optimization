@@ -1,36 +1,47 @@
 #%%
-import numpy as np
-
 from optimize_sequence import optimize_sequence
-from abdominal_tools import TargetTissue, AcquisitionBlock, store_optimization
+from abdominal_tools import store_optimization, RESULTSPATH
 
-# %% Define possible preparation modules
+#%% Define optimization target
+target_t1 = 660.
+target_t2 = 40.
+target_m0 = 1.
+
+shots = 35
+const_fa = 15.
+const_tr = 5.7
+te = 1.4
+total_dur = 1e4
+
 prep_modules = ['noPrep', 'TI21', 'TI100', 'TI250', 'TI400', 'T2prep40', 'T2prep80', 'T2prep120']
 prep_module_weights = [1, 1/4, 1/4, 1/4, 1/4, 1/3, 1/3, 1/3]
-total_dur = 20e3
-min_num_preps = 10
+min_num_preps = 8
+n_iter_max = 1e6
 
-#%% Define target tissue
-target_tissue = TargetTissue(1500, 100, 1)
 inversion_efficiency = 0.95
-delta_B1 = 1
-
-#%% Create acquisition block
-acq_block = AcquisitionBlock(np.full(20, 15.), np.full(20, 20.), 1.0)
+delta_B1 = 1.
+phase_inc = 0.
 
 #%% Perform optimization
-sequences = optimize_sequence(target_tissue, acq_block, prep_modules, total_dur, prep_module_weights=prep_module_weights, min_num_preps=min_num_preps, N_iter_max=1e6, inversion_efficiency=inversion_efficiency, delta_B1=delta_B1)
+sequences = optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inversion_efficiency, delta_B1, phase_inc)
 
 #%%
 prot = {
-    'N': len(sequences),
+    'target_t1': target_t1,
+    'target_t2': target_t2,
+    'target_m0': target_m0,
+    'shots': shots, 
+    'const_fa': const_fa,
+    'const_tr': const_tr,
+    'te': te, 
     'total_dur': total_dur,
     'prep_modules': prep_modules, 
     'prep_module_weights': prep_module_weights,
     'min_num_preps': min_num_preps,
-    'target_tissue': target_tissue.__dict__,
+    'n_iter_max': n_iter_max,
     'inversion_efficiency': inversion_efficiency,
-    'delta_B1': delta_B1
+    'delta_B1': delta_B1,
+    'phase_inc': phase_inc
 }
-store_optimization(sequences, acq_block, prot)
+store_optimization(RESULTSPATH, sequences, prot)
 # %%
