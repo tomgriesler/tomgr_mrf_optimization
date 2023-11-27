@@ -37,7 +37,10 @@ def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr
 
             waittimes = divide_into_random_integers(waittime_tot, beats-1)
 
-            fa = np.full(beats*shots, const_fa)
+            # fa = np.full(beats*shots, const_fa)
+
+            fa = np.repeat(random.choices(list(const_fa), k=beats), shots) 
+
             tr = np.full(beats*shots, 0)
 
             for ii in range(len(waittimes)):
