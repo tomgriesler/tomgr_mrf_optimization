@@ -27,9 +27,9 @@ sequences = optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, 
 
 #%%
 prot = {
-    'taget_t1': target_t1,
-    'taget_t2': target_t2,
-    'taget_m0': target_m0,
+    'target_t1': target_t1,
+    'target_t2': target_t2,
+    'target_m0': target_m0,
     'shots': shots, 
     'const_fa': const_fa,
     'const_tr': const_tr,
