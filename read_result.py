@@ -30,8 +30,9 @@ inversion_efficiency = prot['inversion_efficiency']
 delta_B1 = prot['delta_B1']
 
 #%% Compare to reference
-prep_order_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
-beats_jaubert = len(prep_order_jaubert)
+beats_jaubert = 24
+prep_blocks_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
+prep_order_jaubert = np.concatenate((np.tile(prep_blocks_jaubert, reps=beats_jaubert//len(prep_blocks_jaubert)), prep_blocks_jaubert[:beats_jaubert%len(prep_blocks_jaubert)]))
 waittimes_jaubert = np.full(beats_jaubert-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_jaubert]))/(beats_jaubert-1)
 prep_jaubert = [BLOCKS[name]['prep'] for name in prep_order_jaubert]
 ti_jaubert = [BLOCKS[name]['ti'] for name in prep_order_jaubert]
@@ -43,8 +44,9 @@ for ii in range(len(waittimes_jaubert)):
 ph_jaubert = phase_inc*np.arange(beats_jaubert*shots).cumsum()
 mrf_sequence_jaubert = MRFSequence(beats_jaubert, shots, fa_jaubert, tr_jaubert, ph_jaubert, prep_jaubert, ti_jaubert, t2te_jaubert, const_tr, te)
 
-prep_order_kvernby = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50']
-beats_kvernby = len(prep_order_kvernby)
+beats_kvernby = 24
+prep_blocks_kvernby = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50']
+prep_order_kvernby = np.concatenate((np.tile(prep_blocks_kvernby, reps=beats_kvernby//len(prep_blocks_kvernby)), prep_blocks_kvernby[:beats_kvernby%len(prep_blocks_kvernby)]))
 waittimes_kvernby = np.full(beats_kvernby-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_kvernby]))/(beats_kvernby-1)
 prep_kvernby = [BLOCKS[name]['prep'] for name in prep_order_kvernby]
 ti_kvernby = [BLOCKS[name]['ti'] for name in prep_order_kvernby]
@@ -56,8 +58,9 @@ for ii in range(len(waittimes_kvernby)):
 ph_kvernby = phase_inc*np.arange(beats_kvernby*shots).cumsum()
 mrf_sequence_kvernby = MRFSequence(beats_kvernby, shots, fa_kvernby, tr_kvernby, ph_kvernby, prep_kvernby, ti_kvernby, t2te_kvernby, const_tr, te)
 
-prep_order_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
-beats_hamilton = len(prep_order_hamilton)
+beats_hamilton = 24
+prep_blocks_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
+prep_order_hamilton = np.concatenate((np.tile(prep_blocks_hamilton, reps=beats_hamilton//len(prep_blocks_hamilton)), prep_blocks_hamilton[:beats_hamilton%len(prep_blocks_hamilton)]))
 waittimes_hamilton = np.full(beats_hamilton-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_hamilton]))/(beats_hamilton-1)
 prep_hamilton = [BLOCKS[name]['prep'] for name in prep_order_hamilton]
 ti_hamilton = [BLOCKS[name]['ti'] for name in prep_order_hamilton]
