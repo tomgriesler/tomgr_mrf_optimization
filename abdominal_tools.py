@@ -38,7 +38,7 @@ def divide_into_random_integers(N, n):
     return integers
 
 
-def visualize_sequence(mrf_sequence):
+def visualize_sequence(mrf_sequence, show_fa=False):
     
     prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
 
@@ -54,6 +54,9 @@ def visualize_sequence(mrf_sequence):
         plt.axvline(prep_pulse_timings[ii], color=map[mrf_sequence.prep[ii]]['color'])
         plt.axvline(prep_pulse_timings[ii]+prep_length, color=map[mrf_sequence.prep[ii]]['color'])
         plt.axvspan(prep_pulse_timings[ii]+prep_length, prep_pulse_timings[ii]+prep_length+sum(mrf_sequence.tr[ii*mrf_sequence.shots:(ii+1)*mrf_sequence.shots-1])*1e-3+mrf_sequence.shots*mrf_sequence.tr_offset, color='gray', alpha=0.2, label='acquisition')
+
+        if show_fa:
+            plt.plot([prep_pulse_timings[ii]+prep_length+jj*mrf_sequence.tr_offset for jj in range(mrf_sequence.shots)], mrf_sequence.fa[ii*mrf_sequence.shots:(ii+1)*mrf_sequence.shots], 'o', color='black', ms=1)
 
 
 def visualize_crlb(sequences, weightingmatrix):
