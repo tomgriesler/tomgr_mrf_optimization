@@ -149,7 +149,7 @@ plt.title('Low $cost_{T1}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ii += 1 
 
 # plt.subplot(n_subplots, 1, ii)
@@ -158,7 +158,7 @@ ii += 1
 # plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
-# ax.set_yticks([])
+# ax.set_ylim(0, 1.1*max(const_fa))
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -167,7 +167,7 @@ plt.title('Low $cost_{T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ii += 1 
 
 # plt.subplot(n_subplots, 1, ii)
@@ -176,7 +176,7 @@ ii += 1
 # plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
-# ax.set_yticks([])
+# ax.set_ylim(0, 1.1*max(const_fa))
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -185,7 +185,7 @@ plt.title('Low $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -194,7 +194,7 @@ plt.title('Medium $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -203,7 +203,7 @@ plt.title('High $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -212,7 +212,7 @@ plt.title('Hamilton')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -221,7 +221,7 @@ plt.title('Jaubert')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -229,7 +229,7 @@ visualize_sequence(mrf_sequence_kvernby, True)
 plt.title('Kvernby')
 plt.xlim(0, total_dur)
 ax = plt.gca()
-ax.set_yticks([])
+ax.set_ylim(0, 1.1*max(const_fa))
 ax.set_xlabel('Time [ms]')
 
 handles, labels = plt.gca().get_legend_handles_labels()
