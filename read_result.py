@@ -7,7 +7,7 @@ import numpy as np
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_crlb,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231127_064454'
+timestamp = '231128_073040'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -36,7 +36,7 @@ waittimes_jaubert = np.full(beats_jaubert-1, total_dur - np.sum([BLOCKS[prep]['t
 prep_jaubert = [BLOCKS[name]['prep'] for name in prep_order_jaubert]
 ti_jaubert = [BLOCKS[name]['ti'] for name in prep_order_jaubert]
 t2te_jaubert = [BLOCKS[name]['t2te'] for name in prep_order_jaubert]
-fa_jaubert = np.full(beats_jaubert * shots, const_fa)
+fa_jaubert = np.full(beats_jaubert * shots, 15.)
 tr_jaubert = np.full(beats_jaubert*shots, 0)
 for ii in range(len(waittimes_jaubert)):
     tr_jaubert[(ii+1)*shots-1] += waittimes_jaubert[ii]*1e3
@@ -49,20 +49,21 @@ waittimes_kvernby = np.full(beats_kvernby-1, total_dur - np.sum([BLOCKS[prep]['t
 prep_kvernby = [BLOCKS[name]['prep'] for name in prep_order_kvernby]
 ti_kvernby = [BLOCKS[name]['ti'] for name in prep_order_kvernby]
 t2te_kvernby = [BLOCKS[name]['t2te'] for name in prep_order_kvernby]
-fa_kvernby = np.full(beats_kvernby * shots, const_fa)
+fa_kvernby = np.full(beats_kvernby * shots, 15.)
 tr_kvernby = np.full(beats_kvernby*shots, 0)
 for ii in range(len(waittimes_kvernby)):
     tr_kvernby[(ii+1)*shots-1] += waittimes_kvernby[ii]*1e3
 ph_kvernby = phase_inc*np.arange(beats_kvernby*shots).cumsum()
 mrf_sequence_kvernby = MRFSequence(beats_kvernby, shots, fa_kvernby, tr_kvernby, ph_kvernby, prep_kvernby, ti_kvernby, t2te_kvernby, const_tr, te)
 
-prep_order_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
+# prep_order_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
+prep_order_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80','TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80']
 beats_hamilton = len(prep_order_hamilton)
 waittimes_hamilton = np.full(beats_hamilton-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_hamilton]))/(beats_hamilton-1)
 prep_hamilton = [BLOCKS[name]['prep'] for name in prep_order_hamilton]
 ti_hamilton = [BLOCKS[name]['ti'] for name in prep_order_hamilton]
 t2te_hamilton = [BLOCKS[name]['t2te'] for name in prep_order_hamilton]
-fa_hamilton = np.full(beats_hamilton * shots, const_fa)
+fa_hamilton = np.full(beats_hamilton * shots, 15.)
 tr_hamilton = np.full(beats_hamilton*shots, 0)
 for ii in range(len(waittimes_hamilton)):
     tr_hamilton[(ii+1)*shots-1] += waittimes_hamilton[ii]*1e3
@@ -97,7 +98,7 @@ plt.figure(figsize=(16, 9))
 plt.subplot(1, 3, 1)
 visualize_crlb(seqs_sorted_T1, weightingmatrix_T1T2)
 plt.axhline(np.sum(np.multiply(weightingmatrix_T1, mrf_sequence_hamilton.crlb)), ls=':', label='$cost_{1, ref}$', color='tab:blue', linewidth=2)
-plt.xlim(0, 1e6)
+plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
 plt.xlabel('Index')
@@ -107,7 +108,7 @@ plt.title('Sorted by $cost_1$')
 plt.subplot(1, 3, 2)
 visualize_crlb(seqs_sorted_T2, weightingmatrix_T1T2)
 plt.axhline(np.sum(np.multiply(weightingmatrix_T2, mrf_sequence_hamilton.crlb)), ls=':', label='$cost_{2, ref}$', color='tab:red', linewidth=2)
-plt.xlim(0, 1e6)
+plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
 plt.xlabel('Index')
@@ -118,7 +119,7 @@ plt.title('Sorted by $cost_2$')
 plt.subplot(1, 3, 3)
 visualize_crlb(seqs_sorted_T1T2, weightingmatrix_T1T2)
 plt.axhline(np.sum(np.multiply(weightingmatrix_T1T2, mrf_sequence_hamilton.crlb)), ls=':', label='$cost_{3, ref}$', color='tab:green', linewidth=2)
-plt.xlim(0, 1e6)
+plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
 plt.xlabel('Index')
@@ -141,9 +142,9 @@ n_subplots = 8
 ii = 1
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1[0])
+visualize_sequence(seqs_sorted_T1[0], True)
 plt.title('Low $cost_{T1}$')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
 ax.set_yticks([])
@@ -152,16 +153,16 @@ ii += 1
 # plt.subplot(n_subplots, 1, ii)
 # visualize_sequence(seqs_sorted_T1[-1])
 # plt.title('High $cost_{T1}$')
-# plt.xlim(0, 10000)
+# plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
 # ax.set_yticks([])
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T2[0])
+visualize_sequence(seqs_sorted_T2[0], True)
 plt.title('Low $cost_{T2}$')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
 ax.set_yticks([])
@@ -170,61 +171,61 @@ ii += 1
 # plt.subplot(n_subplots, 1, ii)
 # visualize_sequence(seqs_sorted_T2[-1])
 # plt.title('High $cost_{T2}$')
-# plt.xlim(0, 10000)
+# plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
 # ax.set_yticks([])
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[1])
+visualize_sequence(seqs_sorted_T1T2[1], True)
 plt.title('Low $cost_{T1,T2}$')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
 ax.set_yticks([])
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[500001])
+visualize_sequence(seqs_sorted_T1T2[500001], True)
 plt.title('Medium $cost_{T1,T2}$')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
 ax.set_yticks([])
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[-64])
+visualize_sequence(seqs_sorted_T1T2[-64], True)
 plt.title('High $cost_{T1,T2}$')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
 ax.set_yticks([])
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(mrf_sequence_hamilton)
+visualize_sequence(mrf_sequence_hamilton, True)
 plt.title('Hamilton')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
 ax.set_yticks([])
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(mrf_sequence_jaubert)
+visualize_sequence(mrf_sequence_jaubert, True)
 plt.title('Jaubert')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
 ax.set_yticks([])
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(mrf_sequence_kvernby)
+visualize_sequence(mrf_sequence_kvernby, True)
 plt.title('Kvernby')
-plt.xlim(0, 10000)
+plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_yticks([])
 ax.set_xlabel('Time [ms]')
