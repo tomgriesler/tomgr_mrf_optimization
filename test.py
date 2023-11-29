@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from abdominal_tools import MRFSequence, visualize_sequence, create_weightingmatrix
-
+from signalmodel_abdominal import calculate_orthogonality, calculate_signal
 #%%
 beats = 16
 shots = 35
@@ -73,4 +73,28 @@ plt.ylabel('CRLB')
 plt.legend()
 # %%
 print(1-min(res)/res[0])
+# %%
+calculate_orthogonality([150, 828], [20, 72], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
+# %%
+beats = 1
+
+fa = np.load('/home/tomgriesler/Documents/Uni_Wue/Master/tg_mrf_optimization/initialization/fa_cao.npy')
+tr = np.zeros_like(fa)
+
+shots = len(fa)
+ph = np.zeros_like(fa)
+prep = [1]
+ti = [20]
+t2te = [0]
+
+tr_offset = 12
+
+signal_1 = calculate_signal(150, 20, 1, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
+signal_2 = calculate_signal(828, 72, 1, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
+
+plt.plot(-np.imag(signal_1))
+plt.plot(-np.imag(signal_2))
+
+# %%
+calculate_orthogonality([150, 828], [20, 72], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
 # %%
