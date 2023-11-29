@@ -7,7 +7,7 @@ import numpy as np
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_crlb,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231128_073040'
+timestamp = '231128_175716'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -30,7 +30,7 @@ inversion_efficiency = prot['inversion_efficiency']
 delta_B1 = prot['delta_B1']
 
 #%% Compare to reference
-beats_jaubert = 24
+beats_jaubert = 16
 prep_blocks_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
 prep_order_jaubert = np.concatenate((np.tile(prep_blocks_jaubert, reps=beats_jaubert//len(prep_blocks_jaubert)), prep_blocks_jaubert[:beats_jaubert%len(prep_blocks_jaubert)]))
 waittimes_jaubert = np.full(beats_jaubert-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_jaubert]))/(beats_jaubert-1)
@@ -44,7 +44,7 @@ for ii in range(len(waittimes_jaubert)):
 ph_jaubert = phase_inc*np.arange(beats_jaubert*shots).cumsum()
 mrf_sequence_jaubert = MRFSequence(beats_jaubert, shots, fa_jaubert, tr_jaubert, ph_jaubert, prep_jaubert, ti_jaubert, t2te_jaubert, const_tr, te)
 
-beats_kvernby = 24
+beats_kvernby = 16
 prep_blocks_kvernby = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50']
 prep_order_kvernby = np.concatenate((np.tile(prep_blocks_kvernby, reps=beats_kvernby//len(prep_blocks_kvernby)), prep_blocks_kvernby[:beats_kvernby%len(prep_blocks_kvernby)]))
 waittimes_kvernby = np.full(beats_kvernby-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_kvernby]))/(beats_kvernby-1)
@@ -58,7 +58,7 @@ for ii in range(len(waittimes_kvernby)):
 ph_kvernby = phase_inc*np.arange(beats_kvernby*shots).cumsum()
 mrf_sequence_kvernby = MRFSequence(beats_kvernby, shots, fa_kvernby, tr_kvernby, ph_kvernby, prep_kvernby, ti_kvernby, t2te_kvernby, const_tr, te)
 
-beats_hamilton = 24
+beats_hamilton = 16
 prep_blocks_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
 prep_order_hamilton = np.concatenate((np.tile(prep_blocks_hamilton, reps=beats_hamilton//len(prep_blocks_hamilton)), prep_blocks_hamilton[:beats_hamilton%len(prep_blocks_hamilton)]))
 waittimes_hamilton = np.full(beats_hamilton-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_hamilton]))/(beats_hamilton-1)
@@ -149,7 +149,7 @@ plt.title('Low $cost_{T1}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 # plt.subplot(n_subplots, 1, ii)
@@ -158,7 +158,7 @@ ii += 1
 # plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
-# ax.set_ylim(0, 1.1*max(const_fa))
+# ax.set_ylim(0, 1.1*np.max(const_fa))
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -167,7 +167,7 @@ plt.title('Low $cost_{T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 # plt.subplot(n_subplots, 1, ii)
@@ -176,7 +176,7 @@ ii += 1
 # plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
-# ax.set_ylim(0, 1.1*max(const_fa))
+# ax.set_ylim(0, 1.1*np.max(const_fa))
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -185,7 +185,7 @@ plt.title('Low $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -194,7 +194,7 @@ plt.title('Medium $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -203,7 +203,7 @@ plt.title('High $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -212,7 +212,7 @@ plt.title('Hamilton')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -221,7 +221,7 @@ plt.title('Jaubert')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
@@ -229,7 +229,7 @@ visualize_sequence(mrf_sequence_kvernby, True)
 plt.title('Kvernby')
 plt.xlim(0, total_dur)
 ax = plt.gca()
-ax.set_ylim(0, 1.1*max(const_fa))
+ax.set_ylim(0, 1.1*np.max(const_fa))
 ax.set_xlabel('Time [ms]')
 
 handles, labels = plt.gca().get_legend_handles_labels()
