@@ -126,9 +126,6 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
 
             r_ti = r(t1, t2, ti[ii])
 
-            omega[:2, :] = 0.
-            omega[2, :] *= -inversion_efficiency
-
             domega_dt1[:2, :] = 0.
             domega_dt1[2, :] *= -inversion_efficiency
             domega_dt1 = dr_dt1(t1, ti[ii]) @ omega + r_ti @ domega_dt1
@@ -142,12 +139,12 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
             domega_dm0[2, :] *= -inversion_efficiency
             domega_dm0 = r_ti @ domega_dm0
 
+            omega[:2, :] = 0.
+            omega[2, :] *= -inversion_efficiency
             omega = r_ti @ omega
             omega[2, 0] += m0 * b(t1, ti[ii])
 
         elif prep[ii] == 2:
-
-            omega[:2, :] = 0.
 
             domega_dt1[:2, :] = 0
             domega_dt1 *= np.exp(-t2te[ii]/t2)
@@ -158,6 +155,7 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
             domega_dm0[:2, :] = 0
             domega_dm0 *= np.exp(-t2te[ii]/t2)
 
+            omega[:2, :] = 0.
             omega[2, :] *= np.exp(-t2te[ii]/t2)
 
         for jj in range(shots):
@@ -203,3 +201,30 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
             omega[2, 0] += b_tr
 
     return np.linalg.inv(fim)
+
+
+def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+
+    r_te_1 = r(t1[0], t2[0], te)
+    r_te_2 = r(t1[1], t2[1], te)
+
+    omega_1 = np.vstack((0., 0., fraction*m0))
+    omega_2 = np.vstack((0., 0., (1-fraction)*m0))
+
+    domega_1_dfraction = np.vstack((0., 0., m0))
+    domega_2_dfraction = np.vstack((0., 0., -m0))
+
+    fim = 0.
+
+    for ii in range(beats):
+
+        if prep[ii] == 1:
+
+            omega_1[:2, :] = 0.
+            omega_2[:2, :] = 0.
+
+            omega_1[2, :] *= -inversion_efficiency
+            omega_2[2, :] *= -inversion_efficiency
+
+
+
