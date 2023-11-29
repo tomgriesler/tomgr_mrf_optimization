@@ -14,6 +14,28 @@ def q(alpha, phi=np.pi/2):
     return mat
 
 
+def inversion(inversion_efficiency):
+
+    mat = np.zeros((3, 3))
+    mat[2, 2] = -inversion_efficiency
+
+    return mat
+
+
+def t2prep(t2, t2te):
+
+    mat = np.zeros((3, 3))
+    mat[2, 2] = np.exp(-t2te/t2)
+
+    return mat
+
+
+def dt2prep_dT2(t2, t2te):
+
+    mat = np.zeros((3, 3))
+    mat[2, 2] = t2te/t2**2 * np.exp(-t2te/t2)
+
+
 def r(t1, t2, t):
 
     E1 = np.exp(-t/t1)
@@ -82,14 +104,15 @@ def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_of
     for ii in range(beats):
         
         if prep[ii] == 1:
-            omega[:2, :] = 0.
-            omega[2, :] *= -inversion_efficiency
-            omega = r(t1, t2, ti[ii]) @ omega
+            # omega[:2, :] = 0.
+            # omega[2, :] *= -inversion_efficiency
+            omega = r(t1, t2, ti[ii]) @ inversion(inversion_efficiency) @ omega
             omega[2, 0] += m0 * b(t1, ti[ii])
 
         elif prep[ii] == 2: 
-            omega[:2, :] = 0.
-            omega[2, :] *= np.exp(-t2te[ii]/t2)
+            # omega[:2, :] = 0.
+            # omega[2, :] *= np.exp(-t2te[ii]/t2)
+            omega = t2prep(t2, t2te) @ omega
 
         for jj in range(shots):
 
@@ -125,38 +148,43 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
         if prep[ii] == 1:
 
             r_ti = r(t1, t2, ti[ii])
-
-            domega_dt1[:2, :] = 0.
-            domega_dt1[2, :] *= -inversion_efficiency
-            domega_dt1 = dr_dt1(t1, ti[ii]) @ omega + r_ti @ domega_dt1
+            
+            # domega_dt1[:2, :] = 0.
+            # domega_dt1[2, :] *= -inversion_efficiency
+            domega_dt1 = dr_dt1(t1, ti[ii]) @ inversion(inversion_efficiency) @ omega + r_ti @ inversion(inversion_efficiency) @ domega_dt1
             domega_dt1[2, 0] += m0 * db_dt1(t1, ti[ii])
 
-            domega_dt2[:2, :] = 0.
-            domega_dt2[2, :] *= -inversion_efficiency
-            domega_dt2 = dr_dt2(t2, ti[ii]) @ omega + r_ti @ domega_dt2
+            # domega_dt2[:2, :] = 0.
+            # domega_dt2[2, :] *= -inversion_efficiency
+            domega_dt2 = dr_dt2(t2, ti[ii]) @ inversion(inversion_efficiency) @ omega + r_ti @ inversion(inversion_efficiency) @ domega_dt2
 
-            domega_dm0[:2, :] = 0.
-            domega_dm0[2, :] *= -inversion_efficiency
-            domega_dm0 = r_ti @ domega_dm0
+            # domega_dm0[:2, :] = 0.
+            # domega_dm0[2, :] *= -inversion_efficiency
+            domega_dm0 = r_ti @ inversion(inversion_efficiency) @ domega_dm0
 
-            omega[:2, :] = 0.
-            omega[2, :] *= -inversion_efficiency
-            omega = r_ti @ omega
+            # omega[:2, :] = 0.
+            # omega[2, :] *= -inversion_efficiency
+            omega = r_ti @ inversion(inversion_efficiency) @ omega
             omega[2, 0] += m0 * b(t1, ti[ii])
 
         elif prep[ii] == 2:
 
-            domega_dt1[:2, :] = 0
-            domega_dt1 *= np.exp(-t2te[ii]/t2)
+            # domega_dt1[:2, :] = 0
+            # domega_dt1 *= np.exp(-t2te[ii]/t2)
+            domega_dt1 = t2prep(t2, t2te) @ domega_dt1
 
-            domega_dt2[:2, :] = 0
-            domega_dt2 = np.exp(-t2te[ii]/t2) * (t2te[ii]/t2**2 * omega + domega_dt2)
+            # domega_dt2[:2, :] = 0
+            # domega_dt2 = np.exp(-t2te[ii]/t2) * (t2te[ii]/t2**2 * omega + domega_dt2)
+            domega_dt2 = dt2prep_dT2(t2, t2te[ii]) @ omega + t2prep(t2, t2te[ii]) @ domega_dt2
 
-            domega_dm0[:2, :] = 0
-            domega_dm0 *= np.exp(-t2te[ii]/t2)
+            # domega_dm0[:2, :] = 0
+            # domega_dm0 *= np.exp(-t2te[ii]/t2)
 
-            omega[:2, :] = 0.
-            omega[2, :] *= np.exp(-t2te[ii]/t2)
+            domega_dm0 = t2prep(t2, t2te[ii]) @ domega_dm0
+
+            # omega[:2, :] = 0.
+            # omega[2, :] *= np.exp(-t2te[ii]/t2)
+            omega = t2prep(t2, t2te) @ omega
 
         for jj in range(shots):
 
