@@ -8,7 +8,7 @@ from datetime import datetime
 import subprocess
 
 
-from signalmodel_abdominal import calculate_signal_abdominal, calculate_crlb_abdominal
+from signalmodel_abdominal import calculate_signal, calculate_crlb
 
 
 RESULTSPATH = Path('/home/tomgr/Documents/abdominal/results_optim')
@@ -136,10 +136,10 @@ class MRFSequence:
         
     def calc_signal(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 
-        self.signal = calculate_signal_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
+        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
     def calc_crlb(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 
-        v = calculate_crlb_abdominal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
+        v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
         self.crlb = np.sqrt(np.diagonal(v))

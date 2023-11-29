@@ -68,7 +68,7 @@ def epg_grad(omega):
     return omega
 
 
-def calculate_signal_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
 
     n_ex = beats * shots
 
@@ -107,7 +107,7 @@ def calculate_signal_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t
 
     return signal
 
-def calculate_crlb_abdominal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
 
     r_te = r(t1, t2, te)
     dr_te_dt1 = dr_dt1(t1, te)
