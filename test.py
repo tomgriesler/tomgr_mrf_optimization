@@ -11,7 +11,7 @@ n_ex = beats*shots
 fa = np.full(n_ex, 15)
 tr = np.zeros(n_ex)
 tr_offset = 5
-# ph = np.zeros(n_ex)
+ph = np.zeros(n_ex)
 # ph = np.tile(4*np.arange(shots).cumsum(), beats)
 prep = [1, 0, 2, 2] * 4
 ti = [21, 0, 0, 0, 100, 0, 0, 0, 250, 0, 0, 0, 400, 0, 0, 0]
@@ -50,9 +50,11 @@ res = []
 res_t1 = []
 res_t2 = []
 
-for phase_inc in np.arange(10):
+for phase_inc in np.arange(0, 10):
     # ph = np.tile(phase_inc*np.arange(shots).cumsum(), beats)
     ph = phase_inc*np.arange(beats*shots).cumsum()
+    # ph = phase_inc*np.arange(beats*shots)
+    # ph = phase_inc*np.sin(np.arange(beats*shots)*4*np.pi/beats/shots)
     mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te)
     mrf_seq.calc_crlb(t1, t2, m0)
     # print(phase_inc, mrf_seq.crlb, np.sum(np.multiply(weightingmatrix, mrf_seq.crlb)))
@@ -62,7 +64,13 @@ for phase_inc in np.arange(10):
     res_t2.append(w_crlb[1])
 
 #%%
-# plt.plot(res)
-# plt.plot(res_t1)
-plt.plot(res_t2)
+plt.plot(res, label='cost$_{T1,T2}$:\t' + f'-{(1-min(res)/res[0])*100:.1f}%')
+plt.plot(res_t1, label='cost$_{T1}$:\t' + f'-{(1-min(res_t1)/res_t1[0])*100:.1f}%')
+plt.plot(res_t2, label='cost$_{T2}$:\t' + f'-{(1-min(res_t2)/res_t2[0])*100:.1f}%')
+plt.ylim(0, 4)
+plt.xlabel('$\Delta \Phi$ [deg]')
+plt.ylabel('CRLB')
+plt.legend()
+# %%
+print(1-min(res)/res[0])
 # %%
