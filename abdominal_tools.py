@@ -8,7 +8,7 @@ from datetime import datetime
 import subprocess
 
 
-from signalmodel_abdominal import calculate_signal, calculate_crlb
+from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_orthogonality
 
 
 RESULTSPATH = Path('/home/tomgr/Documents/abdominal/results_optim')
@@ -59,9 +59,9 @@ def visualize_sequence(mrf_sequence, show_fa=False):
             plt.plot([prep_pulse_timings[ii]+prep_length+jj*mrf_sequence.tr_offset for jj in range(mrf_sequence.shots)], mrf_sequence.fa[ii*mrf_sequence.shots:(ii+1)*mrf_sequence.shots], 'o', color='black', ms=2)
 
 
-def visualize_crlb(sequences, weightingmatrix):
+def visualize_cost(sequences, weightingmatrix):
 
-    crlbs = np.array([np.multiply(weightingmatrix, sequence.crlb) for sequence in sequences])
+    crlbs = np.array([np.multiply(weightingmatrix, sequence.cost) for sequence in sequences])
 
     if weightingmatrix[0]:
         plt.plot(crlbs[:, 0], '.', label='$cost_1$', alpha=0.5, ms=0.1, color='tab:blue')
@@ -88,7 +88,7 @@ def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
 
 def sort_sequences(sequences, weightingmatrix):
 
-    sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.crlb)))
+    sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.cost)))
 
 
 def store_optimization(resultspath, sequences, prot):
@@ -142,4 +142,8 @@ class MRFSequence:
 
         v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
 
-        self.crlb = np.sqrt(np.diagonal(v))
+        self.cost = np.sqrt(np.diagonal(v))
+
+    def calc_orthogonality(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
+
+        self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)

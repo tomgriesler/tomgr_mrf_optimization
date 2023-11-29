@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import json
 import numpy as np
 
-from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_crlb,create_weightingmatrix,sort_sequences, MRFSequence
+from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
 timestamp = '231128_175502'
@@ -98,8 +98,8 @@ plt.rcParams.update({'font.size': 22})
 plt.figure(figsize=(16, 9))
 
 plt.subplot(1, 3, 1)
-visualize_crlb(seqs_sorted_T1, weightingmatrix_T1T2)
-plt.axhline(np.sum(np.multiply(weightingmatrix_T1, mrf_sequence_hamilton.crlb)), ls=':', label='$cost_{1, ref}$', color='tab:blue', linewidth=2)
+visualize_cost(seqs_sorted_T1, weightingmatrix_T1T2)
+plt.axhline(np.sum(np.multiply(weightingmatrix_T1, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{1, ref}$', color='tab:blue', linewidth=2)
 plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
@@ -108,8 +108,8 @@ plt.ylabel('cost function value')
 plt.title('Sorted by $cost_1$')
 
 plt.subplot(1, 3, 2)
-visualize_crlb(seqs_sorted_T2, weightingmatrix_T1T2)
-plt.axhline(np.sum(np.multiply(weightingmatrix_T2, mrf_sequence_hamilton.crlb)), ls=':', label='$cost_{2, ref}$', color='tab:red', linewidth=2)
+visualize_cost(seqs_sorted_T2, weightingmatrix_T1T2)
+plt.axhline(np.sum(np.multiply(weightingmatrix_T2, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{2, ref}$', color='tab:red', linewidth=2)
 plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
@@ -119,8 +119,8 @@ ax.set_yticklabels([])
 plt.title('Sorted by $cost_2$')
 
 plt.subplot(1, 3, 3)
-visualize_crlb(seqs_sorted_T1T2, weightingmatrix_T1T2)
-plt.axhline(np.sum(np.multiply(weightingmatrix_T1T2, mrf_sequence_hamilton.crlb)), ls=':', label='$cost_{3, ref}$', color='tab:green', linewidth=2)
+visualize_cost(seqs_sorted_T1T2, weightingmatrix_T1T2)
+plt.axhline(np.sum(np.multiply(weightingmatrix_T1T2, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{3, ref}$', color='tab:green', linewidth=2)
 plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)

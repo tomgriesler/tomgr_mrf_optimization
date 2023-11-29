@@ -41,7 +41,7 @@ plt.plot(np.imag(mrf_seq.signal))
 
 # %%
 mrf_seq.calc_crlb(t1, t2, m0)
-print(mrf_seq.crlb)
+print(mrf_seq.cost)
 
 
 #%%
@@ -57,8 +57,8 @@ for phase_inc in np.arange(0, 10):
     # ph = phase_inc*np.sin(np.arange(beats*shots)*4*np.pi/beats/shots)
     mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te)
     mrf_seq.calc_crlb(t1, t2, m0)
-    # print(phase_inc, mrf_seq.crlb, np.sum(np.multiply(weightingmatrix, mrf_seq.crlb)))
-    w_crlb = np.multiply(weightingmatrix, mrf_seq.crlb)
+    # print(phase_inc, mrf_seq.cost, np.sum(np.multiply(weightingmatrix, mrf_seq.cost)))
+    w_crlb = np.multiply(weightingmatrix, mrf_seq.cost)
     res.append(np.sum(w_crlb))
     res_t1.append(w_crlb[0])
     res_t2.append(w_crlb[1])
