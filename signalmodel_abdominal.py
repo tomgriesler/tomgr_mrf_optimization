@@ -217,28 +217,39 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
     return np.linalg.inv(fim)
 
 
-def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+# def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
 
-    r_te_1 = r(t1[0], t2[0], te)
-    r_te_2 = r(t1[1], t2[1], te)
+#     r_te_1 = r(t1[0], t2[0], te)
+#     r_te_2 = r(t1[1], t2[1], te)
 
-    omega_1 = np.vstack((0., 0., fraction*m0))
-    omega_2 = np.vstack((0., 0., (1-fraction)*m0))
+#     omega_1 = np.vstack((0., 0., fraction*m0))
+#     omega_2 = np.vstack((0., 0., (1-fraction)*m0))
 
-    domega_1_dfraction = np.vstack((0., 0., m0))
-    domega_2_dfraction = np.vstack((0., 0., -m0))
+#     domega_1_dfraction = np.vstack((0., 0., m0))
+#     domega_2_dfraction = np.vstack((0., 0., -m0))
 
-    fim = 0.
+#     fim = 0.
 
-    for ii in range(beats):
+#     for ii in range(beats):
 
-        if prep[ii] == 1:
+#         if prep[ii] == 1:
 
-            omega_1[:2, :] = 0.
-            omega_2[:2, :] = 0.
+#             omega_1[:2, :] = 0.
+#             omega_2[:2, :] = 0.
 
-            omega_1[2, :] *= -inversion_efficiency
-            omega_2[2, :] *= -inversion_efficiency
+#             omega_1[2, :] *= -inversion_efficiency
+#             omega_2[2, :] *= -inversion_efficiency
 
 
+def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
 
+    n_components = len(t1)
+
+    s = np.zeros((n_components, len(fa)), dtype=np.complex128)
+
+    for ii in range(n_components): 
+        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency, delta_B1)
+
+    s = s/np.linalg.norm(s, axis=1, keepdims=True)
+
+    return np.linalg.norm(np.eye(n_components) - s@np.conj(s).T)**2
