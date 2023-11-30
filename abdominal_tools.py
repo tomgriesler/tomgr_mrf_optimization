@@ -133,6 +133,14 @@ class MRFSequence:
         self.t2te = np.array(t2te, dtype=np.float32)
         self.tr_offset = tr_offset
         self.te = te
+
+    def compress(self):
+        self.fa_compressed = [self.fa[ii] for ii in np.arange(self.beats)*self.shots]
+        self.
+        self.tr_compressed = 
+        delattr(self, 'fa')
+
+    
         
     def calc_signal(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 

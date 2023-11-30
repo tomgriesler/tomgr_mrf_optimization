@@ -3,19 +3,20 @@ from optimize_sequence import optimize_sequence
 from abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
-target_t1 = 1500.
-target_t2 = 100.
+target_t1 = 660.
+target_t2 = 40.
 target_m0 = 1.
 
-shots = 10
-const_fa = [5., 10., 15., 20., 25.]
-const_tr = 20.
+shots = 35
+# const_fa = [5., 10., 15., 20., 25.]
+const_fa = 15.
+const_tr = 5.7
 te = 1.
-total_dur = 2e4
+total_dur = 1e4
 
 prep_modules = ['noPrep', 'TI21', 'TI100', 'TI250', 'TI400', 'T2prep40', 'T2prep80', 'T2prep120']
 prep_module_weights = [1, 1/4, 1/4, 1/4, 1/4, 1/3, 1/3, 1/3]
-min_num_preps = 10
+min_num_preps = 8
 n_iter_max = 1e6
 
 inversion_efficiency = 0.95
