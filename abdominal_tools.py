@@ -86,9 +86,13 @@ def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
     return WEIGHTINGMATRICES[weighting]
 
 
-def sort_sequences(sequences, weightingmatrix):
+def sort_sequences(sequences, weightingmatrix=None):
 
-    sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.cost)))
+    if weightingmatrix:
+        sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.cost)))
+
+    else: 
+        sequences.sort(key=lambda x: x.cost)
 
 
 def store_optimization(resultspath, sequences, prot):
@@ -164,10 +168,16 @@ class MRFSequence:
 
         if costfunction == 'crlb':
 
+            if type(t1)==list or type(t2)==list:
+                raise TypeError('Only enter relaxation times of one tissue.')
+
             v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
             self.cost = np.sqrt(np.diagonal(v))
 
         elif costfunction == 'orthogonality': 
+
+            if type(t1)!=list or type(t2)!=list:
+                raise TypeError('Enter relaxation times of two tissues.')
 
             self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
 
