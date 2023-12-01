@@ -17,6 +17,10 @@ with open(resultspath/'prot.json', 'r') as handle:
     prot = json.load(handle)
 
 #%%
+for sequence in sequences:
+    sequence.decompress()
+
+#%%
 target_t1 = prot['target_t1']
 target_t2 = prot['target_t2']
 target_m0 = prot['target_m0']

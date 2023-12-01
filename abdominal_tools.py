@@ -97,6 +97,9 @@ def store_optimization(resultspath, sequences, prot):
     timestamppath = resultspath/timestamp
     timestamppath.mkdir()
 
+    for sequence in sequences:
+        sequence.compress()
+
     with open(timestamppath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
@@ -136,11 +139,22 @@ class MRFSequence:
 
     def compress(self):
         self.fa_compressed = [self.fa[ii] for ii in np.arange(self.beats)*self.shots]
-        self.
-        self.tr_compressed = 
+        self.tr_indices = np.nonzero(self.tr)
+        self.tr_compressed = self.tr[self.tr_indices]
         delattr(self, 'fa')
+        delattr(self, 'tr')    
+        if np.count_nonzero(self.ph)==0:
+            delattr(self, 'ph')
 
-    
+    def decompress(self):
+        self.fa = np.repeat(self.fa_compressed, self.shots)
+        self.tr = np.zeros_like(self.fa)
+        self.tr[self.tr_indices] = self.tr_compressed
+        if not hasattr(self, 'ph'):
+            self.ph = np.zeros_like(self.fa)
+        delattr(self, 'fa_compressed')
+        delattr(self, 'tr_indices') 
+        delattr(self, 'tr_compressed')  
         
     def calc_signal(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
 
