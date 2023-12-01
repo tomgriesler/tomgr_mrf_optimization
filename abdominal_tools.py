@@ -156,16 +156,20 @@ class MRFSequence:
         delattr(self, 'tr_indices') 
         delattr(self, 'tr_compressed')  
         
-    def calc_signal(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
+    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1.):
 
-        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
+        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
 
-    def calc_crlb(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
+    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1.):
 
-        v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
+        if costfunction == 'crlb':
 
-        self.cost = np.sqrt(np.diagonal(v))
+            v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+            self.cost = np.sqrt(np.diagonal(v))
 
-    def calc_orthogonality(self, t1, t2, m0, inversion_efficiency=0.95, delta_B1=1.):
+        elif costfunction == 'orthogonality': 
 
-        self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inversion_efficiency, delta_B1)
+            self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+
+        else: 
+            raise ValueError('Not a valid costfunction.')

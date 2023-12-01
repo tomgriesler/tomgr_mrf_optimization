@@ -5,7 +5,7 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 
-def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=np.inf, inversion_efficiency=0.95, delta_B1=1., phase_inc=0.):
+def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=np.inf, inv_eff=0.95, delta_B1=1., phase_inc=0.):
 
     sequences = []
 
@@ -48,7 +48,7 @@ def optimize_sequence(target_t1, target_t2, target_m0, shots, const_fa, const_tr
 
             mrf_sequence = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te)
 
-            mrf_sequence.calc_crlb(target_t1, target_t2, target_m0, inversion_efficiency, delta_B1)
+            mrf_sequence.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
 
             sequences.append(mrf_sequence)
 

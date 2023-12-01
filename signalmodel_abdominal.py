@@ -14,10 +14,10 @@ def q(alpha, phi=np.pi/2):
     return mat
 
 
-def inversion(inversion_efficiency):
+def inversion(inv_eff):
 
     mat = np.zeros((3, 3))
-    mat[2, 2] = -inversion_efficiency
+    mat[2, 2] = -inv_eff
 
     return mat
 
@@ -92,13 +92,13 @@ def epg_grad(omega):
     return omega
 
 
-def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
 
     n_ex = beats * shots
 
     r_te = r(t1, t2, te)
     b_te = b(t1, te)
-    inv = inversion(inversion_efficiency)
+    inv = inversion(inv_eff)
 
     omega = np.vstack((0., 0., m0))
 
@@ -129,12 +129,12 @@ def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_of
 
     return signal
 
-def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
 
     r_te = r(t1, t2, te)
     dr_te_dt1 = dr_dt1(t1, te)
     dr_te_dt2 = dr_dt2(t2, te)    
-    inv = inversion(inversion_efficiency)
+    inv = inversion(inv_eff)
 
     omega = np.vstack((0., 0., m0))
     domega_dt1 = np.zeros((3, 1))
@@ -217,7 +217,7 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
     return np.linalg.inv(fim)
 
 
-# def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+# def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
 
 #     r_te_1 = r(t1[0], t2[0], te)
 #     r_te_2 = r(t1[1], t2[1], te)
@@ -237,18 +237,18 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
 #             omega_1[:2, :] = 0.
 #             omega_2[:2, :] = 0.
 
-#             omega_1[2, :] *= -inversion_efficiency
-#             omega_2[2, :] *= -inversion_efficiency
+#             omega_1[2, :] *= -inv_eff
+#             omega_2[2, :] *= -inv_eff
 
 
-def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency=0.95, delta_B1=1.):
+def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
 
     n_components = len(t1)
 
     s = np.zeros((n_components, len(fa)), dtype=np.complex128)
 
     for ii in range(n_components): 
-        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inversion_efficiency, delta_B1)
+        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1)
 
     s = s/np.linalg.norm(s, axis=1, keepdims=True)
 

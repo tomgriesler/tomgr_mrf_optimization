@@ -21,6 +21,7 @@ for sequence in sequences:
     sequence.decompress()
 
 #%%
+costfunction = prot['costfunction']
 target_t1 = prot['target_t1']
 target_t2 = prot['target_t2']
 target_m0 = prot['target_m0']
@@ -30,7 +31,7 @@ const_tr = prot['const_tr']
 te = prot['te']
 total_dur = prot['total_dur']
 phase_inc = prot['phase_inc']
-inversion_efficiency = prot['inversion_efficiency']
+inv_eff = prot['inv_eff']
 delta_B1 = prot['delta_B1']
 
 #%% Compare to reference
@@ -77,9 +78,9 @@ ph_hamilton = phase_inc*np.arange(beats_hamilton*shots).cumsum()
 mrf_sequence_hamilton = MRFSequence(beats_hamilton, shots, fa_hamilton, tr_hamilton, ph_hamilton, prep_hamilton, ti_hamilton, t2te_hamilton, const_tr, te)
 
 #%%
-mrf_sequence_jaubert.calc_crlb(target_t1, target_t2, target_m0, inversion_efficiency, delta_B1)
-mrf_sequence_kvernby.calc_crlb(target_t1, target_t2, target_m0, inversion_efficiency, delta_B1)
-mrf_sequence_hamilton.calc_crlb(target_t1, target_t2, target_m0, inversion_efficiency, delta_B1)
+mrf_sequence_jaubert.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
+mrf_sequence_kvernby.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
+mrf_sequence_hamilton.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
 
 #%%
 seqs_sorted_T1T2 = sequences.copy()

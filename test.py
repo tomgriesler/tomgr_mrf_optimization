@@ -22,6 +22,7 @@ total_dur = 1e4
 for ii in range(1, beats):
     tr[ii*shots-1] += (total_dur - np.sum(ti) - np.sum(t2te) - beats*shots*tr_offset)*1e3/(beats-1)
 
+costfunction = 'crlb'
 t1 = 660
 t2 = 40
 m0 = 1
@@ -40,7 +41,7 @@ plt.plot(np.real(mrf_seq.signal))
 plt.plot(np.imag(mrf_seq.signal))
 
 # %%
-mrf_seq.calc_crlb(t1, t2, m0)
+mrf_seq.calc_cost(costfunction, t1, t2, m0)
 print(mrf_seq.cost)
 
 
@@ -56,7 +57,7 @@ for phase_inc in np.arange(0, 10):
     # ph = phase_inc*np.arange(beats*shots)
     # ph = phase_inc*np.sin(np.arange(beats*shots)*4*np.pi/beats/shots)
     mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te)
-    mrf_seq.calc_crlb(t1, t2, m0)
+    mrf_seq.calc_cost(costfunction, t1, t2, m0)
     # print(phase_inc, mrf_seq.cost, np.sum(np.multiply(weightingmatrix, mrf_seq.cost)))
     w_crlb = np.multiply(weightingmatrix, mrf_seq.cost)
     res.append(np.sum(w_crlb))

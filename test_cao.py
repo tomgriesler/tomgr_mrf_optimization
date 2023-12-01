@@ -21,14 +21,15 @@ tr_offset = 12.
 
 mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, 1.4)
 # %%
+costfunction = 'crlb'
 t1 = 660.
 t2 = 40.
 m0 = 1.
 
-mrf_seq.calc_crlb(t1, t2, m0, inversion_efficiency=1.)
+mrf_seq.calc_cost(costfunction, t1, t2, m0, inv_eff=1.)
 print(mrf_seq.crlb)
 # %%
-mrf_seq.calc_signal(t1, t2, m0, inversion_efficiency=1.)
+mrf_seq.calc_signal(t1, t2, m0, inv_eff=1.)
 plt.plot(-np.imag(mrf_seq.signal))
 
 # %%

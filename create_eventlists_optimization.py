@@ -20,7 +20,7 @@ with open(resultspath/'prot.json', 'r') as handle:
     prot = json.load(handle)
 
 target_tissue = TargetTissue(prot['target_tissue']['T1'], prot['target_tissue']['T2'], prot['target_tissue']['M0'])
-inversion_efficiency = prot['inversion_efficiency']
+inv_eff = prot['inv_eff']
 delta_B1 = prot['delta_B1']
 
 
