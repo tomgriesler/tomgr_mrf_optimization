@@ -186,7 +186,7 @@ ii += 1
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[1], True)
+visualize_sequence(seqs_sorted_T1T2[0], True)
 plt.title('Low $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
@@ -195,7 +195,7 @@ ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[500001], True)
+visualize_sequence(seqs_sorted_T1T2[500000], True)
 plt.title('Medium $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
@@ -204,7 +204,7 @@ ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[-64], True)
+visualize_sequence(seqs_sorted_T1T2[-1], True)
 plt.title('High $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
