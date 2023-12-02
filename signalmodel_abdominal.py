@@ -178,14 +178,7 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
 
             q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
 
-            r_tr = r(t1, t2, tr_offset+tr[n]*1e-3)
-            dr_tr_dt1 = dr_dt1(t1, tr_offset+tr[n]*1e-3)
-            dr_tr_dt2 = dr_dt2(t2, tr_offset+tr[n]*1e-3)
-            b_tr = m0 * b(t1, tr_offset+tr[n]*1e-3)
-            db_tr_dt1 = m0 * db_dt1(t1, tr_offset+tr[n]*1e-3)
-            db_tr_dm0 = b_tr/m0
-
-            # Calculate derivatives of signal 
+            # Calculate derivatives of signal at TE
             dsignal_dt1 = (dr_te_dt1 @ q_n @ omega + r_te @ q_n @ domega_dt1)[0, 0]
             dsignal_dt2 = (dr_te_dt2 @ q_n @ omega + r_te @ q_n @ domega_dt2)[0, 0]
             dsignal_dm0 = (r_te @ q_n @ domega_dm0)[0, 0]
@@ -200,8 +193,15 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
 
             # Calculate FIM
             fim = fim + (J_n_t @ J_n)
-            
+
             # Calculate new state matrix and derivatives
+            r_tr = r(t1, t2, tr_offset+tr[n]*1e-3)
+            dr_tr_dt1 = dr_dt1(t1, tr_offset+tr[n]*1e-3)
+            dr_tr_dt2 = dr_dt2(t2, tr_offset+tr[n]*1e-3)
+            b_tr = m0 * b(t1, tr_offset+tr[n]*1e-3)
+            db_tr_dt1 = m0 * db_dt1(t1, tr_offset+tr[n]*1e-3)
+            db_tr_dm0 = b_tr/m0
+            
             domega_dt1 = epg_grad(dr_tr_dt1 @ q_n @ omega + r_tr @ q_n @ domega_dt1) 
             domega_dt1[2, 0] += db_tr_dt1
 
@@ -217,28 +217,82 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
     return np.linalg.inv(fim)
 
 
-# def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
+def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
 
-#     r_te_1 = r(t1[0], t2[0], te)
-#     r_te_2 = r(t1[1], t2[1], te)
+    r_te_1 = r(t1[0], t2[0], te)
+    dr_te_1_dt1 = dr_dt1(t1[0], te)
+    dr_te_1_dt2 = dr_dt2(t2[0], te)
 
-#     omega_1 = np.vstack((0., 0., fraction*m0))
-#     omega_2 = np.vstack((0., 0., (1-fraction)*m0))
+    r_te_2 = r(t1[1], t2[1], te)
+    dr_te_2_dt1 = dr_dt1(t1[1], te)
+    dr_te_2_dt2 = dr_dt2(t2[1], te)
 
-#     domega_1_dfraction = np.vstack((0., 0., m0))
-#     domega_2_dfraction = np.vstack((0., 0., -m0))
+    inv = inversion(inv_eff)
 
-#     fim = 0.
+    omega_1 = np.vstack((0., 0., fraction*m0))
+    omega_2 = np.vstack((0., 0., (1-fraction)*m0))
 
-#     for ii in range(beats):
+    domega_1_dfraction = np.vstack((0., 0., m0))
+    domega_2_dfraction = np.vstack((0., 0., -m0))
 
-#         if prep[ii] == 1:
+    fim = 0.
 
-#             omega_1[:2, :] = 0.
-#             omega_2[:2, :] = 0.
+    for ii in range(beats):
 
-#             omega_1[2, :] *= -inv_eff
-#             omega_2[2, :] *= -inv_eff
+        if prep[ii] == 1:
+
+            r_ti_1 = r(t1[0], t2[0], ti)
+            r_ti_2 = r(t1[1], t2[1], ti)
+
+            domega_1_dfraction = r_ti_1 @ inv @ domega_1_dfraction
+            domega_2_dfraction = r_ti_2 @ inv @ domega_2_dfraction
+            
+            omega_1 = r_ti_1 @ inv @ omega_1
+            omega_2 = r_ti_2 @ inv @ omega_2
+
+        elif prep[ii] == 2:
+
+            t2prep_ii_1 = t2prep(t2[0], t2te[ii])
+            t2prep_ii_2 = t2prep(t2[1], t2te[ii])
+
+            domega_1_dfraction = t2prep_ii_1 @ domega_1_dfraction
+            domega_2_dfraction = t2prep_ii_2 @ domega_2_dfraction
+
+            omega_1 @ t2prep_ii_1 @ omega_1
+            omega_2 @ t2prep_ii_2 @ omega_2
+
+        for jj in range(shots):
+
+            n = ii*shots + jj
+
+            q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
+            
+            # Calculate derivatives of signal at TE
+            dsignal_dfraction = (r_te_1 @ q_n @ omega_1)[0, 0] + (r_te_2 @ q_n @ omega_2)[0, 0]
+
+            # Calculate FIM
+            fim += np.abs(dsignal_dfraction)**2
+
+            # Calculate new state matrix and derivatives
+            r_tr_1 = r(t1[0], t2[0], tr_offset+tr[n]*1e-3)
+            r_tr_2 = r(t1[1], t2[1], tr_offset+tr[n]*1e-3)
+            b_tr_1 = fraction * m0 * b(t1[0], tr_offset+tr[n]*1e-3)
+            b_tr_2 = (1-fraction) * m0 * b(t1[1], tr_offset+tr[n]*1e-3)
+            db_tr_1_dfraction = b_tr_1/fraction
+            db_tr_2_dfraction = -b_tr_2/(1-fraction)
+
+            domega_1_dfraction = epg_grad(r_tr_1 @ q_n @ domega_1_dfraction)
+            domega_1_dfraction[2, 0] += db_tr_1_dfraction
+            domega_2_dfraction = epg_grad(r_tr_2 @ q_n @ domega_2_dfraction)
+            domega_2_dfraction[2, 0] += db_tr_2_dfraction
+
+            # Update magnetization
+            omega_1 = epg_grad(r_tr_1 @ q_n @ omega_1)
+            omega_1[2, 0] += b_tr_1
+            omega_2 = epg_grad(r_tr_2 @ q_n @ omega_2)
+            omega_2[2, 0] += b_tr_2
+
+    return 1/fim
 
 
 def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
