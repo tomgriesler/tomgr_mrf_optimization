@@ -7,7 +7,7 @@ import numpy as np
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231201_165559'
+timestamp = '231204_090913'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -35,9 +35,9 @@ inv_eff = prot['inv_eff']
 delta_B1 = prot['delta_B1']
 
 #%% Compare to reference
-beats_jaubert = 24
-beats_kvernby = 24
-beats_hamilton = 24
+beats_jaubert = 16
+beats_kvernby = 16
+beats_hamilton = 16
 
 prep_blocks_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
 prep_order_jaubert = np.concatenate((np.tile(prep_blocks_jaubert, reps=beats_jaubert//len(prep_blocks_jaubert)), prep_blocks_jaubert[:beats_jaubert%len(prep_blocks_jaubert)]))
@@ -203,8 +203,15 @@ ax.set_xticklabels([])
 ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
+index = -1
+while True:
+    if np.count_nonzero(seqs_sorted_T1T2[index].prep==1) > 0 and np.count_nonzero(seqs_sorted_T1T2[index].prep==2) > 0:
+        break
+    else:
+        index -= 1
+
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[-1], True)
+visualize_sequence(seqs_sorted_T1T2[index], True)
 plt.title('High $cost_{T1,T2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
