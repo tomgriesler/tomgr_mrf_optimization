@@ -88,7 +88,7 @@ def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
 
 def sort_sequences(sequences, weightingmatrix=None):
 
-    if weightingmatrix:
+    if weightingmatrix is not None:
         sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.cost)))
 
     else: 
