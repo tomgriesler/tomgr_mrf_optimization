@@ -220,12 +220,7 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
 def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
 
     r_te_1 = r(t1[0], t2[0], te)
-    dr_te_1_dt1 = dr_dt1(t1[0], te)
-    dr_te_1_dt2 = dr_dt2(t2[0], te)
-
     r_te_2 = r(t1[1], t2[1], te)
-    dr_te_2_dt1 = dr_dt1(t1[1], te)
-    dr_te_2_dt2 = dr_dt2(t2[1], te)
 
     inv = inversion(inv_eff)
 
@@ -241,8 +236,8 @@ def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, 
 
         if prep[ii] == 1:
 
-            r_ti_1 = r(t1[0], t2[0], ti)
-            r_ti_2 = r(t1[1], t2[1], ti)
+            r_ti_1 = r(t1[0], t2[0], ti[ii])
+            r_ti_2 = r(t1[1], t2[1], ti[ii])
 
             domega_1_dfraction = r_ti_1 @ inv @ domega_1_dfraction
             domega_2_dfraction = r_ti_2 @ inv @ domega_2_dfraction
@@ -258,8 +253,8 @@ def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, 
             domega_1_dfraction = t2prep_ii_1 @ domega_1_dfraction
             domega_2_dfraction = t2prep_ii_2 @ domega_2_dfraction
 
-            omega_1 @ t2prep_ii_1 @ omega_1
-            omega_2 @ t2prep_ii_2 @ omega_2
+            omega_1 = t2prep_ii_1 @ omega_1
+            omega_2 = t2prep_ii_2 @ omega_2
 
         for jj in range(shots):
 
@@ -267,7 +262,7 @@ def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, 
 
             q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
             
-            # Calculate derivatives of signal at TE
+            # Calculate derivative of signal at TE
             dsignal_dfraction = (r_te_1 @ q_n @ omega_1)[0, 0] + (r_te_2 @ q_n @ omega_2)[0, 0]
 
             # Calculate FIM

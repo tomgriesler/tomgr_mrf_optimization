@@ -8,7 +8,7 @@ from datetime import datetime
 import subprocess
 
 
-from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_orthogonality
+from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality
 
 
 RESULTSPATH = Path('/home/tomgr/Documents/abdominal/results_optim')
@@ -164,7 +164,7 @@ class MRFSequence:
 
         self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
 
-    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1.):
+    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1., fraction=None):
 
         if costfunction == 'crlb':
 
@@ -180,6 +180,13 @@ class MRFSequence:
                 raise TypeError('Enter relaxation times of two tissues.')
 
             self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+
+        elif costfunction == 'crlb_pv':
+
+            if type(t1)!=list or type(t2)!=list:
+                raise TypeError('Enter relaxation times of two tissues.')
+            
+            self.cost = calculate_crlb_pv(t1, t2, m0, fraction, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
 
         else: 
             raise ValueError('Not a valid costfunction.')
