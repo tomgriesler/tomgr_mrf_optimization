@@ -6,44 +6,38 @@ from tqdm import tqdm
 
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
-def optimize_sequence_worker(seed, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, n_iter, inv_eff, delta_B1, phase_inc):
+def optimize_sequence_worker(seed, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, inv_eff, delta_B1, phase_inc):
     
     random.seed(seed)
     
-    sequences = []
+    beats = random.randint(min_num_preps, max_num_preps)
+    n_ex = beats * shots
 
-    for _ in tqdm(range(n_iter), position=seed):
+    prep_order = random.choices(prep_modules, weights=prep_module_weights, k=beats)
+    prep = [BLOCKS[name]['prep'] for name in prep_order]
+    ti = [BLOCKS[name]['ti'] for name in prep_order]
+    t2te = [BLOCKS[name]['t2te'] for name in prep_order]
 
-        beats = random.randint(min_num_preps, max_num_preps)
-        n_ex = beats * shots
+    prep_time_tot = sum([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_order])
 
-        prep_order = random.choices(prep_modules, weights=prep_module_weights, k=beats)
-        prep = [BLOCKS[name]['prep'] for name in prep_order]
-        ti = [BLOCKS[name]['ti'] for name in prep_order]
-        t2te = [BLOCKS[name]['t2te'] for name in prep_order]
+    waittime_tot = int(total_dur - beats * shots * const_tr - prep_time_tot)
 
-        prep_time_tot = sum([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_order])
+    waittimes = divide_into_random_integers(waittime_tot, beats - 1)
 
-        waittime_tot = int(total_dur - beats * shots * const_tr - prep_time_tot)
+    fa = np.repeat(random.choices((const_fa), k=beats), shots) if type(const_fa) == list else np.full(beats * shots, const_fa)
 
-        waittimes = divide_into_random_integers(waittime_tot, beats - 1)
+    tr = np.full(beats * shots, 0)
 
-        fa = np.repeat(random.choices((const_fa), k=beats), shots) if type(const_fa) == list else np.full(beats * shots, const_fa)
+    for ii in range(len(waittimes)):
+        tr[(ii + 1) * shots - 1] += waittimes[ii] * 1e3
 
-        tr = np.full(beats * shots, 0)
+    ph = phase_inc * np.arange(n_ex).cumsum()
 
-        for ii in range(len(waittimes)):
-            tr[(ii + 1) * shots - 1] += waittimes[ii] * 1e3
+    mrf_sequence = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te)
 
-        ph = phase_inc * np.arange(n_ex).cumsum()
+    mrf_sequence.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
 
-        mrf_sequence = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te)
-
-        mrf_sequence.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
-
-        sequences.append(mrf_sequence)
-
-    return sequences
+    return mrf_sequence
 
 def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=1e6, inv_eff=0.95, delta_B1=1., phase_inc=0., num_workers=8):
 
@@ -61,11 +55,11 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, cons
         
         futures = []
 
-        for seed in range(num_workers):
-            futures.append(executor.submit(optimize_sequence_worker, seed, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, int(n_iter_max/num_workers), inv_eff, delta_B1, phase_inc))
+        for seed in range(int(n_iter_max)):
+            futures.append(executor.submit(optimize_sequence_worker, seed, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, inv_eff, delta_B1, phase_inc))
         
-        for future in as_completed(futures):
-            sequences.extend(future.result())
+        for future in tqdm(as_completed(futures), total=n_iter_max):
+            sequences.append(future.result())
 
     timediff = datetime.now() - t0
     print(f'Total time: {str(timediff).split(".")[0]}. {len(sequences) / timediff.total_seconds():.2f} its/s.')
