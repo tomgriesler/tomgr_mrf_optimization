@@ -2,6 +2,7 @@ import numpy as np
 import random
 from datetime import datetime
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from tqdm import tqdm
 
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
@@ -11,7 +12,7 @@ def optimize_sequence_worker(seed, costfunction, target_t1, target_t2, target_m0
     
     sequences = []
 
-    for _ in range(n_iter):
+    for _ in tqdm(range(n_iter), position=seed):
 
         beats = random.randint(min_num_preps, max_num_preps)
         n_ex = beats * shots
