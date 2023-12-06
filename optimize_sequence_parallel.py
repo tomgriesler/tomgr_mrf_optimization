@@ -5,14 +5,14 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 
 from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
-def optimize_sequence_worker(seed, min_num_preps, max_num_preps, total_dur, prep_modules, prep_module_weights, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, inv_eff, delta_B1, phase_inc, n_iter_max):
+def optimize_sequence_worker(seed, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, n_iter, inv_eff, delta_B1, phase_inc):
     
     random.seed(seed)
     
     sequences = []
-    count = 0
 
-    while True:
+    for _ in range(n_iter):
+
         beats = random.randint(min_num_preps, max_num_preps)
         n_ex = beats * shots
 
@@ -42,14 +42,10 @@ def optimize_sequence_worker(seed, min_num_preps, max_num_preps, total_dur, prep
 
         sequences.append(mrf_sequence)
 
-        count += 1
-
-        if count >= n_iter_max:
-            break
-
     return sequences
 
-def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=np.inf, inv_eff=0.95, delta_B1=1., phase_inc=0., num_workers=8):
+def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=1e6, inv_eff=0.95, delta_B1=1., phase_inc=0., num_workers=8):
+
     sequences = []
 
     max_prep_dur = max([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_modules])
@@ -61,10 +57,11 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, cons
     t0 = datetime.now()
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
+        
         futures = []
 
         for seed in range(num_workers):
-            futures.append(executor.submit(optimize_sequence_worker, seed, min_num_preps, max_num_preps, total_dur, prep_modules, prep_module_weights, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, inv_eff, delta_B1, phase_inc, n_iter_max/num_workers))
+            futures.append(executor.submit(optimize_sequence_worker, seed, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, int(n_iter_max/num_workers), inv_eff, delta_B1, phase_inc))
         
         for future in as_completed(futures):
             sequences.extend(future.result())
