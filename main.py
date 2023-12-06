@@ -1,5 +1,6 @@
 #%%
-from optimize_sequence import optimize_sequence
+# from optimize_sequence import optimize_sequence
+from optimize_sequence_parallel import optimize_sequence
 from abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
@@ -20,7 +21,7 @@ total_dur = 2e4
 prep_modules = ['noPrep', 'TI21', 'T2prep40', 'T2prep80', 'T2prep120']
 prep_module_weights = [1, 1, 1/3, 1/3, 1/3]
 min_num_preps = 20
-n_iter_max = 1e6
+n_iter_max = 1e3
 
 inv_eff = 0.95
 delta_B1 = 1.
