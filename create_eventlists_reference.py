@@ -1,6 +1,7 @@
 #%%
 import numpy as np
 from pathlib import Path
+import shutil
 
 from abdominal_tools import MRFSequence, BLOCKS, visualize_sequence
 
@@ -46,5 +47,6 @@ np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', mrf_seq.fa, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')
+shutil.copyfile('/home/tomgr/Documents/abdominal/code/reconstruction/ID_FISP.txt', savepath/'ID_FISP.txt')
 
 # %%
