@@ -3,6 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 import json
 import numpy as np
+from tqdm import tqdm
 
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
@@ -17,7 +18,7 @@ with open(resultspath/'prot.json', 'r') as handle:
     prot = json.load(handle)
 
 #%%
-for sequence in sequences:
+for sequence in tqdm(sequences, total=len(sequences), desc='Decompressing'):
     sequence.decompress()
 
 #%%
@@ -84,20 +85,26 @@ mrf_sequence_kvernby.calc_cost(costfunction, target_t1, target_t2, target_m0, in
 mrf_sequence_hamilton.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
 
 #%%
+print('Sorting by cost_{T1,T2}...', end='')
 seqs_sorted_T1T2 = sequences.copy()
 weighting = '1/T1, 1/T2, 0'
 weightingmatrix_T1T2 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
 sort_sequences(seqs_sorted_T1T2, weightingmatrix_T1T2)
+print('Done.')
 
+print('Sorting by cost_{T1}...', end='')
 seqs_sorted_T1 = sequences.copy()
 weighting = '1/T1, 0, 0'
 weightingmatrix_T1 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
 sort_sequences(seqs_sorted_T1, weightingmatrix_T1)
+print('Done.')
 
+print('Sorting by cost_{T2}...', end='')
 seqs_sorted_T2 = sequences.copy()
 weighting = '0, 1/T2, 0'
 weightingmatrix_T2 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
 sort_sequences(seqs_sorted_T2, weightingmatrix_T2)
+print('Done.')
 
 # %%
 plt.rcParams.update({'font.size': 22})
