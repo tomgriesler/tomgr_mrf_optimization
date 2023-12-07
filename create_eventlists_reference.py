@@ -17,7 +17,7 @@ shots = 35
 const_tr = 5.7
 te = 1.
 prep_blocks = prep_blocks_dict[which]
-phase_inc = 0.
+phase_inc = 3.
 total_dur = 1e4
 name = f'{which}_{total_dur/1e3:.0f}s_{beats}_phinc{phase_inc:.0f}deg'
 
