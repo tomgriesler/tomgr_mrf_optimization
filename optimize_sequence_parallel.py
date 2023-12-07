@@ -53,6 +53,9 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, cons
 
     max_num_preps = total_dur // (max_prep_dur + shots * const_tr)
 
+    if min_num_preps is None:
+        min_num_preps = max_num_preps
+
     print(f'Total sequence duration: {total_dur:.0f} ms.\nMax num of preps: {max_num_preps:.0f}.')
 
     t0 = datetime.now()
