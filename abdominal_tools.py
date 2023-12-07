@@ -11,7 +11,7 @@ import subprocess
 from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality
 
 
-RESULTSPATH = Path('/home/tomgr/Documents/abdominal/results_optim')
+RESULTSPATH = Path('/home/tomgr/Documents/abdominal/data/sequences')
 
 
 BLOCKS = {

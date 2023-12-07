@@ -61,11 +61,9 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, cons
 
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         
-        print('\nSetting up parallel jobs...')
-        futures = [executor.submit(optimize_sequence_worker, seed, junk_size, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, inv_eff, delta_B1, phase_inc) for seed in tqdm(range(int(num_junks)))]
+        futures = [executor.submit(optimize_sequence_worker, seed, junk_size, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, inv_eff, delta_B1, phase_inc) for seed in tqdm(range(int(num_junks)), desc='Setting up jobs')]
         
-        print('\nComputing...')
-        for future in tqdm(as_completed(futures), total=int(num_junks)):
+        for future in tqdm(as_completed(futures), total=int(num_junks), desc='Computing'):
             sequences.extend(future.result())
 
     timediff = datetime.now() - t0

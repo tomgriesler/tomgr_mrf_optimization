@@ -38,8 +38,8 @@ mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te)
 visualize_sequence(mrf_seq, show_fa=True)
 
 #%% save lists
-savepath = Path(f'/home/tomgr/Documents/shared_files/{name}')
-savepath.mkdir(exist_ok=True)
+savepath = Path(f'/home/tomgr/Documents/abdominal/data/sequences/{name}/textfiles_{name}')
+savepath.mkdir(exist_ok=True, parents=True)
 np.savetxt(savepath/'PREP_FISP.txt', mrf_seq.prep, fmt='%i')
 np.savetxt(savepath/'TI_FISP.txt', mrf_seq.ti, fmt='%f')
 np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te, fmt='%f')

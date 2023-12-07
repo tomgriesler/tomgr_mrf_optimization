@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 import pickle
 import json
+from tqdm import tqdm
 
 from abdominal_tools import RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 
@@ -17,7 +18,7 @@ with open(resultspath/'prot.json', 'r') as handle:
     prot = json.load(handle)
 
 #%%
-for sequence in sequences:
+for sequence in tqdm(sequences, total=len(sequences), desc='Decompressing'):
     sequence.decompress()
 
 #%% old implementation
@@ -64,11 +65,13 @@ name = timestamp + '_best_T1T2'
 visualize_sequence(mrf_seq, show_fa=True)
 
 #%% save lists
-savepath = Path(f'/home/tomgr/Documents/abdominal/MRF_sim_for_tom/Sequences/{name}')
-savepath.mkdir(exist_ok=True)
+savepath = Path(f'/home/tomgr/Documents/abdominal/data/sequences/{timestamp}/{name}/textfiles_{name}')
+savepath.mkdir(exist_ok=True, parents=True)
 np.savetxt(savepath/'PREP_FISP.txt', mrf_seq.prep, fmt='%i')
 np.savetxt(savepath/'TI_FISP.txt', mrf_seq.ti, fmt='%f')
 np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', mrf_seq.fa, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')
+
+# %%

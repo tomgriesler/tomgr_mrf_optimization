@@ -144,8 +144,6 @@ plt.title('Sorted by $cost_3$')
 
 plt.tight_layout()
 
-# plt.savefig(f'/home/tomgr/Documents/abdominal/figures/cost_{timestamp}.png', dpi=300)
-
 plt.show()
 
 # %%
@@ -258,5 +256,4 @@ plt.legend([list(by_label.values())[2], list(by_label.values())[0], list(by_labe
 
 fig.subplots_adjust(hspace=1)
 
-# plt.savefig(f'/home/tomgr/Documents/abdominal/figures/sequences_{timestamp}.png', dpi=300, bbox_inches='tight')
 # %%
