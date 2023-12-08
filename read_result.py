@@ -8,7 +8,7 @@ from tqdm import tqdm
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231206_084151'
+timestamp = '231208_070919'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -36,9 +36,9 @@ inv_eff = prot['inv_eff']
 delta_B1 = prot['delta_B1']
 
 #%% Compare to reference
-beats_jaubert = 24
-beats_kvernby = 24
-beats_hamilton = 24
+beats_jaubert = 62
+beats_kvernby = 62
+beats_hamilton = 62
 
 prep_blocks_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
 prep_order_jaubert = np.concatenate((np.tile(prep_blocks_jaubert, reps=beats_jaubert//len(prep_blocks_jaubert)), prep_blocks_jaubert[:beats_jaubert%len(prep_blocks_jaubert)]))
