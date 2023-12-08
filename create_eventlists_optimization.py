@@ -4,11 +4,12 @@ from pathlib import Path
 import pickle
 import json
 from tqdm import tqdm
+import shutil
 
 from abdominal_tools import RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 
 #%%
-timestamp = '231204_090948'
+timestamp = '231208_070919'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -73,5 +74,6 @@ np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', mrf_seq.fa, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')
+shutil.copyfile('/home/tomgr/Documents/abdominal/code/reconstruction/ID_FISP.txt', savepath/'ID_FISP.txt')
 
 # %%
