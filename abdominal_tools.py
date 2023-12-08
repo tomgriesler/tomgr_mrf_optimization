@@ -6,6 +6,7 @@ import json
 import pickle
 from datetime import datetime
 import subprocess
+from tqdm import tqdm
 
 
 from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality
@@ -101,9 +102,11 @@ def store_optimization(resultspath, sequences, prot):
     timestamppath = resultspath/timestamp
     timestamppath.mkdir()
 
-    for sequence in sequences:
+    for sequence in tqdm(sequences, desc='Compressing', total=len(sequences)):
         sequence.compress()
 
+    print('Saving...')
+    
     with open(timestamppath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
