@@ -26,7 +26,7 @@ num_workers = 8
 
 inv_eff = 0.95
 delta_B1 = 1.
-phase_inc = 3.
+phase_inc = 0.
 
 #%% Perform optimization
 gitbranch = get_gitbranch()
