@@ -55,5 +55,10 @@ prot = {
     'gitbranch': gitbranch,
     'githash': githash
 }
-store_optimization(RESULTSPATH, sequences, prot)
+# store_optimization(RESULTSPATH, sequences, prot)
+
+#%%
+from pathlib import Path
+altpath = Path('/media/tomgr/TOSHIBA EXT/sequences')
+store_optimization(altpath, sequences, prot)
 # %%

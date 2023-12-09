@@ -105,13 +105,15 @@ def store_optimization(resultspath, sequences, prot):
     for sequence in tqdm(sequences, desc='Compressing', total=len(sequences)):
         sequence.compress()
 
-    print('Saving...')
+    print('Saving...', end='')
     
     with open(timestamppath/'sequences.pkl', 'wb') as handle:
         pickle.dump(sequences, handle)
 
     with open(timestamppath/'prot.json', 'w') as handle: 
         json.dump(prot, handle, indent='\t')
+
+    print('done.')
 
 
 def get_githash() -> str:
@@ -148,10 +150,10 @@ class MRFSequence:
         self.fa_compressed = [self.fa[ii] for ii in np.arange(self.beats)*self.shots]
         self.tr_indices = np.nonzero(self.tr)
         self.tr_compressed = self.tr[self.tr_indices]
+        self.ph_inc = self.ph[1]
         delattr(self, 'fa')
         delattr(self, 'tr')    
-        if np.count_nonzero(self.ph)==0:
-            delattr(self, 'ph')
+        delattr(self, 'ph')
 
     def decompress(self):
         self.fa = np.repeat(self.fa_compressed, self.shots)
@@ -159,9 +161,11 @@ class MRFSequence:
         self.tr[self.tr_indices] = self.tr_compressed
         if not hasattr(self, 'ph'):
             self.ph = np.zeros_like(self.fa)
+        self.ph = self.ph_inc*np.arange(len(self.fa)).cumsum()
         delattr(self, 'fa_compressed')
         delattr(self, 'tr_indices') 
         delattr(self, 'tr_compressed')  
+        delattr(self, 'ph_inc')
         
     def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1.):
 
