@@ -17,9 +17,9 @@ const_tr = 5.7
 te = 1.
 total_dur = 1e4
 
-prep_modules = ['noPrep', 'TI21', 'T2prep40', 'T2prep80', 'T2prep120']
-prep_module_weights = [1, 1, 1/3, 1/3, 1/3]
-min_num_preps = None
+prep_modules = ['noPrep', 'TI21', 'TI100', 'TI250', 'TI400', 'T2prep40', 'T2prep80', 'T2prep120']
+prep_module_weights = [1, 1/4, 1/4, 1/4, 1/4, 1/3, 1/3, 1/3]
+min_num_preps = 8
 n_iter_max = 1e6
 num_junks = 1e3
 num_workers = 8
@@ -29,6 +29,9 @@ delta_B1 = 1.
 phase_inc = 3.
 
 #%% Perform optimization
+gitbranch = get_gitbranch()
+githash = get_githash()
+
 sequences = optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc, num_workers=num_workers, num_junks=num_junks)
 
 #%%
@@ -49,8 +52,8 @@ prot = {
     'inv_eff': inv_eff,
     'delta_B1': delta_B1,
     'phase_inc': phase_inc, 
-    'gitbranch': get_gitbranch(),
-    'githash': get_githash()
+    'gitbranch': gitbranch,
+    'githash': githash
 }
 store_optimization(RESULTSPATH, sequences, prot)
 # %%
