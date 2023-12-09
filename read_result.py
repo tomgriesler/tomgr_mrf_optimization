@@ -257,3 +257,12 @@ plt.legend([list(by_label.values())[2], list(by_label.values())[0], list(by_labe
 fig.subplots_adjust(hspace=1)
 
 # %%
+fig = plt.figure(figsize=(16, 9))
+
+for ii in range(10):
+    plt.subplot(10, 1, ii+1)
+    visualize_sequence(seqs_sorted_T1T2[ii], True)
+# %%
+for ii in range(10):
+    print(np.sum(np.multiply(weightingmatrix_T1T2, seqs_sorted_T1T2[ii].cost)))
+# %%

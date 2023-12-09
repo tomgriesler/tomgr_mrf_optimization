@@ -9,10 +9,11 @@ from abdominal_tools import MRFSequence, BLOCKS, visualize_sequence
 prep_blocks_dict = {
     'jaubert': ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300',     'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep'],
     'kvernby': ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50'],
-    'hamilton': ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
+    'hamilton': ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80'],
+    'hamilton_mod': ['TI21', 'noPrep', 'T2prep40', 'T2prep80']
 }
 #%%
-which = 'hamilton'
+which = 'hamilton_mod'
 beats = 16
 shots = 35
 const_tr = 5.7
