@@ -12,7 +12,8 @@ target_t2 = 40.
 target_m0 = 1.
 
 shots = 35
-const_fa = [0., 10., 25.]
+# const_fa = [0., 10., 25.]
+const_fa = [5., 10., 15., 20., 25.]
 const_tr = 5.7
 te = 1.
 total_dur = 1e4

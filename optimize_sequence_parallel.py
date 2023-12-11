@@ -8,7 +8,7 @@ from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
 
 def optimize_sequence_worker(seed, junk_size, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, inv_eff, delta_B1, phase_inc):
 
-    # random.seed(seed)
+    random.seed(seed)
     
     sequences = []
 
