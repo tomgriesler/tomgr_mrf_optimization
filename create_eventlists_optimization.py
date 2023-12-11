@@ -9,7 +9,7 @@ import shutil
 from abdominal_tools import RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 
 #%%
-timestamp = '231208_070919'
+timestamp = '231210_035906'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -23,17 +23,17 @@ for sequence in tqdm(sequences, total=len(sequences), desc='Decompressing'):
     sequence.decompress()
 
 #%% old implementation
-target_t1 = prot['target_t1']
-target_t2 = prot['target_t2']
-target_m0 = prot['target_m0']
-shots = prot['shots']
-const_fa = prot['const_fa']
-const_tr = prot['const_tr']
-te = prot['te']
-total_dur = prot['total_dur']
-phase_inc = prot['phase_inc']
-inv_eff = prot['inversion_efficiency']
-delta_B1 = prot['delta_B1']
+# target_t1 = prot['target_t1']
+# target_t2 = prot['target_t2']
+# target_m0 = prot['target_m0']
+# shots = prot['shots']
+# const_fa = prot['const_fa']
+# const_tr = prot['const_tr']
+# te = prot['te']
+# total_dur = prot['total_dur']
+# phase_inc = prot['phase_inc']
+# inv_eff = prot['inversion_efficiency']
+# delta_B1 = prot['delta_B1']
 
 #%% new implementation
 costfunction = prot['costfunction']
