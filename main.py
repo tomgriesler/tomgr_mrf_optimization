@@ -12,8 +12,8 @@ target_t2 = 40.
 target_m0 = 1.
 
 shots = 35
-# const_fa = [0., 10., 25.]
-const_fa = [5., 10., 15., 20., 25.]
+const_fa = [0.] #, 10., 25.]
+# const_fa = [5., 10., 15., 20., 25.]
 const_tr = 5.7
 te = 1.
 total_dur = 1e4
@@ -37,9 +37,9 @@ phase_inc = 3.
 gitbranch = get_gitbranch()
 githash = get_githash()
 
-sequences = opt_seq_par(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc, num_workers=num_workers, num_junks=num_junks)
+# sequences = opt_seq_par(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc, num_workers=num_workers, num_junks=num_junks)
 
-# sequences = opt_seq_nonpar(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc)
+sequences = opt_seq_nonpar(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc)
 
 #%%
 prot = {

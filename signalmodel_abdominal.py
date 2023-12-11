@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.linalg import LinAlgError
 
 
 def q(alpha, phi=np.pi/2):
@@ -214,7 +215,14 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
             omega = epg_grad(r_tr @ q_n @ omega)
             omega[2, 0] += b_tr
 
-    return np.linalg.inv(fim)
+    try:
+        return np.linalg.inv(fim)
+    except LinAlgError:
+        print(prep)
+        print(ti)
+        print(t2te)
+        print(fa)
+        return np.eye(3)
 
 
 def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
