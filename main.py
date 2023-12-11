@@ -25,12 +25,12 @@ prep_module_weights = [1, 1, 1/3, 1/3, 1/3]
 min_num_preps = None
 
 n_iter_max = 1e6
-num_junks = 1e3
-num_workers = 16
+# num_junks = 1e3
+# num_workers = 16
 
 inv_eff = 0.95
 delta_B1 = 1.
-phase_inc = 3.
+phase_inc = 0.
 
 #%% Perform optimization
 gitbranch = get_gitbranch()
