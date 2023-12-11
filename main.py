@@ -18,8 +18,8 @@ const_tr = 5.7
 te = 1.
 total_dur = 1e4
 
-prep_modules = ['noPrep', 'TI21', 'TI100', 'TI250', 'TI400', 'T2prep40', 'T2prep80', 'T2prep120']
-prep_module_weights = [1, 1/4, 1/4, 1/4, 1/4, 1/3, 1/3, 1/3]
+prep_modules = ['noPrep'] #, 'TI21', 'TI100', 'TI250', 'TI400', 'T2prep40', 'T2prep80', 'T2prep120']
+prep_module_weights = [1] #, 1/4, 1/4, 1/4, 1/4, 1/3, 1/3, 1/3]
 min_num_preps = 8
 # prep_modules = ['noPrep', 'TI21', 'T2prep40', 'T2prep80', 'T2prep120']
 # prep_module_weights = [1, 1, 1/3, 1/3, 1/3]
