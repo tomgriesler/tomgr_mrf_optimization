@@ -1,6 +1,6 @@
 #%%
-# from optimize_sequence import optimize_sequence
-from optimize_sequence_parallel import optimize_sequence
+from optimize_sequence import optimize_sequence
+# from optimize_sequence_parallel import optimize_sequence
 from abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
@@ -36,7 +36,9 @@ phase_inc = 3.
 gitbranch = get_gitbranch()
 githash = get_githash()
 
-sequences = optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc, num_workers=num_workers, num_junks=num_junks)
+# sequences = optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc, num_workers=num_workers, num_junks=num_junks)
+
+sequences = optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc)
 
 #%%
 prot = {
