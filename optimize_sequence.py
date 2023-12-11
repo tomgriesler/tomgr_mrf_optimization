@@ -2,7 +2,7 @@ import numpy as np
 import random
 from datetime import datetime
 
-from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
+from abdominal_tools import BLOCKS, divide_into_random_floats, MRFSequence
 
 
 def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=np.inf, inv_eff=0.95, delta_B1=1., phase_inc=0.):
@@ -37,9 +37,13 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, cons
 
             waittime_tot = int(total_dur - beats*shots*const_tr - prep_time_tot)
 
-            waittimes = divide_into_random_integers(waittime_tot, beats-1)
+            waittimes = divide_into_random_floats(waittime_tot, beats-1)
 
             fa = np.repeat(random.choices((const_fa), k=beats), shots) if type(const_fa) == list else np.full(beats*shots, const_fa)
+
+            # Ensure that not all flipangles are zero
+            if np.count_nonzero(fa) == 0:
+                continue
 
             tr = np.full(beats*shots, 0)
 

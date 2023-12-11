@@ -218,10 +218,7 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
     try:
         return np.linalg.inv(fim)
     except LinAlgError:
-        print(prep)
-        print(ti)
-        print(t2te)
-        print(fa)
+        print('Singular matrix.')
         return np.eye(3)
 
 

@@ -4,7 +4,7 @@ from datetime import datetime
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 
-from abdominal_tools import BLOCKS, divide_into_random_integers, MRFSequence
+from abdominal_tools import BLOCKS, divide_into_random_floats, MRFSequence
 
 def optimize_sequence_worker(seed, junk_size, costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, max_num_preps, inv_eff, delta_B1, phase_inc):
 
@@ -26,9 +26,13 @@ def optimize_sequence_worker(seed, junk_size, costfunction, target_t1, target_t2
 
         waittime_tot = int(total_dur - beats * shots * const_tr - prep_time_tot)
 
-        waittimes = divide_into_random_integers(waittime_tot, beats - 1)
+        waittimes = divide_into_random_floats(waittime_tot, beats - 1)
 
         fa = np.repeat(random.choices((const_fa), k=beats), shots) if type(const_fa) == list else np.full(beats * shots, const_fa)
+
+        # Ensure that not all flipangles are zero
+        if np.count_nonzero(fa) == 0:
+            continue
 
         tr = np.full(beats * shots, 0)
 

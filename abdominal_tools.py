@@ -39,6 +39,14 @@ def divide_into_random_integers(N, n):
     return integers
 
 
+def divide_into_random_floats(N, n):
+
+    positions = [0] + sorted([random.uniform(0, N) for _ in range(n-1)]) + [N]
+    floats = [positions[ii+1]-positions[ii] for ii in range(n)]
+
+    return floats
+
+
 def visualize_sequence(mrf_sequence, show_fa=False):
     
     prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
