@@ -1,6 +1,6 @@
 #%%
-from optimize_sequence import optimize_sequence
-# from optimize_sequence_parallel import optimize_sequence
+from optimize_sequence import optimize_sequence as opt_seq_nonpar
+from optimize_sequence_parallel import optimize_sequence as opt_seq_par
 from abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
@@ -25,8 +25,8 @@ min_num_preps = 8
 # min_num_preps = None
 
 n_iter_max = 1e6
-# num_junks = 1e3
-# num_workers = 16
+num_junks = 1e3
+num_workers = 16
 
 inv_eff = 0.95
 delta_B1 = 1.
@@ -36,9 +36,9 @@ phase_inc = 3.
 gitbranch = get_gitbranch()
 githash = get_githash()
 
-# sequences = optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc, num_workers=num_workers, num_junks=num_junks)
+sequences = opt_seq_par(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc, num_workers=num_workers, num_junks=num_junks)
 
-sequences = optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc)
+# sequences = opt_seq_nonpar(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_num_preps, n_iter_max, inv_eff, delta_B1, phase_inc)
 
 #%%
 prot = {
