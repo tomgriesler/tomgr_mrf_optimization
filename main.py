@@ -25,8 +25,8 @@ min_num_preps = 8
 # min_num_preps = None
 
 n_iter_max = 1e6
-num_junks = 1e3
-num_workers = 4
+num_junks = 1e6
+num_workers = 1
 
 inv_eff = 0.95
 delta_B1 = 1.
