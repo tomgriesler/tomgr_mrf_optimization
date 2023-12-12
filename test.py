@@ -5,27 +5,40 @@ import matplotlib.pyplot as plt
 from abdominal_tools import MRFSequence, visualize_sequence, create_weightingmatrix
 from signalmodel_abdominal import calculate_orthogonality, calculate_signal
 #%%
-beats = 16
-shots = 35
-n_ex = beats*shots
-fa = np.full(n_ex, 15)
+beats = 15
+shots = 47
+n_ex = beats * shots
+fa = np.loadtxt('/home/tomgriesler/Documents/UM/code/abdominal/textfiles/FA_FISP_sydney.txt')
 tr = np.zeros(n_ex)
-tr_offset = 5
+tr_offset = 5.4
 ph = np.zeros(n_ex)
-# ph = np.tile(4*np.arange(shots).cumsum(), beats)
-prep = [1, 0, 2, 2] * 4
-ti = [21, 0, 0, 0, 100, 0, 0, 0, 250, 0, 0, 0, 400, 0, 0, 0]
-t2te = [0, 0, 40, 80] * 4
-te = 1.
-total_dur = 1e4
 
-for ii in range(1, beats):
-    tr[ii*shots-1] += (total_dur - np.sum(ti) - np.sum(t2te) - beats*shots*tr_offset)*1e3/(beats-1)
+# # Jesse's cardiac T1T2 sequence
+# prep = [1, 0, 2, 2] * 4
+# ti = [21, 0, 0, 0, 100, 0, 0, 0, 250, 0, 0, 0, 400, 0, 0, 0]
+# t2te = [0, 0, 40, 80] * 4
+
+# Sydney's cardiac T1T2T1rho sequence
+prep = [1, 0, 3, 3, 3] + [1, 0, 2, 2, 2] * 2
+ti = [21, 0, 0, 0, 0] * 3
+t2te = [0, 0, 0, 0, 0] + [0, 0, 30, 50, 80] * 2
+tsl = [0, 0, 30, 50, 60] + [0] * 10
+
+te = 1.
+
+# for ii in range(1, beats):
+#     tr[ii*shots-1] += (total_dur - np.sum(ti) - np.sum(t2te) - beats*shots*tr_offset)*1e3/(beats-1)
+
+for ii in range(beats):
+    tr[(ii+1)*shots-1] += 1e6 - (ti[ii] + t2te[ii] + tsl[ii] + tr_offset*shots)*1e3
 
 costfunction = 'crlb'
-t1 = 660
-t2 = 40
+
+# Relaxation times of healthy myocardium
+t1 = 1000
+t2 = 44
 m0 = 1
+t1rho = 50
 
 #%%
 mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te)
@@ -44,6 +57,8 @@ plt.plot(np.imag(mrf_seq.signal))
 mrf_seq.calc_cost(costfunction, t1, t2, m0)
 print(mrf_seq.cost)
 
+#%%
+mrf_seq.calc_cost(costfunction, t1, t2, m0, t1rho=t2)
 
 #%%
 weightingmatrix = create_weightingmatrix(t1, t2, m0, '1/T1, 1/T2, 0')

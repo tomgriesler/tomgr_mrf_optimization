@@ -46,7 +46,8 @@ def visualize_sequence(mrf_sequence, show_fa=False):
     map = {
         0: {'color': 'white', 'label': None},
         1: {'color': 'tab:blue', 'label': 'T1 prep'},
-        2: {'color': 'tab:red', 'label': 'T2 prep'}
+        2: {'color': 'tab:red', 'label': 'T2 prep'},
+        3: {'color': 'tab:orange', 'label': 'T1rho prep'}
     }
 
     for ii in range(mrf_sequence.beats): 
@@ -134,7 +135,7 @@ class TargetTissue:
 
 class MRFSequence:
 
-    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
+    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl=None):
         self.beats = beats
         self.shots = shots
         self.fa = np.array(fa, dtype=np.float32)
@@ -143,6 +144,7 @@ class MRFSequence:
         self.prep = np.array(prep, dtype=np.float32)
         self.ti = np.array(ti, dtype=np.float32)
         self.t2te = np.array(t2te, dtype=np.float32)
+        self.tsl = np.zeros_like(self.prep, dtype=np.float32) if tsl==None else np.array(tsl, dtype=np.float32)
         self.tr_offset = tr_offset
         self.te = te
 
@@ -167,18 +169,18 @@ class MRFSequence:
         delattr(self, 'tr_compressed')  
         delattr(self, 'ph_inc')
         
-    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1.):
+    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None):
 
-        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
 
-    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1., fraction=None):
+    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1., fraction=None, t1rho=None):
 
         if costfunction == 'crlb':
 
             if type(t1)==list or type(t2)==list:
                 raise TypeError('Only enter relaxation times of one tissue.')
 
-            v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+            v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
             self.cost = np.sqrt(np.diagonal(v))
 
         elif costfunction == 'orthogonality': 
