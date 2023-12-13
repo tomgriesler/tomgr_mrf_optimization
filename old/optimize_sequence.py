@@ -5,7 +5,7 @@ from datetime import datetime
 from abdominal_tools import BLOCKS, divide_into_random_floats, MRFSequence
 
 
-def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_num_preps=1, n_iter_max=np.inf, inv_eff=0.95, delta_B1=1., phase_inc=0.):
+def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_beats=1, n_iter_max=np.inf, inv_eff=0.95, delta_B1=1., phase_inc=0.):
 
     sequences = []
 
@@ -13,19 +13,19 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, cons
 
     max_prep_dur = max([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_modules])
 
-    max_num_preps = total_dur // (max_prep_dur+shots*const_tr)
+    max_beats = total_dur // (max_prep_dur+shots*const_tr)
 
-    if min_num_preps is None:
-        min_num_preps = max_num_preps
+    if min_beats is None:
+        min_beats = max_beats
 
-    print(f'Total sequence duration: {total_dur:.0f} ms.\nMax num of preps: {max_num_preps:.0f}.')
+    print(f'Total sequence duration: {total_dur:.0f} ms.\nMax num of preps: {max_beats:.0f}.')
 
     t0 = datetime.now()
 
     try:
         while True:
 
-            beats = random.randint(min_num_preps, max_num_preps)
+            beats = random.randint(min_beats, max_beats)
             n_ex = beats*shots
 
             prep_order = random.choices(prep_modules, weights=prep_module_weights, k=beats)
@@ -36,7 +36,6 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, cons
             prep_time_tot = sum([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] for name in prep_order])
 
             waittime_tot = int(total_dur - beats*shots*const_tr - prep_time_tot)
-
             waittimes = divide_into_random_floats(waittime_tot, beats-1)
 
             fa = np.repeat(random.choices((const_fa), k=beats), shots) if type(const_fa) == list else np.full(beats*shots, const_fa)
