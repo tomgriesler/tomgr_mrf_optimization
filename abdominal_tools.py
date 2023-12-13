@@ -48,13 +48,19 @@ def divide_into_random_floats(N, n):
 
 
 def visualize_sequence(mrf_sequence, show_fa=False):
+
+    try:
+        mrf_sequence.tsl
+    except NameError:
+        mrf_sequence.tsl = np.zeros_like(mrf_sequence.prep, dtype=np.float32)
     
-    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
+    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii])+np.sum(mrf_sequence.tsl[:ii]) for ii in range(mrf_sequence.beats)]
 
     map = {
         0: {'color': 'white', 'label': None},
         1: {'color': 'tab:blue', 'label': 'T1 prep'},
-        2: {'color': 'tab:red', 'label': 'T2 prep'}
+        2: {'color': 'tab:red', 'label': 'T2 prep'},
+        3: {'color': 'tab:orange', 'label': 'T1rho prep'}
     }
 
     for ii in range(mrf_sequence.beats): 
@@ -80,7 +86,7 @@ def visualize_cost(sequences, weightingmatrix):
         plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_3$', ms=0.1, color='tab:green')
 
 
-def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
+def create_weightingmatrix(target_t1, target_t2, target_m0, weighting, target_t1rho=np.inf):
 
     WEIGHTINGMATRICES = {
         '1, 1, 0': np.array([1, 1, 0]),
@@ -88,8 +94,8 @@ def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
         '0, 1/T2, 0': np.array([0, 1/target_t2, 0]),
         '1/T1, 1/T2, 0': np.array([1/target_t1, 1/target_t2, 0]),
         '1/T1, 1/T2, 1/M0': np.array([1/target_t1, 1/target_t2, 1/target_m0]),
-        '1/T1**2, 1/T2**2, 0': np.array([1/target_t1**2, 1/target_t2**2, 0]),
-        '1/T1**2, 1/T2**2, 1/M0**2': np.array([1/target_t1**2, 1/target_t2**2, 1/target_m0**2])
+        '1/T1, 1/T2, 1/M0, 1/T1rho': np.array([1/target_t1, 1/target_t2, 1/target_m0, 1/target_t1rho]),
+        '1/T1, 1/T2, 0, 1/T1rho': np.array([1/target_t1, 1/target_t2, 0, 1/target_t1rho])
     }
         
     return WEIGHTINGMATRICES[weighting]
@@ -142,7 +148,7 @@ class TargetTissue:
 
 class MRFSequence:
 
-    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
+    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl=None):
         self.beats = beats
         self.shots = shots
         self.fa = np.array(fa, dtype=np.float32)
@@ -151,6 +157,7 @@ class MRFSequence:
         self.prep = np.array(prep, dtype=np.float32)
         self.ti = np.array(ti, dtype=np.float32)
         self.t2te = np.array(t2te, dtype=np.float32)
+        self.tsl = np.zeros_like(self.prep, dtype=np.float32) if tsl==None else np.array(tsl, dtype=np.float32)
         self.tr_offset = tr_offset
         self.te = te
 
@@ -175,18 +182,18 @@ class MRFSequence:
         delattr(self, 'tr_compressed')  
         delattr(self, 'ph_inc')
         
-    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1.):
+    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None):
 
-        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
 
-    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1., fraction=None):
+    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1., fraction=None, t1rho=None):
 
         if costfunction == 'crlb':
 
             if type(t1)==list or type(t2)==list:
                 raise TypeError('Only enter relaxation times of one tissue.')
 
-            v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+            v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
             self.cost = np.sqrt(np.diagonal(v))
 
         elif costfunction == 'orthogonality': 

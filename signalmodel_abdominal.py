@@ -31,10 +31,26 @@ def t2prep(t2, t2te):
     return mat
 
 
-def dt2prep_dT2(t2, t2te):
+def dt2prep_dt2(t2, t2te):
 
     mat = np.zeros((3, 3))
     mat[2, 2] = t2te/t2**2 * np.exp(-t2te/t2)
+
+    return mat
+
+
+def t1rhoprep(t1rho, tsl):
+
+    mat = np.zeros((3, 3))
+    mat[2, 2] = np.exp(-tsl/t1rho)
+
+    return mat
+
+
+def dt1rhoprep_dt1rho(t1rho, tsl):
+
+    mat = np.zeros((3, 3))
+    mat[2, 2] = tsl/t1rho**2 * np.exp(-tsl/t1rho)
 
     return mat
 
@@ -93,7 +109,7 @@ def epg_grad(omega):
     return omega
 
 
-def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
+def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
 
     n_ex = beats * shots
 
@@ -114,6 +130,9 @@ def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_of
         elif prep[ii] == 2: 
             omega = t2prep(t2, t2te[ii]) @ omega
 
+        elif prep[ii] == 3: 
+            omega = t1rhoprep(t1rho, tsl[ii]) @ omega
+
         for jj in range(shots):
 
             n = ii*shots+jj
@@ -130,7 +149,8 @@ def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_of
 
     return signal
 
-def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
+
+def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
 
     r_te = r(t1, t2, te)
     dr_te_dt1 = dr_dt1(t1, te)
@@ -141,8 +161,9 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
     domega_dt1 = np.zeros((3, 1))
     domega_dt2 = np.zeros((3, 1))
     domega_dm0 = np.vstack((0., 0., 1.))
+    domega_dt1rho = np.zeros((3, 1)) if t1rho is not None else None 
 
-    fim = np.zeros((3, 3))
+    fim = np.zeros((3, 3)) if t1rho is None else np.zeros((4, 4))
 
     for ii in range(beats): 
 
@@ -157,21 +178,40 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
 
             domega_dm0 = r_ti @ inv @ domega_dm0
 
+            domega_dt1rho = r_ti @ inv @ domega_dt1rho if t1rho is not None else None
+
             omega = r_ti @ inv @ omega
             omega[2, 0] += m0 * b(t1, ti[ii])
 
         elif prep[ii] == 2:
 
             t2prep_ii = t2prep(t2, t2te[ii])
-            dt2prep_ii_dT2 = dt2prep_dT2(t2, t2te[ii])
+            dt2prep_ii_dt2 = dt2prep_dt2(t2, t2te[ii])
 
             domega_dt1 = t2prep_ii @ domega_dt1
 
-            domega_dt2 = dt2prep_ii_dT2 @ omega + t2prep_ii @ domega_dt2
+            domega_dt2 = dt2prep_ii_dt2 @ omega + t2prep_ii @ domega_dt2
 
             domega_dm0 = t2prep_ii @ domega_dm0
 
+            domega_dt1rho = t2prep_ii @ domega_dt1rho if t1rho is not None else None
+
             omega = t2prep_ii @ omega
+
+        elif prep[ii] == 3:
+            
+            t1rhoprep_ii = t1rhoprep(t1rho, tsl[ii])
+            dt1rhoprep_ii_dt1rho = dt1rhoprep_dt1rho(t1rho, tsl[ii])
+
+            domega_dt1 = t1rhoprep_ii @ domega_dt1
+
+            domega_dt2 = t1rhoprep_ii @ domega_dt2
+
+            domega_dm0 = t1rhoprep_ii @ domega_dm0
+
+            domega_dt1rho = dt1rhoprep_ii_dt1rho @ omega + t1rhoprep_ii @ domega_dt1rho
+
+            omega = t1rhoprep_ii @ omega
 
         for jj in range(shots):
 
@@ -185,10 +225,17 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
             dsignal_dm0 = (r_te @ q_n @ domega_dm0)[0, 0]
 
             # Calculate Jacobian
-            J_n = np.array([
-                [np.real(dsignal_dt1), np.real(dsignal_dt2), np.real(dsignal_dm0)],
-                [np.imag(dsignal_dt1), np.imag(dsignal_dt2), np.imag(dsignal_dm0)]
-            ])
+            if t1rho is None:
+                J_n = np.array([
+                    [np.real(dsignal_dt1), np.real(dsignal_dt2), np.real(dsignal_dm0)],
+                    [np.imag(dsignal_dt1), np.imag(dsignal_dt2), np.imag(dsignal_dm0)]
+                ])
+            else:
+                dsignal_dt1rho = (r_te @ q_n @ domega_dt1rho)[0, 0]
+                J_n = np.array([
+                    [np.real(dsignal_dt1), np.real(dsignal_dt2), np.real(dsignal_dm0), np.real(dsignal_dt1rho)],
+                    [np.imag(dsignal_dt1), np.imag(dsignal_dt2), np.imag(dsignal_dm0), np.imag(dsignal_dt1rho)]
+                ])
 
             J_n_t = np.transpose(J_n)
 
@@ -210,6 +257,8 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
 
             domega_dm0 = epg_grad(r_tr @ q_n @ domega_dm0)
             domega_dm0[2, 0] += db_tr_dm0
+
+            domega_dt1rho = epg_grad(r_tr @ q_n @ domega_dt1rho) if t1rho is not None else None
 
             # Update Magnetization
             omega = epg_grad(r_tr @ q_n @ omega)
