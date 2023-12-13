@@ -8,7 +8,8 @@ from signalmodel_abdominal import calculate_orthogonality, calculate_signal
 beats = 15
 shots = 47
 n_ex = beats * shots
-fa = np.loadtxt('/home/tomgriesler/Documents/UM/code/abdominal/textfiles/FA_FISP_sydney.txt')
+# fa = np.loadtxt('/home/tomgriesler/Documents/UM/code/abdominal/textfiles/FA_FISP_sydney.txt')
+fa = np.loadtxt('/home/tomgr/Documents/abdominal/textfiles/FA_FISP_sydney.txt')
 tr = np.zeros(n_ex)
 tr_offset = 5.4
 ph = np.zeros(n_ex)
@@ -60,7 +61,7 @@ mrf_seq.calc_cost(costfunction, t1, t2, m0, t1rho=t1rho)
 print(mrf_seq.cost)
 
 #%%
-mrf_seq.calc_cost(costfunction, t1, t2, m0, t1rho=t2)
+mrf_seq.calc_cost(costfunction, t1, t2, m0, t1rho=t1rho)
 
 #%%
 weightingmatrix = create_weightingmatrix(t1, t2, m0, '1/T1, 1/T2, 0, 1/T1rho', t1rho)
