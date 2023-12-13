@@ -40,8 +40,13 @@ def divide_into_random_integers(N, n):
 
 
 def visualize_sequence(mrf_sequence, show_fa=False):
+
+    try:
+        mrf_sequence.tsl
+    except NameError:
+        mrf_sequence.tsl = np.zeros_like(mrf_sequence.prep, dtype=np.float32)
     
-    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
+    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii])+np.sum(mrf_sequence.tsl[:ii]) for ii in range(mrf_sequence.beats)]
 
     map = {
         0: {'color': 'white', 'label': None},
@@ -73,7 +78,7 @@ def visualize_cost(sequences, weightingmatrix):
         plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_3$', ms=0.1, color='tab:green')
 
 
-def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
+def create_weightingmatrix(target_t1, target_t2, target_m0, weighting, target_t1rho=np.inf):
 
     WEIGHTINGMATRICES = {
         '1, 1, 0': np.array([1, 1, 0]),
@@ -81,8 +86,8 @@ def create_weightingmatrix(target_t1, target_t2, target_m0, weighting):
         '0, 1/T2, 0': np.array([0, 1/target_t2, 0]),
         '1/T1, 1/T2, 0': np.array([1/target_t1, 1/target_t2, 0]),
         '1/T1, 1/T2, 1/M0': np.array([1/target_t1, 1/target_t2, 1/target_m0]),
-        '1/T1**2, 1/T2**2, 0': np.array([1/target_t1**2, 1/target_t2**2, 0]),
-        '1/T1**2, 1/T2**2, 1/M0**2': np.array([1/target_t1**2, 1/target_t2**2, 1/target_m0**2])
+        '1/T1, 1/T2, 1/M0, 1/T1rho': np.array([1/target_t1, 1/target_t2, 1/target_m0, 1/target_t1rho]),
+        '1/T1, 1/T2, 0, 1/T1rho': np.array([1/target_t1, 1/target_t2, 0, 1/target_t1rho])
     }
         
     return WEIGHTINGMATRICES[weighting]

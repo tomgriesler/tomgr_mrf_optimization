@@ -230,7 +230,7 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
                     [np.imag(dsignal_dt1), np.imag(dsignal_dt2), np.imag(dsignal_dm0)]
                 ])
             else:
-                dsignal_dt1rho = (r_te @ q_n @ domega_dm0)[0, 0]
+                dsignal_dt1rho = (r_te @ q_n @ domega_dt1rho)[0, 0]
                 J_n = np.array([
                     [np.real(dsignal_dt1), np.real(dsignal_dt2), np.real(dsignal_dm0), np.real(dsignal_dt1rho)],
                     [np.imag(dsignal_dt1), np.imag(dsignal_dt2), np.imag(dsignal_dm0), np.imag(dsignal_dt1rho)]
