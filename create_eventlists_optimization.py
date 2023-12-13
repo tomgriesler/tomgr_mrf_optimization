@@ -9,7 +9,7 @@ import shutil
 from abdominal_tools import RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 
 #%%
-timestamp = '231210_035906'
+timestamp = '231211_171934'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 

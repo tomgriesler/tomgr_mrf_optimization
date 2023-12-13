@@ -14,7 +14,7 @@ prep_blocks_dict = {
 }
 #%%
 which = 'hamilton_mod'
-beats = 16
+beats = 31
 shots = 35
 const_tr = 5.7
 te = 1.

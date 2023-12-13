@@ -8,7 +8,7 @@ from tqdm import tqdm
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231208_070919'
+timestamp = '231210_034637'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -36,9 +36,9 @@ inv_eff = prot['inv_eff']
 delta_B1 = prot['delta_B1']
 
 #%% Compare to reference
-beats_jaubert = 62
-beats_kvernby = 62
-beats_hamilton = 62
+beats_jaubert = 16
+beats_kvernby = 16
+beats_hamilton = 16
 
 prep_blocks_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
 prep_order_jaubert = np.concatenate((np.tile(prep_blocks_jaubert, reps=beats_jaubert//len(prep_blocks_jaubert)), prep_blocks_jaubert[:beats_jaubert%len(prep_blocks_jaubert)]))
@@ -90,21 +90,21 @@ seqs_sorted_T1T2 = sequences.copy()
 weighting = '1/T1, 1/T2, 0'
 weightingmatrix_T1T2 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
 sort_sequences(seqs_sorted_T1T2, weightingmatrix_T1T2)
-print('Done.')
+print('done.')
 
 print('Sorting by cost_{T1}...', end='')
 seqs_sorted_T1 = sequences.copy()
 weighting = '1/T1, 0, 0'
 weightingmatrix_T1 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
 sort_sequences(seqs_sorted_T1, weightingmatrix_T1)
-print('Done.')
+print('done.')
 
 print('Sorting by cost_{T2}...', end='')
 seqs_sorted_T2 = sequences.copy()
 weighting = '0, 1/T2, 0'
 weightingmatrix_T2 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
 sort_sequences(seqs_sorted_T2, weightingmatrix_T2)
-print('Done.')
+print('done.')
 
 # %%
 plt.rcParams.update({'font.size': 22})
