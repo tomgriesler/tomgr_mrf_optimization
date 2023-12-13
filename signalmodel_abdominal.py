@@ -265,10 +265,12 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
             omega[2, 0] += b_tr
 
     try:
-        return np.linalg.inv(fim)
+        v = np.linalg.inv(fim)
     except LinAlgError:
-        print('Singular matrix.')
-        return np.eye(3)
+        v = np.zeros_like(fim)
+        np.fill_diagonal(v, np.inf)
+        
+    return v
 
 
 def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):

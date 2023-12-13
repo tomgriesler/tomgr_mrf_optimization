@@ -16,27 +16,31 @@ RESULTSPATH = Path('/home/tomgr/Documents/abdominal/data/sequences')
 
 
 BLOCKS = {
-    'noPrep': {'prep': 0, 'ti': 0, 't2te': 0},
-    'TI12': {'prep': 1, 'ti': 12, 't2te': 0},
-    'TI21': {'prep': 1, 'ti': 21, 't2te': 0},
-    'TI100': {'prep': 1, 'ti': 100, 't2te': 0},
-    'TI250': {'prep': 1, 'ti': 250, 't2te': 0},
-    'TI300': {'prep': 1, 'ti': 300, 't2te': 0},
-    'TI400': {'prep': 1, 'ti': 400, 't2te': 0},
-    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40},
-    'T2prep50': {'prep': 2, 'ti': 0, 't2te': 50},
-    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80},
-    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120},
-    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160}
+    'noPrep': {'prep': 0, 'ti': 0, 't2te': 0, 'tsl': 0},
+    'TI12': {'prep': 1, 'ti': 12, 't2te': 0, 'tsl': 0},
+    'TI21': {'prep': 1, 'ti': 21, 't2te': 0, 'tsl': 0},
+    'TI100': {'prep': 1, 'ti': 100, 't2te': 0, 'tsl': 0},
+    'TI250': {'prep': 1, 'ti': 250, 't2te': 0, 'tsl': 0},
+    'TI300': {'prep': 1, 'ti': 300, 't2te': 0, 'tsl': 0},
+    'TI400': {'prep': 1, 'ti': 400, 't2te': 0, 'tsl': 0},
+    'T2prep30': {'prep': 2, 'ti': 0, 't2te': 30, 'tsl': 0},
+    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40, 'tsl': 0},
+    'T2prep50': {'prep': 2, 'ti': 0, 't2te': 50, 'tsl': 0},
+    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80, 'tsl': 0},
+    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120, 'tsl': 0},
+    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160, 'tsl': 0},
+    'T1rhoprep30': {'prep': 3, 'ti': 0, 't2te': 0, 'tsl': 30},
+    'T1rhoprep50': {'prep': 3, 'ti': 0, 't2te': 0, 'tsl': 50},
+    'T1rhoprep60': {'prep': 3, 'ti': 0, 't2te': 0, 'tsl': 60},
 }
 
 
-def divide_into_random_integers(N, n):
+# def divide_into_random_integers(N, n):
 
-    positions = [0] + sorted(list(random.sample(range(1, N), n-1))) + [N]
-    integers = [positions[ii+1]-positions[ii] for ii in range(n)]
+#     positions = [0] + sorted(list(random.sample(range(1, N), n-1))) + [N]
+#     integers = [positions[ii+1]-positions[ii] for ii in range(n)]
 
-    return integers
+#     return integers
 
 
 def divide_into_random_floats(N, n):
@@ -51,16 +55,16 @@ def visualize_sequence(mrf_sequence, show_fa=False):
 
     try:
         mrf_sequence.tsl
-    except NameError:
+    except AttributeError:
         mrf_sequence.tsl = np.zeros_like(mrf_sequence.prep, dtype=np.float32)
     
     prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii])+np.sum(mrf_sequence.tsl[:ii]) for ii in range(mrf_sequence.beats)]
 
     map = {
         0: {'color': 'white', 'label': None},
-        1: {'color': 'tab:blue', 'label': 'T1 prep'},
-        2: {'color': 'tab:red', 'label': 'T2 prep'},
-        3: {'color': 'tab:orange', 'label': 'T1rho prep'}
+        1: {'color': 'tab:red', 'label': 'T1 prep'},
+        2: {'color': 'tab:blue', 'label': 'T2 prep'},
+        3: {'color': 'tab:purple', 'label': 'T1rho prep'}
     }
 
     for ii in range(mrf_sequence.beats): 
@@ -79,11 +83,13 @@ def visualize_cost(sequences, weightingmatrix):
     crlbs = np.array([np.multiply(weightingmatrix, sequence.cost) for sequence in sequences])
 
     if weightingmatrix[0]:
-        plt.plot(crlbs[:, 0], '.', label='$cost_1$', alpha=0.5, ms=0.1, color='tab:blue')
+        plt.plot(crlbs[:, 0], '.', label='$cost_T1$', alpha=0.5, ms=0.1, color='tab:blue')
     if weightingmatrix[1]:
-        plt.plot(crlbs[:, 1], '.', label='$cost_2$', alpha=0.5, ms=0.1, color='tab:red')
+        plt.plot(crlbs[:, 1], '.', label='$cost_T2$', alpha=0.5, ms=0.1, color='tab:red')
+    if weightingmatrix[3]:
+        plt.plot(crlbs[:, 3], '.', label='$cost_T1rho$', alpha=0.5, ms=0.1, color='tab:red')
     if weightingmatrix[0] and weightingmatrix[1]:
-        plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_3$', ms=0.1, color='tab:green')
+        plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_T1T2T1rho$', ms=0.1, color='tab:green')
 
 
 def create_weightingmatrix(target_t1, target_t2, target_m0, weighting, target_t1rho=np.inf):
