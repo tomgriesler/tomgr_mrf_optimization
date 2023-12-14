@@ -1,6 +1,7 @@
 #%%
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 from abdominal_tools import MRFSequence, visualize_sequence, create_weightingmatrix
 from signalmodel_abdominal import calculate_orthogonality, calculate_signal
@@ -12,7 +13,8 @@ n_ex = beats * shots
 fa = np.loadtxt('/home/tomgr/Documents/abdominal/textfiles/FA_FISP_sydney.txt')
 tr = np.zeros(n_ex)
 tr_offset = 5.4
-ph = np.zeros(n_ex)
+# ph = np.zeros(n_ex)
+ph = 3 * np.arange(n_ex).cumsum()
 
 # # Jesse's cardiac T1T2 sequence
 # prep = [1, 0, 2, 2] * 4
@@ -70,7 +72,7 @@ res_t1 = []
 res_t2 = []
 res_t1rho = []
 
-for phase_inc in np.arange(0, 10):
+for phase_inc in tqdm(np.arange(0, 10)):
     ph = phase_inc*np.arange(beats*shots).cumsum()
     mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl)
     mrf_seq.calc_cost(costfunction, t1, t2, m0, t1rho=t1rho)
