@@ -64,7 +64,7 @@ print(mrf_seq.cost)
 mrf_seq.calc_cost(costfunction, t1, t2, m0, t1rho=t1rho)
 
 #%%
-weightingmatrix = create_weightingmatrix(t1, t2, m0, '1/T1, 1/T2, 0, 1/T1rho', t1rho)
+weightingmatrix = create_weightingmatrix('T1, T2, T1rho', t1, t2, t1rho, dims=4)
 res = []
 res_t1 = []
 res_t2 = []
