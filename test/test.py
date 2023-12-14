@@ -35,7 +35,7 @@ te = 1.
 for ii in range(beats):
     tr[(ii+1)*shots-1] += 1e6 - (ti[ii] + t2te[ii] + tsl[ii] + tr_offset*shots)*1e3
     
-
+#%%
 costfunction = 'crlb'
 
 # Relaxation times of healthy myocardium
