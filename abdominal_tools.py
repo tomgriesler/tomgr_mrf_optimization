@@ -92,16 +92,14 @@ def visualize_cost(sequences, weightingmatrix):
         plt.plot(np.sum(crlbs, axis=1), '.', label='$cost_T1T2T1rho$', ms=0.1, color='tab:green')
 
 
-def create_weightingmatrix(target_t1, target_t2, target_m0, weighting, target_t1rho=np.inf):
+def create_weightingmatrix(weighting, target_t1=np.inf, target_t2=np.inf, target_t1rho=np.inf, dims=3):
 
     WEIGHTINGMATRICES = {
-        '1, 1, 0': np.array([1, 1, 0]),
-        '1/T1, 0, 0': np.array([1/target_t1, 0, 0]),
-        '0, 1/T2, 0': np.array([0, 1/target_t2, 0]),
-        '1/T1, 1/T2, 0': np.array([1/target_t1, 1/target_t2, 0]),
-        '1/T1, 1/T2, 1/M0': np.array([1/target_t1, 1/target_t2, 1/target_m0]),
-        '1/T1, 1/T2, 1/M0, 1/T1rho': np.array([1/target_t1, 1/target_t2, 1/target_m0, 1/target_t1rho]),
-        '1/T1, 1/T2, 0, 1/T1rho': np.array([1/target_t1, 1/target_t2, 0, 1/target_t1rho])
+        'T1': np.array([1/target_t1, 0, 0, 0][:dims]),
+        'T2': np.array([0, 1/target_t2, 0, 0][:dims]),
+        'T1rho': np.array([0, 0, 0, 1/target_t1rho][:dims]),
+        'T1, T2': np.array([1/target_t1, 1/target_t2, 0, 0][:dims]),
+        'T1, T2, T1rho': np.array([1/target_t1, 1/target_t2, 0, 1/target_t1rho][:dims])
     }
         
     return WEIGHTINGMATRICES[weighting]
@@ -109,11 +107,15 @@ def create_weightingmatrix(target_t1, target_t2, target_m0, weighting, target_t1
 
 def sort_sequences(sequences, weightingmatrix=None):
 
-    if weightingmatrix is not None:
-        sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.cost)))
+    cost_list = [np.sum(np.multiply(weightingmatrix, x.cost)) for x in sequences]
+    order = np.argsort(cost_list)
+    sequences = [sequences[idx] for idx in order]
+    return sequences
 
-    else: 
-        sequences.sort(key=lambda x: x.cost)
+
+def sort_sequences_inplace(sequences, weightingmatrix):
+
+    sequences.sort(key = lambda x: np.sum(np.multiply(weightingmatrix, x.cost)))
 
 
 def store_optimization(resultspath, sequences, prot):
