@@ -14,7 +14,7 @@ fa = np.loadtxt('/home/tomgr/Documents/abdominal/textfiles/FA_FISP_sydney.txt')
 tr = np.zeros(n_ex)
 tr_offset = 5.4
 # ph = np.zeros(n_ex)
-ph = 3 * np.arange(n_ex).cumsum()
+ph = 0 * np.arange(n_ex).cumsum()
 
 # # Jesse's cardiac T1T2 sequence
 # prep = [1, 0, 2, 2] * 4
