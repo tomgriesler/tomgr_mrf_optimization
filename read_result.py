@@ -8,7 +8,7 @@ from tqdm import tqdm
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231210_034637'
+timestamp = '231214_070801'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -35,12 +35,17 @@ phase_inc = prot['phase_inc']
 inv_eff = prot['inv_eff']
 delta_B1 = prot['delta_B1']
 
+try:
+    target_t1rho = prot['target_t1rho']
+except KeyError:
+    target_t1rho = None
+
 #%% Compare to reference
 beats_jaubert = 16
 beats_kvernby = 16
 beats_hamilton = 16
 
-prep_blocks_jaubert = ['TI12', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI300', 'noPrep', 'T2prep40', 'T2prep80', 'T2prep120', 'TI12', 'noPrep']
+prep_blocks_jaubert = ['TI12', 'noPrep', 't2prep40', 't2prep80', 't2prep120', 'TI300', 'noPrep', 't2prep40', 't2prep80', 't2prep120', 'TI12', 'noPrep']
 prep_order_jaubert = np.concatenate((np.tile(prep_blocks_jaubert, reps=beats_jaubert//len(prep_blocks_jaubert)), prep_blocks_jaubert[:beats_jaubert%len(prep_blocks_jaubert)]))
 waittimes_jaubert = np.full(beats_jaubert-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_jaubert]))/(beats_jaubert-1)
 prep_jaubert = [BLOCKS[name]['prep'] for name in prep_order_jaubert]
@@ -53,7 +58,7 @@ for ii in range(len(waittimes_jaubert)):
 ph_jaubert = phase_inc*np.arange(beats_jaubert*shots).cumsum()
 mrf_sequence_jaubert = MRFSequence(beats_jaubert, shots, fa_jaubert, tr_jaubert, ph_jaubert, prep_jaubert, ti_jaubert, t2te_jaubert, const_tr, te)
 
-prep_blocks_kvernby = ['T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 'T2prep50']
+prep_blocks_kvernby = ['t2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 't2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 't2prep50', 'TI100', 'noPrep', 'noPrep', 'noPrep', 't2prep50']
 prep_order_kvernby = np.concatenate((np.tile(prep_blocks_kvernby, reps=beats_kvernby//len(prep_blocks_kvernby)), prep_blocks_kvernby[:beats_kvernby%len(prep_blocks_kvernby)]))
 waittimes_kvernby = np.full(beats_kvernby-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_kvernby]))/(beats_kvernby-1)
 prep_kvernby = [BLOCKS[name]['prep'] for name in prep_order_kvernby]
@@ -66,7 +71,7 @@ for ii in range(len(waittimes_kvernby)):
 ph_kvernby = phase_inc*np.arange(beats_kvernby*shots).cumsum()
 mrf_sequence_kvernby = MRFSequence(beats_kvernby, shots, fa_kvernby, tr_kvernby, ph_kvernby, prep_kvernby, ti_kvernby, t2te_kvernby, const_tr, te)
 
-prep_blocks_hamilton = ['TI21', 'noPrep', 'T2prep40', 'T2prep80', 'TI100', 'noPrep', 'T2prep40', 'T2prep80', 'TI250', 'noPrep', 'T2prep40', 'T2prep80', 'TI400', 'noPrep', 'T2prep40', 'T2prep80']
+prep_blocks_hamilton = ['TI21', 'noPrep', 't2prep40', 't2prep80', 'TI100', 'noPrep', 't2prep40', 't2prep80', 'TI250', 'noPrep', 't2prep40', 't2prep80', 'TI400', 'noPrep', 't2prep40', 't2prep80']
 prep_order_hamilton = np.concatenate((np.tile(prep_blocks_hamilton, reps=beats_hamilton//len(prep_blocks_hamilton)), prep_blocks_hamilton[:beats_hamilton%len(prep_blocks_hamilton)]))
 waittimes_hamilton = np.full(beats_hamilton-1, total_dur - np.sum([BLOCKS[prep]['ti'] + BLOCKS[prep]['t2te'] + shots*const_tr for prep in prep_order_hamilton]))/(beats_hamilton-1)
 prep_hamilton = [BLOCKS[name]['prep'] for name in prep_order_hamilton]
@@ -85,25 +90,53 @@ mrf_sequence_kvernby.calc_cost(costfunction, target_t1, target_t2, target_m0, in
 mrf_sequence_hamilton.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
 
 #%%
-print('Sorting by cost_{T1,T2}...', end='')
-seqs_sorted_T1T2 = sequences.copy()
-weighting = '1/T1, 1/T2, 0'
-weightingmatrix_T1T2 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
-sort_sequences(seqs_sorted_T1T2, weightingmatrix_T1T2)
+prep_sydney = [1, 0, 3, 3, 3] + [1, 0, 2, 2, 2] * 2
+ti_sydney = [21, 0, 0, 0, 0] * 3
+t2te_sydney = [0, 0, 0, 0, 0] + [0, 0, 30, 50, 80] * 2
+tsl_sydney = [0, 0, 30, 50, 60] + [0] * 10
+beats_sydney = 15
+n_ex_sydney = beats_sydney * shots
+fa_sydney = np.loadtxt('/home/tomgr/Documents/abdominal/textfiles/FA_FISP_sydney.txt')
+tr_sydney = np.zeros(n_ex_sydney)
+tr_offset_sydney = 5.4
+# ph_sydney = np.zeros(n_ex_sydney)
+ph_sydney = phase_inc * np.arange(n_ex_sydney).cumsum()
+for ii in range(beats_sydney):
+    tr_sydney[(ii+1)*shots-1] += 1e6 - (ti_sydney[ii] + t2te_sydney[ii] + tsl_sydney[ii] + tr_offset_sydney*shots)*1e3
+mrf_sequence_sydney = MRFSequence(beats_sydney, shots, fa_sydney, tr_sydney, ph_sydney, prep_sydney, ti_sydney, t2te_sydney, tr_offset_sydney, te, tsl_sydney)
+
+mrf_sequence_sydney.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1, t1rho=target_t1rho)
+
+#%%
+print('Sorting by cost_{t1,t2}...', end='')
+weighting = 't1, t2'
+weightingmatrix_t1t2 = create_weightingmatrix(weighting, target_t1, target_t2, dims=3)
+seqs_sorted_t1t2 = sort_sequences(sequences, weightingmatrix_t1t2)
 print('done.')
 
-print('Sorting by cost_{T1}...', end='')
-seqs_sorted_T1 = sequences.copy()
-weighting = '1/T1, 0, 0'
-weightingmatrix_T1 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
-sort_sequences(seqs_sorted_T1, weightingmatrix_T1)
+print('Sorting by cost_{t1}...', end='')
+weighting = 'T1'
+weightingmatrix_t1 = create_weightingmatrix(weighting, target_t1, target_t2, dims=3)
+seqs_sorted_t1 = sort_sequences(sequences, weightingmatrix_t1)
 print('done.')
 
-print('Sorting by cost_{T2}...', end='')
-seqs_sorted_T2 = sequences.copy()
-weighting = '0, 1/T2, 0'
-weightingmatrix_T2 = create_weightingmatrix(target_t1, target_t2, target_m0, weighting)
-sort_sequences(seqs_sorted_T2, weightingmatrix_T2)
+print('Sorting by cost_{t2}...', end='')
+weighting = 'T2'
+weightingmatrix_t2 = create_weightingmatrix(weighting, target_t1, target_t2, dims=3)
+seqs_sorted_t2 = sort_sequences(sequences, weightingmatrix_t2)
+print('done.')
+
+#%%
+print('Sorting by cost_{t1, t2, t1rho}')
+weighting = 'T1, T2, T1rho'
+weightingmatrix_t1t2t1rho = create_weightingmatrix(weighting, target_t1, target_t2, target_t1rho, dims=4)
+seqs_sorted_t1t2t1rho = sort_sequences(sequences, weightingmatrix_t1t2t1rho)
+print('done.')
+
+print('Sorting by cost_{t1rho}')
+weighting = 'T1rho'
+weightingmatrix_t1rho = create_weightingmatrix(weighting, target_t1rho=target_t1rho, dims=4)
+seqs_sorted_t1rho = sort_sequences(sequences, weightingmatrix_t1rho)
 print('done.')
 
 # %%
@@ -111,8 +144,8 @@ plt.rcParams.update({'font.size': 22})
 plt.figure(figsize=(16, 9))
 
 plt.subplot(1, 3, 1)
-visualize_cost(seqs_sorted_T1, weightingmatrix_T1T2)
-plt.axhline(np.sum(np.multiply(weightingmatrix_T1, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{1, ref}$', color='tab:blue', linewidth=2)
+visualize_cost(seqs_sorted_t1, weightingmatrix_t1t2)
+plt.axhline(np.sum(np.multiply(weightingmatrix_t1, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{1, ref}$', color='tab:blue', linewidth=2)
 plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
@@ -121,8 +154,8 @@ plt.ylabel('cost function value')
 plt.title('Sorted by $cost_1$')
 
 plt.subplot(1, 3, 2)
-visualize_cost(seqs_sorted_T2, weightingmatrix_T1T2)
-plt.axhline(np.sum(np.multiply(weightingmatrix_T2, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{2, ref}$', color='tab:red', linewidth=2)
+visualize_cost(seqs_sorted_t2, weightingmatrix_t1t2)
+plt.axhline(np.sum(np.multiply(weightingmatrix_t2, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{2, ref}$', color='tab:red', linewidth=2)
 plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
@@ -132,8 +165,8 @@ ax.set_yticklabels([])
 plt.title('Sorted by $cost_2$')
 
 plt.subplot(1, 3, 3)
-visualize_cost(seqs_sorted_T1T2, weightingmatrix_T1T2)
-plt.axhline(np.sum(np.multiply(weightingmatrix_T1T2, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{3, ref}$', color='tab:green', linewidth=2)
+visualize_cost(seqs_sorted_t1t2, weightingmatrix_t1t2)
+plt.axhline(np.sum(np.multiply(weightingmatrix_t1t2, mrf_sequence_hamilton.cost)), ls=':', label='$cost_{3, ref}$', color='tab:green', linewidth=2)
 plt.xlim(0, len(sequences))
 plt.ylim(0, 10)
 plt.legend(loc='upper left', markerscale=200)
@@ -155,8 +188,8 @@ n_subplots = 8
 ii = 1
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1[0], True)
-plt.title('Low $cost_{T1}$')
+visualize_sequence(seqs_sorted_t1[0], True)
+plt.title('Low $cost_{t1}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
@@ -164,8 +197,8 @@ ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 # plt.subplot(n_subplots, 1, ii)
-# visualize_sequence(seqs_sorted_T1[-1])
-# plt.title('High $cost_{T1}$')
+# visualize_sequence(seqs_sorted_t1[-1])
+# plt.title('High $cost_{t1}$')
 # plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
@@ -173,8 +206,8 @@ ii += 1
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T2[0], True)
-plt.title('Low $cost_{T2}$')
+visualize_sequence(seqs_sorted_t2[0], True)
+plt.title('Low $cost_{t2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
@@ -182,8 +215,8 @@ ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 # plt.subplot(n_subplots, 1, ii)
-# visualize_sequence(seqs_sorted_T2[-1])
-# plt.title('High $cost_{T2}$')
+# visualize_sequence(seqs_sorted_t2[-1])
+# plt.title('High $cost_{t2}$')
 # plt.xlim(0, total_dur)
 # ax = plt.gca()
 # ax.set_xticklabels([])
@@ -191,8 +224,8 @@ ii += 1
 # ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[0], True)
-plt.title('Low $cost_{T1,T2}$')
+visualize_sequence(seqs_sorted_t1t2[0], True)
+plt.title('Low $cost_{t1,t2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
@@ -200,8 +233,8 @@ ax.set_ylim(0, 1.1*np.max(const_fa))
 ii += 1 
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[500000], True)
-plt.title('Medium $cost_{T1,T2}$')
+visualize_sequence(seqs_sorted_t1t2[500000], True)
+plt.title('Medium $cost_{t1,t2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
@@ -210,14 +243,14 @@ ii += 1
 
 index = -1
 while True:
-    if np.count_nonzero(seqs_sorted_T1T2[index].prep==1) > 0 and np.count_nonzero(seqs_sorted_T1T2[index].prep==2) > 0:
+    if np.count_nonzero(seqs_sorted_t1t2[index].prep==1) > 0 and np.count_nonzero(seqs_sorted_t1t2[index].prep==2) > 0:
         break
     else:
         index -= 1
 
 plt.subplot(n_subplots, 1, ii)
-visualize_sequence(seqs_sorted_T1T2[index], True)
-plt.title('High $cost_{T1,T2}$')
+visualize_sequence(seqs_sorted_t1t2[index], True)
+plt.title('High $cost_{t1,t2}$')
 plt.xlim(0, total_dur)
 ax = plt.gca()
 ax.set_xticklabels([])
@@ -261,8 +294,8 @@ fig = plt.figure(figsize=(16, 9))
 
 for ii in range(10):
     plt.subplot(10, 1, ii+1)
-    visualize_sequence(seqs_sorted_T1T2[ii], True)
+    visualize_sequence(seqs_sorted_t1t2[ii], True)
 # %%
 for ii in range(10):
-    print(np.sum(np.multiply(weightingmatrix_T1T2, seqs_sorted_T1T2[ii].cost)))
+    print(np.sum(np.multiply(weightingmatrix_t1t2, seqs_sorted_t1t2[ii].cost)))
 # %%
