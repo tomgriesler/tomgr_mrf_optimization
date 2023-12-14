@@ -346,14 +346,14 @@ def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, 
     return 1/fim
 
 
-def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
+def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
 
     n_components = len(t1)
 
     s = np.zeros((n_components, len(fa)), dtype=np.complex128)
 
     for ii in range(n_components): 
-        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1)
+        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho, tsl)
 
     s = s/np.linalg.norm(s, axis=1, keepdims=True)
 

@@ -209,7 +209,7 @@ class MRFSequence:
             if type(t1)!=list or type(t2)!=list:
                 raise TypeError('Enter relaxation times of two tissues.')
 
-            self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+            self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
 
         elif costfunction == 'crlb_pv':
 
