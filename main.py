@@ -16,9 +16,9 @@ parallel = True
 num_junks = 1e3
 num_workers = 16
 
-target_t1 = 660.
-target_t2 = 40.
-target_t1rho = 55
+target_t1 = 1000.
+target_t2 = 44.
+target_t1rho = 50
 target_m0 = 1.
 
 inv_eff = 0.95
@@ -47,22 +47,31 @@ sequences = optimize_sequence(costfunction, target_t1, target_t2, target_t1rho, 
 #%%
 prot = {
     'costfunction': costfunction,
-    'target_t1': target_t1,
-    'target_t2': target_t2,
-    'target_m0': target_m0,
+    'optimize_positions': optimize_positions,
+    'n_iter_max': n_iter_max,
     'shots': shots, 
     'const_fa': const_fa,
     'const_tr': const_tr,
     'te': te, 
     'total_dur': total_dur,
-    'prep_modules': prep_modules, 
-    'prep_module_weights': prep_module_weights,
-    'min_beats': min_beats,
-    'n_iter_max': n_iter_max,
+    'parallel': parallel,
+    'num_junks': num_junks,
+    'num_workers': num_workers,
+    'target_t1': target_t1,
+    'target_t2': target_t2,
+    'target_t1rho': target_t1rho,
+    'target_m0': target_m0,
     'inv_eff': inv_eff,
     'delta_B1': delta_B1,
     'phase_inc': phase_inc, 
+
+    'prep_modules': prep_modules, 
+    'prep_module_weights': prep_module_weights,
+    'min_beats': min_beats,
+    'max_beats': max_beats,
     'gitbranch': gitbranch,
     'githash': githash
 }
 store_optimization(RESULTSPATH, sequences, prot)
+
+# %%
