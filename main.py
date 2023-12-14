@@ -12,7 +12,7 @@ const_tr = 5.4
 te = 1.
 total_dur = 15e3
 
-parallel = True
+parallel = False
 num_junks = 1e3
 num_workers = 16
 

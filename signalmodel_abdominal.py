@@ -353,7 +353,7 @@ def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te
     s = np.zeros((n_components, len(fa)), dtype=np.complex128)
 
     for ii in range(n_components): 
-        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho, tsl)
+        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho[ii], tsl)
 
     s = s/np.linalg.norm(s, axis=1, keepdims=True)
 
