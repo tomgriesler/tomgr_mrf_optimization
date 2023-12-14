@@ -105,11 +105,11 @@ def create_weightingmatrix(weighting, target_t1=np.inf, target_t2=np.inf, target
     return WEIGHTINGMATRICES[weighting]
 
 
-def sort_sequences(sequences, weightingmatrix=None):
+def sort_sequences(sequences, weightingmatrix):
 
-    cost_list = [np.sum(np.multiply(weightingmatrix, x.cost)) for x in sequences]
+    cost_list = [np.sum(np.multiply(weightingmatrix, x.cost)) for x in tqdm(sequences, total=len(sequences), desc='Create cost list')]
     order = np.argsort(cost_list)
-    sequences = [sequences[idx] for idx in order]
+    sequences = [sequences[idx] for idx in tqdm(order, total=len(order), desc='Sort')]
     return sequences
 
 
@@ -146,14 +146,6 @@ def get_gitbranch() -> str:
     return str(subprocess.check_output(['git', 'branch'])).split("* ")[1].split("\\n")[0]
 
 
-class TargetTissue:
-
-    def __init__(self, t1, t2, m0):
-        self.t1 = t1
-        self.t2 = t2
-        self.m0 = m0
-
-
 class MRFSequence:
 
     def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl=None):
@@ -165,7 +157,7 @@ class MRFSequence:
         self.prep = np.array(prep, dtype=np.float32)
         self.ti = np.array(ti, dtype=np.float32)
         self.t2te = np.array(t2te, dtype=np.float32)
-        self.tsl = np.zeros_like(self.prep, dtype=np.float32) if tsl==None else np.array(tsl, dtype=np.float32)
+        self.tsl = np.zeros_like(self.prep, dtype=np.float32) if tsl is None else np.array(tsl, dtype=np.float32)
         self.tr_offset = tr_offset
         self.te = te
 
