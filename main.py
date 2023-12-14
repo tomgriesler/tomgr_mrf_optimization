@@ -23,7 +23,7 @@ target_m0 = 1.
 
 inv_eff = 0.95
 delta_B1 = 1.
-phase_inc = 0.
+phase_inc = 3.
 
 prep_modules = ['noPrep', 'TI21', 'T1rhoprep30', 'T1rhoprep50', 'T1rhoprep60', 'T2prep30', 'T2prep50', 'T2prep80']
 prep_module_weights = [1/5, 1/5, 1/15, 1/15, 1/15, 2/15, 2/15, 2/15]
@@ -64,7 +64,6 @@ prot = {
     'inv_eff': inv_eff,
     'delta_B1': delta_B1,
     'phase_inc': phase_inc, 
-
     'prep_modules': prep_modules, 
     'prep_module_weights': prep_module_weights,
     'min_beats': min_beats,
