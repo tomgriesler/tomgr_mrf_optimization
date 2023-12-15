@@ -14,7 +14,7 @@ total_dur = 15e3
 
 parallel = True
 num_junks = 1e3
-num_workers = 16
+num_workers = 4
 
 target_t1 = [1000., 1100]
 target_t2 = [44., 50]
