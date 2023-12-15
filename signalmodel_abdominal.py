@@ -31,7 +31,7 @@ def t2prep(t2, t2te):
 
 def dt2prep_dt2(t2, t2te):
 
-    mat = np.zeros([0, 0, t2te/t2**2 * np.exp(-t2te/t2)])
+    mat = np.diag([0, 0, t2te/t2**2 * np.exp(-t2te/t2)])
 
     return mat
 
@@ -45,7 +45,7 @@ def t1rhoprep(t1rho, tsl):
 
 def dt1rhoprep_dt1rho(t1rho, tsl):
 
-    mat = np.zeros([0, 0, -tsl/t1rho**2 * np.exp(-tsl/t1rho)])
+    mat = np.diag([0, 0, -tsl/t1rho**2 * np.exp(-tsl/t1rho)])
 
     return mat
 
