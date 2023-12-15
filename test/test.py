@@ -36,13 +36,13 @@ for ii in range(beats):
     tr[(ii+1)*shots-1] += 1e6 - (ti[ii] + t2te[ii] + tsl[ii] + tr_offset*shots)*1e3
     
 #%%
-costfunction = 'crlb'
+costfunction = 'crlb_orth'
 
 # Relaxation times of healthy myocardium
-t1 = 1000
-t2 = 44
+t1 = [1000, 1100]
+t2 = [44, 50]
 m0 = 1
-t1rho = 50
+t1rho = [50, 90]
 
 #%%
 mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl)

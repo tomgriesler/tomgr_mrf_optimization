@@ -9,7 +9,7 @@ import subprocess
 from tqdm import tqdm
 
 
-from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality
+from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality, calculate_crlb_orthogonality_combined
 
 
 RESULTSPATH = Path('/home/tomgr/Documents/abdominal/data/sequences')
@@ -213,7 +213,11 @@ class MRFSequence:
             if type(t1)!=list or type(t2)!=list:
                 raise TypeError('Enter relaxation times of two tissues.')
             
-            cost = calculate_crlb_pv(t1, t2, m0, fraction, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+            cost = np.sqrt(calculate_crlb_pv(t1, t2, m0, fraction, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1))
+
+        elif costfunction == 'crlb_orth':
+
+            cost = calculate_crlb_orthogonality_combined(t1, t2, t1rho, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tsl, self.tr_offset, self.te, inv_eff, delta_B1)
 
         else: 
             raise ValueError('Not a valid costfunction.')
