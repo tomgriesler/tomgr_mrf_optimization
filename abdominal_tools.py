@@ -105,9 +105,9 @@ def create_weightingmatrix(weighting, target_t1=np.inf, target_t2=np.inf, target
     return WEIGHTINGMATRICES[weighting]
 
 
-def sort_sequences(sequences, weightingmatrix):
+def sort_sequences(sequences, weightingmatrix=None):
 
-    cost_list = [np.sum(np.multiply(weightingmatrix, x.cost)) for x in tqdm(sequences, total=len(sequences), desc='Create cost list')]
+    cost_list = [np.sum(np.multiply(weightingmatrix, x.cost)) for x in tqdm(sequences, total=len(sequences), desc='Create cost list')] if weightingmatrix is not None else [x.cost for x in sequences]
     order = np.argsort(cost_list)
     sequences = [sequences[idx] for idx in tqdm(order, total=len(order), desc='Sort')]
     return sequences
@@ -182,11 +182,16 @@ class MRFSequence:
         delattr(self, 'tr_compressed')  
         delattr(self, 'ph_inc')
         
-    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None):
+    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None, return_result=False):
 
-        self.signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
+        signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
 
-    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1., fraction=None, t1rho=None):
+        if return_result:
+            return signal
+        else:
+            self.signal = signal
+
+    def calc_cost(self, costfunction, t1, t2, m0, inv_eff=0.95, delta_B1=1., fraction=None, t1rho=None, return_result=False):
 
         if costfunction == 'crlb':
 
@@ -194,21 +199,26 @@ class MRFSequence:
                 raise TypeError('Only enter relaxation times of one tissue.')
 
             v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
-            self.cost = np.sqrt(np.diagonal(v))
+            cost = np.sqrt(np.diagonal(v))
 
         elif costfunction == 'orthogonality': 
 
             if type(t1)!=list or type(t2)!=list:
                 raise TypeError('Enter relaxation times of two tissues.')
 
-            self.cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
+            cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
 
         elif costfunction == 'crlb_pv':
 
             if type(t1)!=list or type(t2)!=list:
                 raise TypeError('Enter relaxation times of two tissues.')
             
-            self.cost = calculate_crlb_pv(t1, t2, m0, fraction, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
+            cost = calculate_crlb_pv(t1, t2, m0, fraction, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1)
 
         else: 
             raise ValueError('Not a valid costfunction.')
+        
+        if return_result:
+            return cost
+        else:
+            self.cost = cost
