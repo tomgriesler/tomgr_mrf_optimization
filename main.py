@@ -3,7 +3,7 @@ from optimize_sequence_parallel import optimize_sequence
 from abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
-costfunction = 'orthogonality'
+costfunction = 'crlb'
 optimize_positions = False
 n_iter_max = 1e6
 shots = 47
@@ -14,16 +14,16 @@ total_dur = 15e3
 
 parallel = True
 num_junks = 1e3
-num_workers = 4
+num_workers = 16
 
-target_t1 = [1000., 1100.]
-target_t2 = [44., 50.]
-target_t1rho = [50., 90.]
+target_t1 = 1000.
+target_t2 = 44.
+target_t1rho = 50.
 target_m0 = 1.
 
 inv_eff = 0.95
 delta_B1 = 1.
-phase_inc = 0.
+phase_inc = 3.
 
 prep_modules = ['noPrep', 'TI21', 'T1rhoprep30', 'T1rhoprep50', 'T1rhoprep60', 'T2prep30', 'T2prep50', 'T2prep80']
 prep_module_weights = [1/5, 1/5, 1/15, 1/15, 1/15, 2/15, 2/15, 2/15]
