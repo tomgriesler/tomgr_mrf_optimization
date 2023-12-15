@@ -8,7 +8,7 @@ from tqdm import tqdm
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231214_070801'
+timestamp = '231215_083347'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -84,28 +84,9 @@ for ii in range(len(waittimes_hamilton)):
 ph_hamilton = phase_inc*np.arange(beats_hamilton*shots).cumsum()
 mrf_sequence_hamilton = MRFSequence(beats_hamilton, shots, fa_hamilton, tr_hamilton, ph_hamilton, prep_hamilton, ti_hamilton, t2te_hamilton, const_tr, te)
 
-#%%
 mrf_sequence_jaubert.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
 mrf_sequence_kvernby.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
 mrf_sequence_hamilton.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1)
-
-#%%
-prep_sydney = [1, 0, 3, 3, 3] + [1, 0, 2, 2, 2] * 2
-ti_sydney = [21, 0, 0, 0, 0] * 3
-t2te_sydney = [0, 0, 0, 0, 0] + [0, 0, 30, 50, 80] * 2
-tsl_sydney = [0, 0, 30, 50, 60] + [0] * 10
-beats_sydney = 15
-n_ex_sydney = beats_sydney * shots
-fa_sydney = np.loadtxt('/home/tomgr/Documents/abdominal/textfiles/FA_FISP_sydney.txt')
-tr_sydney = np.zeros(n_ex_sydney)
-tr_offset_sydney = 5.4
-# ph_sydney = np.zeros(n_ex_sydney)
-ph_sydney = phase_inc * np.arange(n_ex_sydney).cumsum()
-for ii in range(beats_sydney):
-    tr_sydney[(ii+1)*shots-1] += 1e6 - (ti_sydney[ii] + t2te_sydney[ii] + tsl_sydney[ii] + tr_offset_sydney*shots)*1e3
-mrf_sequence_sydney = MRFSequence(beats_sydney, shots, fa_sydney, tr_sydney, ph_sydney, prep_sydney, ti_sydney, t2te_sydney, tr_offset_sydney, te, tsl_sydney)
-
-mrf_sequence_sydney.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1, t1rho=target_t1rho)
 
 #%%
 print('Sorting by cost_{t1,t2}...', end='')
@@ -127,16 +108,37 @@ seqs_sorted_t2 = sort_sequences(sequences, weightingmatrix_t2)
 print('done.')
 
 #%%
-print('Sorting by cost_{t1, t2, t1rho}')
+prep_sydney = [1, 0, 3, 3, 3] + [1, 0, 2, 2, 2] * 2
+ti_sydney = [21, 0, 0, 0, 0] * 3
+t2te_sydney = [0, 0, 0, 0, 0] + [0, 0, 30, 50, 80] * 2
+tsl_sydney = [0, 0, 30, 50, 60] + [0] * 10
+beats_sydney = 15
+n_ex_sydney = beats_sydney * shots
+fa_sydney = np.loadtxt('/home/tomgr/Documents/abdominal/textfiles/FA_FISP_sydney.txt')
+tr_sydney = np.zeros(n_ex_sydney)
+tr_offset_sydney = 5.4
+# ph_sydney = np.zeros(n_ex_sydney)
+ph_sydney = phase_inc * np.arange(n_ex_sydney).cumsum()
+for ii in range(beats_sydney):
+    tr_sydney[(ii+1)*shots-1] += 1e6 - (ti_sydney[ii] + t2te_sydney[ii] + tsl_sydney[ii] + tr_offset_sydney*shots)*1e3
+mrf_sequence_sydney = MRFSequence(beats_sydney, shots, fa_sydney, tr_sydney, ph_sydney, prep_sydney, ti_sydney, t2te_sydney, tr_offset_sydney, te, tsl_sydney)
+
+mrf_sequence_sydney.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1, t1rho=target_t1rho)
+
+#%%
+print('Sorting by cost_{t1, t2, t1rho}.')
 weighting = 'T1, T2, T1rho'
 weightingmatrix_t1t2t1rho = create_weightingmatrix(weighting, target_t1, target_t2, target_t1rho, dims=4)
 seqs_sorted_t1t2t1rho = sort_sequences(sequences, weightingmatrix_t1t2t1rho)
-print('done.')
 
-print('Sorting by cost_{t1rho}')
+print('Sorting by cost_{t1rho}.')
 weighting = 'T1rho'
 weightingmatrix_t1rho = create_weightingmatrix(weighting, target_t1rho=target_t1rho, dims=4)
 seqs_sorted_t1rho = sort_sequences(sequences, weightingmatrix_t1rho)
+
+#%%
+print('Sorting by orthogonality...', end='')
+seqs_sorted_orth = sort_sequences(sequences)
 print('done.')
 
 # %%
@@ -298,4 +300,15 @@ for ii in range(10):
 # %%
 for ii in range(10):
     print(np.sum(np.multiply(weightingmatrix_t1t2, seqs_sorted_t1t2[ii].cost)))
+
+# %%
+_, ax = plt.subplots(2, 2)
+for t1, t2, t1rho in zip(target_t1, target_t2, target_t1rho):
+    signal_ref = mrf_sequence_sydney.calc_signal(t1, t2, target_m0, inv_eff, delta_B1, t1rho, True)
+    signal_opt = seqs_sorted_orth[3].calc_signal(t1, t2, target_m0, inv_eff, delta_B1, t1rho, True)
+    ax[0, 0].plot(np.real(signal_ref))
+    ax[1, 0].plot(np.real(signal_opt))
+    ax[0, 1].plot(np.imag(signal_ref))
+    ax[1, 1].plot(np.imag(signal_opt))
+    
 # %%
