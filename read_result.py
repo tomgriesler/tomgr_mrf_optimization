@@ -296,8 +296,8 @@ fig = plt.figure(figsize=(16, 9))
 
 for ii in range(10):
     plt.subplot(10, 1, ii+1)
-    visualize_sequence(seqs_sorted_t1t2[ii], True)
-# %%
+    visualize_sequence(seqs_sorted_t1t2t1rho[ii], True)
+    # %%
 for ii in range(10):
     print(np.sum(np.multiply(weightingmatrix_t1t2, seqs_sorted_t1t2[ii].cost)))
 
