@@ -17,24 +17,21 @@ def q(alpha, phi=np.pi/2):
 
 def inversion(inv_eff):
 
-    mat = np.zeros((3, 3))
-    mat[2, 2] = -inv_eff
+    mat = np.diag([0, 0, -inv_eff])
 
     return mat
 
 
 def t2prep(t2, t2te):
 
-    mat = np.zeros((3, 3))
-    mat[2, 2] = np.exp(-t2te/t2)
+    mat = np.diag([0, 0, np.exp(-t2te/t2)])
 
     return mat
 
 
 def dt2prep_dt2(t2, t2te):
 
-    mat = np.zeros((3, 3))
-    mat[2, 2] = t2te/t2**2 * np.exp(-t2te/t2)
+    mat = np.zeros([0, 0, t2te/t2**2 * np.exp(-t2te/t2)])
 
     return mat
 
@@ -48,8 +45,7 @@ def t1rhoprep(t1rho, tsl):
 
 def dt1rhoprep_dt1rho(t1rho, tsl):
 
-    mat = np.zeros((3, 3))
-    mat[2, 2] = tsl/t1rho**2 * np.exp(-tsl/t1rho)
+    mat = np.zeros([0, 0, -tsl/t1rho**2 * np.exp(-tsl/t1rho)])
 
     return mat
 
@@ -59,29 +55,21 @@ def r(t1, t2, t):
     E1 = np.exp(-t/t1)
     E2 = np.exp(-t/t2)
 
-    mat = np.array([
-        [E2, 0, 0],
-        [0, E2, 0],
-        [0, 0, E1]
-    ])
+    mat = np.diag([E2, E2, E1])
 
     return mat
 
 
 def dr_dt1(t1, t):
-    
-    mat = t/t1**2 * np.exp(-t/t1) * np.array([[0, 0, 0],
-                                              [0, 0, 0],
-                                              [0, 0, 1]])
+
+    mat = np.diag([0, 0, t/t1**2 * np.exp(-t/t1)])
     
     return mat
 
 
 def dr_dt2(t2, t):
     
-    mat = t/t2**2 * np.exp(-t/t2) * np.array([[1, 0, 0],
-                                              [0, 1, 0],
-                                              [0, 0, 0]])
+    mat = t/t2**2 * np.exp(-t/t2) * np.diag([1, 1, 0])
     
     return mat
 
