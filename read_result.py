@@ -8,7 +8,7 @@ from tqdm import tqdm
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231215_083347'
+timestamp = '231218_074414'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -297,9 +297,10 @@ fig = plt.figure(figsize=(16, 9))
 for ii in range(10):
     plt.subplot(10, 1, ii+1)
     visualize_sequence(seqs_sorted_t1t2t1rho[ii], True)
-    # %%
+
+# %%
 for ii in range(10):
-    print(np.sum(np.multiply(weightingmatrix_t1t2, seqs_sorted_t1t2[ii].cost)))
+    print(np.sum(np.multiply(weightingmatrix_t1t2t1rho, seqs_sorted_t1t2t1rho[ii].cost)))
 
 # %%
 _, ax = plt.subplots(2, 2)
