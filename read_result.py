@@ -8,7 +8,7 @@ from tqdm import tqdm
 from abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
 
 #%%
-timestamp = '231218_074414'
+timestamp = '231218_074418'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
