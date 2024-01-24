@@ -12,7 +12,7 @@ from tqdm import tqdm
 from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality, calculate_crlb_orthogonality_combined
 
 
-RESULTSPATH = Path('/home/tomgr/Documents/abdominal/data/sequences')
+RESULTSPATH = Path('/scratch/abdominal/data/sequences')
 
 
 BLOCKS = {
