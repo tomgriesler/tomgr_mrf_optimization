@@ -60,6 +60,7 @@ def optimize_sequence_worker(junk_size, args):
 
     return sequences
 
+
 def optimize_sequence(costfunction, target_t1, target_t2, target_t1rho, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_beats=1, max_beats=None, n_iter_max=1e6, inv_eff=0.95, delta_B1=1., phase_inc=0., optimize_positions=True, parallel=True, num_workers=8, num_junks=1e2):
 
     sequences = []
