@@ -18,7 +18,7 @@ num_workers = 16
 
 target_t1 = 660.
 target_t2 = 40.
-target_t1rho = 0.
+target_t1rho = None
 target_m0 = 1.
 
 inv_eff = 0.95
