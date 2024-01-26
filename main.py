@@ -23,7 +23,7 @@ target_m0 = 1.
 
 inv_eff = 0.95
 delta_B1 = 1.
-phase_inc = 0.
+phase_inc = 3.
 
 prep_modules = ['noPrep', 'TI21', 'T2prep40', 'T2prep80', 'T2prep120']
 prep_module_weights = [1, 1, 1/3, 1/3, 1/3]
