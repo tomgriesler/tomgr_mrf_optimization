@@ -6,12 +6,12 @@ from pathlib import Path
 from abdominal_tools import MRFSequence, create_weightingmatrix, visualize_sequence
 
 #%%
-t1 = 1000.
-t2 = 44.
-t1rho = 50.
+t1 = 660.
+t2 = 40.
+t1rho = None
 m0 = 1. 
 
-weightingmatrix = create_weightingmatrix('T1, T2, T1rho', t1, t2, t1rho, dims=4)
+weightingmatrix = create_weightingmatrix('T1, T2', t1, t2, t1rho, dims=3)
 
 #%%
 # seqpaths = [
@@ -22,10 +22,10 @@ weightingmatrix = create_weightingmatrix('T1, T2, T1rho', t1, t2, t1rho, dims=4)
 # ]
 
 seqpaths = [
-    '/scratch/abdominal/data/sequences/sydney_15s_15_phinc0deg/textfiles_sydney_15s_15_phinc0deg',
-    '/scratch/abdominal/data/sequences/sydney_15s_15_phinc3deg/textfiles_sydney_15s_15_phinc3deg',
-    '/scratch/abdominal/data/sequences/231218_074414/231218_074414_best_T1T2T1rho/textfiles_231218_074414_best_T1T2T1rho',
-    '/scratch/abdominal/data/sequences/231218_074418/231218_074418_best_T1T2T1rho/textfiles_231218_074418_best_T1T2T1rho'
+    '/scratch/abdominal/data/sequences/hamilton_10s_16_phinc0deg/textfiles_hamilton_10s_16_phinc0deg',
+    '/scratch/abdominal/data/sequences/hamilton_10s_16_phinc3deg/textfiles_hamilton_10s_16_phinc3deg',
+    '/scratch/abdominal/data/sequences/hamilton_mod_10s_31_phinc0deg/textfiles_hamilton_mod_10s_31_phinc0deg',
+    '/scratch/abdominal/data/sequences/hamilton_mod_10s_31_phinc3deg/textfiles_hamilton_mod_10s_31_phinc3deg'
 ]
 
 seqpaths = [Path(seqpath) for seqpath in seqpaths]
@@ -75,6 +75,6 @@ for ii in range(len(mrf_seqs)):
         plt.xlabel('TR Index')
     
 plt.tight_layout()
-plt.savefig('/home/tomgr/Documents/temp/seqs_t1rho.png', dpi=300)
+# plt.savefig('/home/tomgr/Documents/temp/seqs_t1rho.png', dpi=300)
 plt.show()
 # %%
