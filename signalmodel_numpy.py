@@ -3,9 +3,7 @@ from numpy.linalg import LinAlgError
 
 
 def q(alpha, phi=np.pi/2):
-    '''
-    Basically taken from Rad229.
-    '''
+
     mat = np.array([
         [(np.cos(alpha/2.))**2., np.exp(2.*1j*phi)*(np.sin(alpha/2.))**2., -1j*np.exp(1j*phi)*np.sin(alpha)],
         [np.exp(-2.*1j*phi)*(np.sin(alpha/2.))**2., (np.cos(alpha/2.))**2., 1j*np.exp(-1j*phi)*np.sin(alpha)],
