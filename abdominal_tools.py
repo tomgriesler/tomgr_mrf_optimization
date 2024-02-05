@@ -9,7 +9,7 @@ import subprocess
 from tqdm import tqdm
 
 
-from signalmodel_abdominal import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality, calculate_crlb_orthogonality_combined
+from signalmodel_numpy import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality, calculate_crlb_orthogonality_combined
 
 
 RESULTSPATH = Path('/scratch/abdominal/data/sequences')
@@ -93,6 +93,9 @@ def visualize_cost(sequences, weightingmatrix):
 
 
 def create_weightingmatrix(weighting, target_t1=np.inf, target_t2=np.inf, target_t1rho=np.inf, dims=3):
+
+    if target_t1rho == None:
+        target_t1rho = np.inf
 
     WEIGHTINGMATRICES = {
         'T1': np.array([1/target_t1, 0, 0, 0][:dims]),

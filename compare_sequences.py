@@ -4,10 +4,10 @@ import json
 import numpy as np
 from tqdm import tqdm
 
-from abdominal_tools import RESULTSPATH, create_weightingmatrix, sort_sequences
+from abdominal_tools import RESULTSPATH, create_weightingmatrix, sort_sequences, visualize_sequence
 
 #%%
-timestamp = '231214_070808'
+timestamp = '231210_034637'
 resultspath = RESULTSPATH/timestamp
 
 with open(resultspath/'sequences.pkl', 'rb') as handle: 
@@ -32,19 +32,23 @@ except KeyError:
 
 #%%
 weighting = 'T1'
-weightingmatrix_T1 = create_weightingmatrix(weighting, target_t1, target_t1, target_t1rho, dims)
+weightingmatrix_T1 = create_weightingmatrix(weighting, target_t1, target_t2, target_t1rho, dims)
 seqs_sorted_T1 = sort_sequences(sequences, weightingmatrix_T1)
 
 weighting = 'T2'
-weightingmatrix_T2 = create_weightingmatrix(weighting, target_t1, target_t1, target_t1rho, dims)
+weightingmatrix_T2 = create_weightingmatrix(weighting, target_t1, target_t2, target_t1rho, dims)
 seqs_sorted_T2 = sort_sequences(sequences, weightingmatrix_T2)
 
+weighting = 'T1, T2'
+weightingmatrix_T1T2 = create_weightingmatrix(weighting, target_t1, target_t2, target_t1rho, dims)
+seqs_sorted_T1T2 = sort_sequences(sequences, weightingmatrix_T1T2)
+
 weighting = 'T1rho'
-weightingmatrix_T1rho = create_weightingmatrix(weighting, target_t1, target_t1, target_t1rho, dims)
+weightingmatrix_T1rho = create_weightingmatrix(weighting, target_t1, target_t2, target_t1rho, dims)
 seqs_sorted_T1rho = sort_sequences(sequences, weightingmatrix_T1rho)
 
 weighting = 'T1, T2, T1rho'
-weightingmatrix_T1T2T1rho = create_weightingmatrix(weighting, target_t1, target_t1, target_t1rho, dims)
+weightingmatrix_T1T2T1rho = create_weightingmatrix(weighting, target_t1, target_t2, target_t1rho, dims)
 seqs_sorted_T1T2T1rho = sort_sequences(sequences, weightingmatrix_T1T2T1rho)
 
 #%%
