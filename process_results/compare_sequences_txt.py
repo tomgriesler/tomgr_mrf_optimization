@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-from utils.abdominal_tools import MRFSequence, create_weightingmatrix, visualize_sequence
+from utils.abdominal_tools import MRFSequence, create_weightingmatrix
+from utils.visualization import visualize_sequence
 
 #%%
 t1 = 660.
@@ -40,10 +41,9 @@ for seqpath in seqpaths:
     ph = np.loadtxt(seqpath/'PH_FISP.txt')
     prep = np.loadtxt(seqpath/'PREP_FISP.txt')
     ti = np.loadtxt(seqpath/'TI_FISP.txt')
-    t2te = np.multiply(prep==2, np.loadtxt(seqpath/'T2TE_FISP.txt'))
-    tsl = np.multiply(prep==3, np.loadtxt(seqpath/'T2TE_FISP.txt'))
+    t2te = np.multiply((prep==2)|(prep==3), np.loadtxt(seqpath/'T2TE_FISP.txt'))
 
-    mrf_seq = MRFSequence(len(prep), int(len(fa)/len(prep)), fa, tr, ph, prep, ti, t2te, 5.4, 1., tsl)
+    mrf_seq = MRFSequence(len(prep), int(len(fa)/len(prep)), fa, tr, ph, prep, ti, t2te, 5.4, 1.)
     mrf_seq.calc_cost('crlb', t1, t2, 1., t1rho=t1rho)
 
     mrf_seqs.append(mrf_seq)

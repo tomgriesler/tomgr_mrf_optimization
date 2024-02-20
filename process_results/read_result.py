@@ -5,7 +5,10 @@ import json
 import numpy as np
 from tqdm import tqdm
 
-from utils.abdominal_tools import RESULTSPATH, BLOCKS, visualize_sequence, visualize_cost,create_weightingmatrix,sort_sequences, MRFSequence
+from utils.abdominal_tools import create_weightingmatrix, sort_sequences, MRFSequence
+from utils.fstools import RESULTSPATH
+from utils.blocks import BLOCKS
+from utils.visualization import visualize_sequence, visualize_cost
 
 #%%
 timestamp = '231218_074418'

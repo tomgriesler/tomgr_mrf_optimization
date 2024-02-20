@@ -6,7 +6,9 @@ import json
 from tqdm import tqdm
 import shutil
 
-from utils.abdominal_tools import RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
+from utils.abdominal_tools import sort_sequences, create_weightingmatrix
+from utils.fstools import RESULTSPATH
+from utils.visualization import visualize_sequence
 
 #%%
 timestamp = '231218_074418'
@@ -83,19 +85,8 @@ savepath = Path(f'/home/tomgr/Documents/abdominal/data/sequences/{timestamp}/{na
 savepath.mkdir(exist_ok=True, parents=True)
 np.savetxt(savepath/'PREP_FISP.txt', mrf_seq.prep, fmt='%i')
 np.savetxt(savepath/'TI_FISP.txt', mrf_seq.ti, fmt='%f')
-np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te+mrf_seq.tsl, fmt='%f')
+np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', mrf_seq.fa, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')
 shutil.copyfile('/home/tomgr/Documents/abdominal/code/reconstruction/ID_FISP.txt', savepath/'ID_FISP.txt')
-
-# # %% (Sydney's naming convention)
-# savepath = Path(f'/home/tomgr/Documents/abdominal/data/sequences/{timestamp}/sydney/{name}/textfiles_{name}')
-# savepath.mkdir(exist_ok=True, parents=True)
-# np.savetxt(savepath/'PREP_FISP_T2.txt', mrf_seq.prep, fmt='%i')
-# np.savetxt(savepath/'TI_FISP.txt', mrf_seq.ti, fmt='%f')
-# np.savetxt(savepath/'T2T1rhoPREPtime_MRF.txt', (mrf_seq.t2te+mrf_seq.tsl)*1e3, fmt='%f')
-# np.savetxt(savepath/'FA_FISP.txt', mrf_seq.fa, fmt='%f')
-# np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
-# np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')
-# shutil.copyfile('/home/tomgr/Documents/abdominal/code/reconstruction/ID_FISP.txt', savepath/'ID_FISP.txt')

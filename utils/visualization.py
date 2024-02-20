@@ -4,12 +4,7 @@ import matplotlib.pyplot as plt
 
 def visualize_sequence(mrf_sequence, show_fa=False):
 
-    try:
-        mrf_sequence.tsl
-    except AttributeError:
-        mrf_sequence.tsl = np.zeros_like(mrf_sequence.prep, dtype=np.float32)
-    
-    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii])+np.sum(mrf_sequence.tsl[:ii]) for ii in range(mrf_sequence.beats)]
+    prep_pulse_timings = [ii*mrf_sequence.shots*mrf_sequence.tr_offset+np.sum(mrf_sequence.tr[:ii*mrf_sequence.shots])*1e-3+np.sum(mrf_sequence.ti[:ii])+np.sum(mrf_sequence.t2te[:ii]) for ii in range(mrf_sequence.beats)]
 
     map = {
         0: {'color': 'white', 'label': None},

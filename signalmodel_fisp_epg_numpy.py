@@ -94,7 +94,7 @@ def epg_grad(omega):
     return omega
 
 
-def calculate_signal_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
+def calculate_signal_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
 
     n_ex = beats * shots
 
@@ -116,7 +116,7 @@ def calculate_signal_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, 
             omega = t2prep(t2, t2te[ii]) @ omega
 
         elif prep[ii] == 3: 
-            omega = t1rhoprep(t1rho, tsl[ii]) @ omega
+            omega = t1rhoprep(t1rho, t2te[ii]) @ omega
 
         for jj in range(shots):
 
@@ -135,7 +135,7 @@ def calculate_signal_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, 
     return signal
 
 
-def calculate_crlb_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
+def calculate_crlb_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
 
     r_te = r(t1, t2, te)
     dr_te_dt1 = dr_dt1(t1, te)
@@ -185,8 +185,8 @@ def calculate_crlb_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr
 
         elif prep[ii] == 3:
             
-            t1rhoprep_ii = t1rhoprep(t1rho, tsl[ii])
-            dt1rhoprep_ii_dt1rho = dt1rhoprep_dt1rho(t1rho, tsl[ii])
+            t1rhoprep_ii = t1rhoprep(t1rho, t2te[ii])
+            dt1rhoprep_ii_dt1rho = dt1rhoprep_dt1rho(t1rho, t2te[ii])
 
             domega_dt1 = t1rhoprep_ii @ domega_dt1
 
@@ -331,14 +331,14 @@ def calculate_crlb_fisp_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep,
     return 1/fim
 
 
-def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
+def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
 
     n_components = len(t1)
 
     s = np.zeros((n_components, beats*shots), dtype=np.complex128)
 
     for ii in range(n_components): 
-        s[ii] = calculate_signal_fisp(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho[ii], tsl)
+        s[ii] = calculate_signal_fisp(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho[ii])
 
     s = s/np.linalg.norm(s, axis=1, keepdims=True)
 

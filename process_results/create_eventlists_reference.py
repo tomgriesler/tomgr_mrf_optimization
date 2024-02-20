@@ -3,7 +3,9 @@ import numpy as np
 from pathlib import Path
 import shutil
 
-from utils.abdominal_tools import MRFSequence, BLOCKS, visualize_sequence
+from utils.abdominal_tools import MRFSequence
+from utils.blocks import BLOCKS
+from utils.visualization import visualize_sequence
 
 # %%
 prep_blocks_dict = {
@@ -28,8 +30,7 @@ name = f'{which}_{total_dur/1e3:.0f}s_{beats}_phinc{phase_inc:.0f}deg'
 prep_order = np.concatenate((np.tile(prep_blocks, reps=beats//len(prep_blocks)), prep_blocks[:beats%len(prep_blocks)]))
 prep = [BLOCKS[name]['prep'] for name in prep_order]
 ti = [BLOCKS[name]['ti'] for name in prep_order]
-t2te = [BLOCKS[name]['t2te'] for name in prep_order]
-tsl = [BLOCKS[name]['tsl'] for name in prep_order]
+t2te = [BLOCKS[name]['t2te'] + BLOCKS[name]['tsl'] for name in prep_order]
 fa = np.full(beats * shots, 15.)
 ph = phase_inc*np.arange(beats*shots).cumsum()
 
@@ -42,7 +43,7 @@ for ii in range(len(waittimes)):
 #%% equal distance between start of blocks
 tr = np.zeros(beats*shots)
 for ii in range(beats):
-    tr[(ii+1)*shots-1] += 1e6 - (ti[ii] + t2te[ii] + tsl[ii] + const_tr*shots)*1e3
+    tr[(ii+1)*shots-1] += 1e6 - (ti[ii] + t2te[ii] + const_tr*shots)*1e3
 
 #%%
 mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te)
@@ -55,7 +56,7 @@ savepath = Path(f'/home/tomgr/Documents/abdominal/data/sequences/{name}/textfile
 savepath.mkdir(exist_ok=True, parents=True)
 np.savetxt(savepath/'PREP_FISP.txt', mrf_seq.prep, fmt='%i')
 np.savetxt(savepath/'TI_FISP.txt', mrf_seq.ti, fmt='%f')
-np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te + mrf_seq.tsl, fmt='%f')
+np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', mrf_seq.fa, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')

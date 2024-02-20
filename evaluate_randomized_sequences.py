@@ -18,8 +18,7 @@ def create_sequence(args):
     prep_order = random.choices(prep_modules, weights=prep_module_weights, k=beats)
     prep = [BLOCKS[name]['prep'] for name in prep_order]
     ti = [BLOCKS[name]['ti'] for name in prep_order]
-    t2te = [BLOCKS[name]['t2te'] for name in prep_order]
-    tsl = [BLOCKS[name]['tsl'] for name in prep_order]
+    t2te = [BLOCKS[name]['t2te'] + BLOCKS[name]['tsl'] for name in prep_order]
 
     prep_time_tot = sum([BLOCKS[name]['ti'] + BLOCKS[name]['t2te'] + BLOCKS[name]['tsl'] for name in prep_order])
 
@@ -27,7 +26,7 @@ def create_sequence(args):
         waittime_tot = total_dur - beats*shots*const_tr - prep_time_tot
         waittimes = divide_into_random_floats(waittime_tot, beats-1)
     else:
-        waittimes = [max(0, total_dur/beats-ti[ii]-t2te[ii]-tsl[ii]-const_tr*shots) for ii in range(beats)]
+        waittimes = [max(0, total_dur/beats-ti[ii]-t2te[ii]-const_tr*shots) for ii in range(beats)]
 
     fa = np.repeat(random.choices((const_fa), k=beats), shots) if type(const_fa) == list else np.full(beats*shots, const_fa)
 
@@ -38,7 +37,7 @@ def create_sequence(args):
 
     ph = phase_inc * np.arange(n_ex).cumsum()
 
-    mrf_sequence = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te, tsl)
+    mrf_sequence = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, const_tr, te)
 
     mrf_sequence.calc_cost(costfunction, target_t1, target_t2, target_m0, inv_eff, delta_B1, t1rho=target_t1rho)
 

@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from utils.abdominal_tools import MRFSequence, visualize_sequence, create_weightingmatrix
+from utils.abdominal_tools import MRFSequence, create_weightingmatrix
+from utils.visualization import visualize_sequence
 from signalmodel_fisp_epg_numpy import calculate_orthogonality, calculate_signal_fisp
 #%%
 beats = 15
@@ -24,8 +25,7 @@ ph = 3. * np.arange(n_ex).cumsum()
 # Sydney's cardiac T1T2T1rho sequence
 prep = [1, 0, 3, 3, 3] + [1, 0, 2, 2, 2] * 2
 ti = [21, 0, 0, 0, 0] * 3
-t2te = [0, 0, 0, 0, 0] + [0, 0, 30, 50, 80] * 2
-tsl = [0, 0, 30, 50, 60] + [0] * 10
+t2te = [0, 0, 30, 50, 60] + [0, 0, 30, 50, 80] * 2
 
 te = 1.
 
@@ -33,7 +33,7 @@ te = 1.
 #     tr[ii*shots-1] += (total_dur - np.sum(ti) - np.sum(t2te) - beats*shots*tr_offset)*1e3/(beats-1)
 
 for ii in range(beats):
-    tr[(ii+1)*shots-1] += 1e6 - (ti[ii] + t2te[ii] + tsl[ii] + tr_offset*shots)*1e3
+    tr[(ii+1)*shots-1] += 1e6 - (ti[ii] + t2te[ii] + tr_offset*shots)*1e3
     
 #%%
 costfunction = 'crlb_orth'
@@ -45,7 +45,7 @@ m0 = 1
 t1rho = [50, 90]
 
 #%%
-mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl)
+mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te)
 
 #%%
 visualize_sequence(mrf_seq, True)
@@ -74,7 +74,7 @@ res_t1rho = []
 
 for phase_inc in tqdm(np.arange(0, 10)):
     ph = phase_inc*np.arange(beats*shots).cumsum()
-    mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl)
+    mrf_seq = MRFSequence(beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te)
     mrf_seq.calc_cost(costfunction, t1, t2, m0, t1rho=t1rho)
     w_crlb = np.multiply(weightingmatrix, mrf_seq.cost)
     res.append(np.sum(w_crlb))

@@ -44,7 +44,7 @@ def sort_sequences_inplace(sequences, weightingmatrix):
 
 class MRFSequence:
 
-    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, tsl=None):
+    def __init__(self, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te):
         self.beats = beats
         self.shots = shots
         self.fa = np.array(fa, dtype=np.float32)
@@ -53,7 +53,6 @@ class MRFSequence:
         self.prep = np.array(prep, dtype=np.float32)
         self.ti = np.array(ti, dtype=np.float32)
         self.t2te = np.array(t2te, dtype=np.float32)
-        self.tsl = np.zeros_like(self.prep, dtype=np.float32) if tsl is None else np.array(tsl, dtype=np.float32)
         self.tr_offset = tr_offset
         self.te = te
 
@@ -80,7 +79,7 @@ class MRFSequence:
         
     def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None, return_result=False):
 
-        signal = calculate_signal_fisp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
+        signal = calculate_signal_fisp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho)
 
         if return_result:
             return signal
@@ -94,7 +93,7 @@ class MRFSequence:
             if type(t1)==list or type(t2)==list:
                 raise TypeError('Only enter relaxation times of one tissue.')
 
-            v = calculate_crlb_fisp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
+            v = calculate_crlb_fisp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho)
             cost = np.sqrt(np.diagonal(v))
 
         elif costfunction == 'orthogonality': 
@@ -102,7 +101,7 @@ class MRFSequence:
             if type(t1)!=list or type(t2)!=list:
                 raise TypeError('Enter relaxation times of two tissues.')
 
-            cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
+            cost = calculate_orthogonality(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho)
 
         elif costfunction == 'crlb_pv':
 
