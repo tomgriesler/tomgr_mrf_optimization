@@ -2,7 +2,7 @@ import numpy as np
 import random
 from tqdm import tqdm
 
-from signalmodel_fisp import calculate_signal, calculate_crlb, calculate_crlb_pv, calculate_orthogonality, calculate_crlb_orthogonality_combined
+from signalmodel_fisp_epg_numpy import calculate_signal_fisp, calculate_crlb_fisp, calculate_crlb_fisp_pv, calculate_orthogonality
 
 
 def divide_into_random_floats(N, n):
@@ -80,7 +80,7 @@ class MRFSequence:
         
     def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None, return_result=False):
 
-        signal = calculate_signal(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
+        signal = calculate_signal_fisp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
 
         if return_result:
             return signal
@@ -94,7 +94,7 @@ class MRFSequence:
             if type(t1)==list or type(t2)==list:
                 raise TypeError('Only enter relaxation times of one tissue.')
 
-            v = calculate_crlb(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
+            v = calculate_crlb_fisp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho, self.tsl)
             cost = np.sqrt(np.diagonal(v))
 
         elif costfunction == 'orthogonality': 
@@ -109,11 +109,7 @@ class MRFSequence:
             if type(t1)!=list or type(t2)!=list:
                 raise TypeError('Enter relaxation times of two tissues.')
             
-            cost = np.sqrt(calculate_crlb_pv(t1, t2, m0, fraction, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1))
-
-        elif costfunction == 'crlb_orth':
-
-            cost = calculate_crlb_orthogonality_combined(t1, t2, t1rho, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tsl, self.tr_offset, self.te, inv_eff, delta_B1)
+            cost = np.sqrt(calculate_crlb_fisp_pv(t1, t2, m0, fraction, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1))
 
         else: 
             raise ValueError('Not a valid costfunction.')

@@ -94,7 +94,7 @@ def epg_grad(omega):
     return omega
 
 
-def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
+def calculate_signal_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
 
     n_ex = beats * shots
 
@@ -135,7 +135,7 @@ def calculate_signal(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_of
     return signal
 
 
-def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
+def calculate_crlb_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, tsl=None):
 
     r_te = r(t1, t2, te)
     dr_te_dt1 = dr_dt1(t1, te)
@@ -258,7 +258,7 @@ def calculate_crlb(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offs
     return v
 
 
-def calculate_crlb_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
+def calculate_crlb_fisp_pv(t1, t2, m0, fraction, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1.):
 
     r_te_1 = r(t1[0], t2[0], te)
     r_te_2 = r(t1[1], t2[1], te)
@@ -338,19 +338,8 @@ def calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te
     s = np.zeros((n_components, beats*shots), dtype=np.complex128)
 
     for ii in range(n_components): 
-        s[ii] = calculate_signal(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho[ii], tsl)
+        s[ii] = calculate_signal_fisp(t1[ii], t2[ii], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho[ii], tsl)
 
     s = s/np.linalg.norm(s, axis=1, keepdims=True)
 
     return np.linalg.norm(np.eye(n_components) - s@np.conj(s).T)**2
-
-
-def calculate_crlb_orthogonality_combined(t1, t2, t1rho, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tsl, tr_offset, te, inv_eff=0.95, delta_B1=1.):
-
-    crlb_1 = np.sqrt(calculate_crlb(t1[0], t2[0], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho[0], tsl)[-1, -1] / t1rho[0])
-
-    crlb_2 = np.sqrt(calculate_crlb(t1[1], t2[1], m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho[0], tsl)[-1, -1] / t1rho[1])
-
-    orth = calculate_orthogonality(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff, delta_B1, t1rho, tsl)
-
-    return 1 / (crlb_1 + crlb_2) / orth

@@ -5,7 +5,7 @@ from datetime import datetime
 from utils.abdominal_tools import BLOCKS, divide_into_random_floats, MRFSequence
 
 
-def optimize_sequence(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_beats=1, n_iter_max=np.inf, inv_eff=0.95, delta_B1=1., phase_inc=0.):
+def randomized_sequences(costfunction, target_t1, target_t2, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_beats=1, n_iter_max=np.inf, inv_eff=0.95, delta_B1=1., phase_inc=0.):
 
     sequences = []
 

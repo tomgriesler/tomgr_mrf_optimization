@@ -31,10 +31,6 @@ def create_sequence(args):
 
     fa = np.repeat(random.choices((const_fa), k=beats), shots) if type(const_fa) == list else np.full(beats*shots, const_fa)
 
-    # # Ensure that not all flipangles are zero
-    # if np.count_nonzero(fa) == 0:
-    #     return
-
     tr = np.full(beats*shots, 0)
 
     for ii in range(len(waittimes)):
@@ -49,7 +45,7 @@ def create_sequence(args):
     return mrf_sequence
 
 
-def optimize_sequence_worker(junk_size, args):
+def create_sequences_worker(junk_size, args):
     
     sequences = []
 
@@ -62,7 +58,7 @@ def optimize_sequence_worker(junk_size, args):
     return sequences
 
 
-def optimize_sequence(costfunction, target_t1, target_t2, target_t1rho, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_beats=1, max_beats=None, n_iter_max=1e6, inv_eff=0.95, delta_B1=1., phase_inc=0., optimize_positions=True, parallel=True, num_workers=8, num_junks=1e2):
+def randomized_sequences(costfunction, target_t1, target_t2, target_t1rho, target_m0, shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights=None, min_beats=1, max_beats=None, n_iter_max=1e6, inv_eff=0.95, delta_B1=1., phase_inc=0., optimize_positions=True, parallel=True, num_workers=8, num_junks=1e2):
 
     sequences = []
 
@@ -85,7 +81,7 @@ def optimize_sequence(costfunction, target_t1, target_t2, target_t1rho, target_m
 
         with ProcessPoolExecutor(max_workers=num_workers) as executor:
             
-            futures = [executor.submit(optimize_sequence_worker, junk_size, args) for _ in tqdm(range(int(num_junks)), desc='Setting up jobs')]
+            futures = [executor.submit(create_sequences_worker, junk_size, args) for _ in tqdm(range(int(num_junks)), desc='Setting up jobs')]
             
             for future in tqdm(as_completed(futures), total=int(num_junks), desc='Computing'):
                 sequences.extend(future.result())

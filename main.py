@@ -1,6 +1,6 @@
 #%%
-from optimize_sequence import optimize_sequence
-from utils.abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
+from evaluate_randomized_sequences import randomized_sequences
+from utils.fstools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
 costfunction = 'crlb'
@@ -42,7 +42,7 @@ max_beats = None
 gitbranch = get_gitbranch()
 githash = get_githash()
 
-sequences = optimize_sequence(costfunction, target_t1, target_t2, target_t1rho, target_m0 , shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_beats, max_beats, n_iter_max, inv_eff, delta_B1, phase_inc, optimize_positions, parallel, num_workers=num_workers, num_junks=num_junks)
+sequences = randomized_sequences(costfunction, target_t1, target_t2, target_t1rho, target_m0 , shots, const_fa, const_tr, te, total_dur, prep_modules, prep_module_weights, min_beats, max_beats, n_iter_max, inv_eff, delta_B1, phase_inc, optimize_positions, parallel, num_workers=num_workers, num_junks=num_junks)
 
 #%%
 prot = {

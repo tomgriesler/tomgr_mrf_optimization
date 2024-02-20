@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 from utils.abdominal_tools import MRFSequence, visualize_sequence, create_weightingmatrix
-from signalmodel_fisp import calculate_orthogonality, calculate_signal
+from signalmodel_fisp_epg_numpy import calculate_orthogonality, calculate_signal_fisp
 #%%
 beats = 15
 shots = 47
@@ -111,8 +111,8 @@ t2te = [0]
 
 tr_offset = 12
 
-signal_1 = calculate_signal(150, 20, 1, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
-signal_2 = calculate_signal(828, 72, 1, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
+signal_1 = calculate_signal_fisp(150, 20, 1, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
+signal_2 = calculate_signal_fisp(828, 72, 1, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, 1.)
 
 plt.plot(-np.imag(signal_1))
 plt.plot(-np.imag(signal_2))
