@@ -308,8 +308,8 @@ for ii in range(10):
 # %%
 _, ax = plt.subplots(2, 2)
 for t1, t2, t1rho in zip(target_t1, target_t2, target_t1rho):
-    signal_ref = mrf_sequence_sydney.calc_signal(t1, t2, target_m0, inv_eff, delta_B1, t1rho, True)
-    signal_opt = seqs_sorted_orth[3].calc_signal(t1, t2, target_m0, inv_eff, delta_B1, t1rho, True)
+    signal_ref = mrf_sequence_sydney.calc_signal_fisp(t1, t2, target_m0, inv_eff, delta_B1, t1rho, True)
+    signal_opt = seqs_sorted_orth[3].calc_signal_fisp(t1, t2, target_m0, inv_eff, delta_B1, t1rho, True)
     ax[0, 0].plot(np.real(signal_ref))
     ax[1, 0].plot(np.real(signal_opt))
     ax[0, 1].plot(np.imag(signal_ref))

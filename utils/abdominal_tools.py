@@ -4,6 +4,8 @@ from tqdm import tqdm
 
 from signalmodel_fisp_epg_numpy import calculate_signal_fisp, calculate_crlb_fisp, calculate_crlb_fisp_pv, calculate_orthogonality
 
+from signalmodel_bssfp_numpy import calculate_signal_bssfp
+
 
 def divide_into_random_floats(N, n):
 
@@ -77,9 +79,18 @@ class MRFSequence:
         delattr(self, 'tr_compressed')  
         delattr(self, 'ph_inc')
         
-    def calc_signal(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None, return_result=False):
+    def calc_signal_fisp(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., t1rho=None, return_result=False):
 
         signal = calculate_signal_fisp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, t1rho)
+
+        if return_result:
+            return signal
+        else:
+            self.signal = signal
+
+    def calc_signal_bssfp(self, t1, t2, m0, inv_eff=0.95, delta_B1=1., df=0, t1rho=None, return_result=False):
+
+        signal = calculate_signal_bssfp(t1, t2, m0, self.beats, self.shots, self.fa, self.tr, self.ph, self.prep, self.ti, self.t2te, self.tr_offset, self.te, inv_eff, delta_B1, df, t1rho)
 
         if return_result:
             return signal

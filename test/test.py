@@ -52,7 +52,7 @@ visualize_sequence(mrf_seq, True)
 plt.ylim(0)
 
 #%%
-mrf_seq.calc_signal(t1, t2, m0, t1rho=t1rho)
+mrf_seq.calc_signal_fisp(t1, t2, m0, t1rho=t1rho)
 
 #%%
 plt.plot(np.real(mrf_seq.signal))
