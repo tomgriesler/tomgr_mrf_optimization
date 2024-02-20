@@ -1,6 +1,6 @@
 #%%
-from optimize_sequence_parallel import optimize_sequence
-from abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
+from optimize_sequence import optimize_sequence
+from utils.abdominal_tools import store_optimization, get_gitbranch, get_githash, RESULTSPATH
 
 #%% Define optimization target
 costfunction = 'crlb'

@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-from abdominal_tools import MRFSequence, create_weightingmatrix, visualize_sequence
+from utils.abdominal_tools import MRFSequence, create_weightingmatrix, visualize_sequence
 
 #%%
 t1 = 660.

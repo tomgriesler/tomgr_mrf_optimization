@@ -2,7 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from abdominal_tools import MRFSequence
+from utils.abdominal_tools import MRFSequence
 
 #%%
 beats = 1

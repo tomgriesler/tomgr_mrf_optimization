@@ -1,0 +1,18 @@
+BLOCKS = {
+    'noPrep': {'prep': 0, 'ti': 0, 't2te': 0, 'tsl': 0},
+    'TI12': {'prep': 1, 'ti': 12, 't2te': 0, 'tsl': 0},
+    'TI21': {'prep': 1, 'ti': 21, 't2te': 0, 'tsl': 0},
+    'TI100': {'prep': 1, 'ti': 100, 't2te': 0, 'tsl': 0},
+    'TI250': {'prep': 1, 'ti': 250, 't2te': 0, 'tsl': 0},
+    'TI300': {'prep': 1, 'ti': 300, 't2te': 0, 'tsl': 0},
+    'TI400': {'prep': 1, 'ti': 400, 't2te': 0, 'tsl': 0},
+    'T2prep30': {'prep': 2, 'ti': 0, 't2te': 30, 'tsl': 0},
+    'T2prep40': {'prep': 2, 'ti': 0, 't2te': 40, 'tsl': 0},
+    'T2prep50': {'prep': 2, 'ti': 0, 't2te': 50, 'tsl': 0},
+    'T2prep80': {'prep': 2, 'ti': 0, 't2te': 80, 'tsl': 0},
+    'T2prep120': {'prep': 2, 'ti': 0, 't2te': 120, 'tsl': 0},
+    'T2prep160': {'prep': 2, 'ti': 0, 't2te': 160, 'tsl': 0},
+    'T1rhoprep30': {'prep': 3, 'ti': 0, 't2te': 0, 'tsl': 30},
+    'T1rhoprep50': {'prep': 3, 'ti': 0, 't2te': 0, 'tsl': 50},
+    'T1rhoprep60': {'prep': 3, 'ti': 0, 't2te': 0, 'tsl': 60},
+}

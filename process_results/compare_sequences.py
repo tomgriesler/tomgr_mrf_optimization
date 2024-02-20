@@ -4,7 +4,7 @@ import json
 import numpy as np
 from tqdm import tqdm
 
-from abdominal_tools import RESULTSPATH, create_weightingmatrix, sort_sequences, visualize_sequence
+from utils.abdominal_tools import RESULTSPATH, create_weightingmatrix, sort_sequences, visualize_sequence
 
 #%%
 timestamp = '231210_034637'

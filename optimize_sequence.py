@@ -4,7 +4,8 @@ from datetime import datetime
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 
-from abdominal_tools import BLOCKS, divide_into_random_floats, MRFSequence
+from utils.abdominal_tools import divide_into_random_floats, MRFSequence
+from utils.blocks import BLOCKS
 
 
 def create_sequence(args):

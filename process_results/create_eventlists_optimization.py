@@ -6,7 +6,7 @@ import json
 from tqdm import tqdm
 import shutil
 
-from abdominal_tools import RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
+from utils.abdominal_tools import RESULTSPATH, visualize_sequence, sort_sequences, create_weightingmatrix
 
 #%%
 timestamp = '231218_074418'
@@ -84,7 +84,6 @@ savepath.mkdir(exist_ok=True, parents=True)
 np.savetxt(savepath/'PREP_FISP.txt', mrf_seq.prep, fmt='%i')
 np.savetxt(savepath/'TI_FISP.txt', mrf_seq.ti, fmt='%f')
 np.savetxt(savepath/'T2TE_FISP.txt', mrf_seq.t2te+mrf_seq.tsl, fmt='%f')
-# np.savetxt(savepath/'TSL_FISP.txt', mrf_seq.tsl, fmt='%f')
 np.savetxt(savepath/'FA_FISP.txt', mrf_seq.fa, fmt='%f')
 np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
 np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')
@@ -100,6 +99,3 @@ shutil.copyfile('/home/tomgr/Documents/abdominal/code/reconstruction/ID_FISP.txt
 # np.savetxt(savepath/'TR_FISP.txt', mrf_seq.tr, fmt='%f')
 # np.savetxt(savepath/'PH_FISP.txt', mrf_seq.ph, fmt='%f')
 # shutil.copyfile('/home/tomgr/Documents/abdominal/code/reconstruction/ID_FISP.txt', savepath/'ID_FISP.txt')
-# # %%
-
-# %%

@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-from abdominal_tools import MRFSequence, visualize_sequence, create_weightingmatrix
-from signalmodel_numpy import calculate_orthogonality, calculate_signal
+from utils.abdominal_tools import MRFSequence, visualize_sequence, create_weightingmatrix
+from signalmodel_fisp import calculate_orthogonality, calculate_signal
 #%%
 beats = 15
 shots = 47
