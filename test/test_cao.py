@@ -16,7 +16,7 @@ prep = [1]
 ti = [20]
 t2te = [0]
 ph = np.zeros_like(fa)
-ph[::2] = np.pi
+ph[::2] = 180
 
 tr_offset = 12.
 
@@ -28,12 +28,11 @@ t2 = 40.
 m0 = 1.
 
 # %%
-mrf_seq.calc_signal_fisp(t1, t2, m0, inv_eff=1.)
-plt.plot(-np.imag(mrf_seq.signal))
+signal_fisp = mrf_seq.calc_signal_fisp(t1, t2, m0, inv_eff=1., return_result=True)
+signal_bssfp = mrf_seq.calc_signal_bssfp(t1, t2, m0, inv_eff=1., return_result=True)
 
-#%%
-mrf_seq.calc_signal_bssfp(t1, t2, m0, inv_eff=1.)
-plt.plot(-np.imag(mrf_seq.signal))
+plt.plot(-np.imag(signal_fisp), label='fisp')
+plt.plot(-np.imag(signal_bssfp), label='bssfp')
 
-
+plt.legend()
 # %%
