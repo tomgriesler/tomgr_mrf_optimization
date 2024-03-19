@@ -135,6 +135,60 @@ def calculate_signal_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, 
     return signal
 
 
+def calculate_signal_fisp_t1var(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
+    """
+    Assuming piecewise constant T1 (during each event). 
+    """
+
+    n_ex = beats * shots
+
+    inv = inversion(inv_eff)
+    
+    omega = np.vstack((0., 0., m0))
+
+    signal = np.empty(n_ex, dtype=complex)
+
+    t = 0
+
+    for ii in range(beats):
+
+        if prep[ii] == 1:
+            omega = r(t1(t), t2, ti[ii]) @ inv @ omega
+            omega[2, 0] += m0 * b(t1(t), ti[ii])
+            t += ti[ii]
+
+        elif prep[ii] == 2: 
+            omega = t2prep(t2, t2te[ii]) @ omega
+            t += t2te[ii]
+
+        elif prep[ii] == 3: 
+            omega = t1rhoprep(t1rho, t2te[ii]) @ omega
+            t += t2te[ii]
+
+        for jj in range(shots):
+
+            n = ii*shots+jj
+
+            q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
+
+            r_te = r(t1(t), t2, te)
+            b_te = b(t1(t), te)
+
+            omega = r_te @ q_n @ omega
+            omega[2, 0] += m0 * b_te
+
+            signal[n] = omega[0, 0] * np.exp(-1j*np.deg2rad(ph[n]))
+
+            t += te
+
+            omega = epg_grad(r(t1(t), t2, tr_offset+tr[n]*1e-3-te) @ omega)
+            omega[2, 0] += m0 * b(t1(t), tr_offset+tr[n]*1e-3-te)
+
+            t += tr_offset+tr[n]*1e-3-te
+
+    return signal
+
+
 def calculate_crlb_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
 
     r_te = r(t1, t2, te)
