@@ -1,6 +1,9 @@
 import numpy as np
 
 
+RFSPOIL = np.diag([0., 0., 1.])
+
+
 def xrot(alpha):
 
     sinalpha = np.sin(alpha)
@@ -112,5 +115,44 @@ def calculate_signal_bssfp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te,
 
             Afp_tr, Bfp_tr = freeprecess(t1, t2, tr_offset+tr[n]*1e-3-te, df)
             m = Afp_tr @ m + m0*Bfp_tr
+
+    return signal
+
+
+def calculate_signal_flash(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
+
+    n_ex = beats * shots
+
+    Afp_te, Bfp_te = freeprecess(t1, t2, te, 0)    
+    inv = inversion(inv_eff)
+
+    m = np.vstack((0., 0., m0))
+
+    signal = np.empty(n_ex, dtype=complex)
+
+    for ii in range(beats):
+
+        if prep[ii] ==1:
+            Afp_ti, Bfp_ti = freeprecess(t1, t2, ti[ii], 0)
+            m = RFSPOIL @ (Afp_ti @ inv @ m + m0 * Bfp_ti)
+
+        elif prep[ii] == 2:
+            m = RFSPOIL @ t2prep(t2, t2te[ii]) @ m
+
+        elif prep[ii] == 3:
+            m = RFSPOIL @ t1rhoprep(t1rho, t2te[ii]) @ m
+
+        for jj in range(shots):
+
+            n = ii*shots+jj
+
+            q_n = q(delta_B1 * np.deg2rad(fa[n]), np.deg2rad(ph[n]))
+
+            m = Afp_te @ q_n @ m + m0 * Bfp_te
+
+            signal[n] = (m[0] + 1j*m[1]) * np.exp(-1j*np.deg2rad(ph[n]))
+
+            Afp_tr, Bfp_tr = freeprecess(t1, t2, tr_offset+tr[n]*1e-3-te, 0)
+            m = RFSPOIL @ (Afp_tr @ m + m0*Bfp_tr)
 
     return signal

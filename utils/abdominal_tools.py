@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 from signalmodel_fisp_epg_numpy import calculate_signal_fisp, calculate_crlb_fisp, calculate_crlb_fisp_pv, calculate_orthogonality
 
-from signalmodel_bssfp_numpy import calculate_signal_bssfp
+from signalmodel_bssfp_flash_numpy import calculate_signal_bssfp
 
 
 def divide_into_random_floats(N, n):

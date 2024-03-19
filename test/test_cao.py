@@ -32,3 +32,5 @@ for t1, t2 in zip([4000, 800, 150], [600, 70, 20]):
 
 plt.legend()
 # %%
+plt.plot(-np.imag(mrf_seq.calc_signal_fisp(t1, t2, 1, return_result=True)))
+# %%
