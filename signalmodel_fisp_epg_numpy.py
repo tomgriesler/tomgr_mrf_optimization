@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.linalg import LinAlgError
+from numba import jit
 
-
+@jit(nopython=True)
 def q(alpha, phi=np.pi/2):
 
     mat = np.array([
@@ -82,6 +83,7 @@ def db_dt1(t1, t):
     return (-t/t1**2 * np.exp(-t/t1))
 
 
+# @jit(nopython=True)
 def epg_grad(omega):
 
     omega = np.hstack((omega, np.zeros((3, 1))))
@@ -135,7 +137,7 @@ def calculate_signal_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, 
     return signal
 
 
-def calculate_signal_fisp_t1var(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
+def calculate_signal_fisp_t1var(t1func, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None, return_t_arr=False):
     """
     Assuming piecewise constant T1 (during each event). 
     """
@@ -147,23 +149,24 @@ def calculate_signal_fisp_t1var(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, 
     omega = np.vstack((0., 0., m0))
 
     signal = np.empty(n_ex, dtype=complex)
+    t_arr = np.empty(n_ex)
 
     t = 0
 
     for ii in range(beats):
 
         if prep[ii] == 1:
-            omega = r(t1(t), t2, ti[ii]) @ inv @ omega
-            omega[2, 0] += m0 * b(t1(t), ti[ii])
-            t += ti[ii]
+            omega = r(t1func(t), t2, ti[ii]) @ inv @ omega
+            omega[2, 0] += m0 * b(t1func(t), ti[ii])
+            t += ti[ii]*1e-3
 
         elif prep[ii] == 2: 
             omega = t2prep(t2, t2te[ii]) @ omega
-            t += t2te[ii]
+            t += t2te[ii]*1e-3
 
         elif prep[ii] == 3: 
             omega = t1rhoprep(t1rho, t2te[ii]) @ omega
-            t += t2te[ii]
+            t += t2te[ii]*1e-3
 
         for jj in range(shots):
 
@@ -171,22 +174,28 @@ def calculate_signal_fisp_t1var(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, 
 
             q_n = q(delta_B1*np.deg2rad(fa[n]), np.deg2rad(ph[n]))
 
-            r_te = r(t1(t), t2, te)
-            b_te = b(t1(t), te)
+            t1 = t1func(t)
+
+            r_te = r(t1, t2, te)
+            b_te = b(t1, te)
 
             omega = r_te @ q_n @ omega
             omega[2, 0] += m0 * b_te
 
             signal[n] = omega[0, 0] * np.exp(-1j*np.deg2rad(ph[n]))
+            t_arr[n] = t
 
-            t += te
+            t += te*1e-3
 
-            omega = epg_grad(r(t1(t), t2, tr_offset+tr[n]*1e-3-te) @ omega)
-            omega[2, 0] += m0 * b(t1(t), tr_offset+tr[n]*1e-3-te)
+            t1 = t1func(t)
 
-            t += tr_offset+tr[n]*1e-3-te
+            omega = epg_grad(r(t1, t2, tr_offset+tr[n]*1e-3-te) @ omega)
+            omega[2, 0] += m0 * b(t1, tr_offset+tr[n]*1e-3-te)
 
-    return signal
+            t += tr_offset+tr[n]*1e-6-te*1e-3
+
+    if return_t_arr: return signal, t_arr
+    else: return signal
 
 
 def calculate_crlb_fisp(t1, t2, m0, beats, shots, fa, tr, ph, prep, ti, t2te, tr_offset, te, inv_eff=0.95, delta_B1=1., t1rho=None):
