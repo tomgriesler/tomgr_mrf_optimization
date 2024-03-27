@@ -61,13 +61,17 @@ plt.xlabel('t [ms]')
 plt.ylabel('T1 [ms]')
 plt.legend(ncols=2, loc='upper center')
 #%%
-signal_t1high = calculate_signal_fisp(1000, t2, 1, 1, len(fa), fa, tr, ph, [1], [ti], [0], 0, 1, 1)
-signal_t1low = calculate_signal_fisp(100, t2, 1, 1, len(fa), fa, tr, ph, [1], [ti], [0], 0, 1, 1)
-signal_t1var = calculate_signal_fisp_t1var(t1var, t2, 1, 1, len(fa), fa, tr, ph, [1], [ti], [0], 0, 1, 1)
-signal_t1var2 = calculate_signal_fisp_t1var(t1var2, t2, 1, 1, len(fa), fa, tr, ph, [1], [ti], [0], 0, 1, 1)
-signal_t1var3 = calculate_signal_fisp_t1var(t1var3, t2, 1, 1, len(fa), fa, tr, ph, [1], [ti], [0], 0, 1, 1)
-signal_t1var4 = calculate_signal_fisp_t1var(t1var4, t2, 1, 1, len(fa), fa, tr, ph, [1], [ti], [0], 0, 1, 1)
-signal_t1var5 = calculate_signal_fisp_t1var(t1var5, t2, 1, 1, len(fa), fa, tr, ph, [1], [ti], [0], 0, 1, 1)
+prep = [0]
+ti = [0]
+t2te = [0]
+
+signal_t1high = calculate_signal_fisp(1000, t2, 1, 1, len(fa), fa, tr, ph, prep, ti, t2te, 0, 1, 1)
+signal_t1low = calculate_signal_fisp(100, t2, 1, 1, len(fa), fa, tr, ph, prep, ti, t2te, 0, 1, 1)
+signal_t1var = calculate_signal_fisp_t1var(t1var, t2, 1, 1, len(fa), fa, tr, ph, prep, ti, t2te, 0, 1, 1)
+signal_t1var2 = calculate_signal_fisp_t1var(t1var2, t2, 1, 1, len(fa), fa, tr, ph, prep, ti, t2te, 0, 1, 1)
+signal_t1var3 = calculate_signal_fisp_t1var(t1var3, t2, 1, 1, len(fa), fa, tr, ph, prep, ti, t2te, 0, 1, 1)
+signal_t1var4 = calculate_signal_fisp_t1var(t1var4, t2, 1, 1, len(fa), fa, tr, ph, prep, ti, t2te, 0, 1, 1)
+signal_t1var5 = calculate_signal_fisp_t1var(t1var5, t2, 1, 1, len(fa), fa, tr, ph, prep, ti, t2te, 0, 1, 1)
 
 #%%
 # plt.plot(-np.imag(signal_t1high), label='$T_1=1000\,$ms', ls='--', color=colors[0])
